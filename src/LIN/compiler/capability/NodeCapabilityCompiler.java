@@ -1,4 +1,4 @@
-package LIN.compiler;
+package LIN.compiler.capability;
 
 import LIN.Slave;
 import org.antlr.v4.runtime.ANTLRInputStream;
@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-public class NodeCapabilityFileCompiler {
+public class NodeCapabilityCompiler {
     public ArrayList<Slave> compile(InputStream file) throws IOException {
         ArrayList<Slave> slaves = new ArrayList<>();
 
@@ -29,7 +29,7 @@ public class NodeCapabilityFileCompiler {
     }
 
     public static void main(String [] args) throws IOException {
-        NodeCapabilityFileCompiler compiler = new NodeCapabilityFileCompiler();
+        NodeCapabilityCompiler compiler = new NodeCapabilityCompiler();
 
         for(String arg : args) {
             System.out.println(arg);

@@ -1,4 +1,4 @@
-package LIN.compiler;
+package LIN.compiler.capability;
 
 class NodeUtil {
     static protected int convert(NodeCapabilityFileParser.IntegerContext ctx) {

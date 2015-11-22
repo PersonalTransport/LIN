@@ -1,7 +1,9 @@
-package LIN.compiler;
+package LIN.compiler.capability;
 
-import LIN.*;
-import static LIN.compiler.NodeUtil.*;
+import LIN.Frame;
+import LIN.Slave;
+
+import static LIN.compiler.capability.NodeUtil.convert;
 
 class FrameDefinitionVisitor extends NodeCapabilityFileBaseVisitor<Frame> {
     private final Slave slave;

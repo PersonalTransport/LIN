@@ -1,9 +1,9 @@
-package LIN.compiler;
+package LIN.compiler.capability;
 
-import LIN.*;
+import LIN.Slave;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import static LIN.compiler.NodeUtil.*;
+import static LIN.compiler.capability.NodeUtil.convert;
 
 class NodeDefinitionVisitor extends NodeCapabilityFileBaseVisitor<Slave> {
         private Slave slave;

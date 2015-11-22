@@ -1,9 +1,9 @@
-package LIN.compiler;
+package LIN.compiler.capability;
 
-import LIN.*;
+import LIN.Slave;
 import LIN.signal.Signal;
 
-import static LIN.compiler.NodeUtil.*;
+import static LIN.compiler.capability.NodeUtil.convert;
 
 class SignalDefinitionVisitor extends NodeCapabilityFileBaseVisitor<Signal> {
     private final Slave slave;
@@ -14,7 +14,7 @@ class SignalDefinitionVisitor extends NodeCapabilityFileBaseVisitor<Signal> {
 
     @Override
     public Signal visitSignalDefinition(NodeCapabilityFileParser.SignalDefinitionContext ctx) {
-        Signal signal = new Signal(ctx.name.getText(),convert(ctx.size),convert(ctx.offset));
+        Signal signal = new Signal(ctx.name.getText(), NodeUtil.convert(ctx.size), NodeUtil.convert(ctx.offset));
 
         signal.setInitialValue(new SignalValueVisitor().visit(ctx.signalValue()));
 

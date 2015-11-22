@@ -1,11 +1,11 @@
-package LIN.compiler;
+package LIN.compiler.capability;
 
 import LIN.bitrate.AutomaticBitrate;
 import LIN.bitrate.Bitrate;
 import LIN.bitrate.FixedBitrate;
 import LIN.bitrate.SelectBitrate;
 
-import static LIN.compiler.NodeUtil.*;
+import static LIN.compiler.capability.NodeUtil.convert;
 
 class BitrateDefinitionVisitor extends NodeCapabilityFileBaseVisitor<Bitrate> {
     @Override

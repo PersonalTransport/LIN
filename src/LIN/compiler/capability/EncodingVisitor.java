@@ -1,4 +1,4 @@
-package LIN.compiler;
+package LIN.compiler.capability;
 
 import LIN.encoding.Encoding;
 
