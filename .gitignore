@@ -65,6 +65,8 @@ install_manifest.txt
 # Intellij
 .idea
 *.iml
+bin/
+out/
 
 # QtCreator
 CMakeLists.txt.user

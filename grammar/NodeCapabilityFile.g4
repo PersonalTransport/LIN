@@ -1,183 +1,222 @@
 grammar NodeCapabilityFile;
 
-node_capability_file:
-    'node_capability_file' ';'
-    'LIN_language_version' '=' VersionString ';'
-    node_definition+
+nodeCapabilityFile:
+    nodeCapabilityFileHeader
+    nodeDefinition+
     EOF;
 
-node_definition :
-    'node' name=node_name '{'
-        general_definition
-        diagnostic_definition
-        frame_definition
-        encoding_definition
-        status_management
-        free_text_definition?
+nodeCapabilityFileHeader:
+    NodeCapabilityfile ';'
+    LINLanguageVersion '=' version=CharString ';'
+    ;
+
+nodeDefinition:
+    Node nodeName=Identifier '{'
+        generalDefinition
+        diagnosticDefinition
+        framesDefinition
+        encodingsDefinition
+        statusManagement
+        freeTextDefinition?
+    '}'
+    ;
+
+generalDefinition:
+    General '{'
+        LINProtocolVersion '=' version=CharString ';'
+        Supplier '=' supplier=integer ';'
+        Function '=' function=integer ';'
+        Variant '=' variant=integer ';'
+        Bitrate '=' bitrateDefinition ';'
+        SendsWakeUpSignal '=' sendsWakeUp=('"yes"'|'"no"') ';'
     '}';
 
-node_name:
-    Identifier;
+bitrateDefinition:
+    automaticBitrateDefinition
+    | selectBitrateDefinition
+    | fixedBitrateDefinition
+    ;
 
-general_definition:
-    'general' '{'
-        'LIN_protocol_version' '=' VersionString ';'
-        'supplier' '=' supplier_id ';'
-        'function' '=' function_id ';'
-        'variant' '=' variant_id ';'
-        'bitrate' '=' bitrate_definition ';'
-        'sends_wake_up_signal' '=' YesOrNo ';'
+automaticBitrateDefinition:
+    Automatic (Min min=bitrate)? (Max max=bitrate)?
+    ;
+
+selectBitrateDefinition:
+    Select '{' bitrate (',' bitrate)* '}'
+    ;
+
+fixedBitrateDefinition:
+    bitrate
+    ;
+
+bitrate:
+    value=real Kbps
+    ;
+
+diagnosticDefinition:
+    Diagnostic '{'
+        NAD '=' (nadList=integerList | startNAD=integer To endNAD=integer) ';'
+        DiagnosticClass '=' diagnosticClass=integer ';'
+        (P2Min '=' p2Min=real Millisecond ';')?
+        (STMin '=' stMin=real Millisecond ';')?
+        (NAsTimeout '=' nAsTimeout=real Millisecond ';')?
+        (NCrTimeout '=' nCrTimeout=real Millisecond ';')?
+        (SupportSid '{' supportSids=integerList '}'  ';')?
+        (MaxMessageLength '=' maxMessageLength=integer ';')?
     '}';
 
-supplier_id:
-    integer;
-
-function_id:
-    integer;
-
-variant_id:
-    integer;
-
-bitrate_definition:
-      'automatic' ('min' bitrate)? ('max' bitrate)?
-    | 'select' '{' bitrate (',' bitrate)+ '}'
-    | bitrate;
-
-bitrate :  real_or_integer 'kbps';
-
-diagnostic_definition:
-    'diagnostic' '{'
-         'NAD' '=' (integer (',' integer)* | (integer 'to' integer)) ';'
-         'diagnostic_class' '=' integer ';'
-         ('P2_min' '=' real_or_integer 'ms' ';')?
-         ('ST_min' '=' real_or_integer 'ms' ';')?
-         ('N_As_timeout' '=' real_or_integer 'ms' ';')?
-         ('N_Cr_timeout' '=' real_or_integer 'ms' ';')?
-         ('support_sid' '{' integer (',' integer)* '}' ';')?
-         ('max_message_length' '=' integer ';')?
+framesDefinition:
+    Frames '{'
+        frameDefinition+
     '}';
 
-frame_definition:
-    'frames' '{'
-        single_frame+
+frameDefinition:
+    kind=(Publish | Subscribe) name=Identifier '{'
+        Length '=' length=integer ';'
+        (MinPeriod '=' minPeriod=integer Millisecond ';')?
+        (MaxPeriod '=' maxPeriod=integer Millisecond ';')?
+        (EventTriggeredFrame '=' eventTriggeredFrame=Identifier ';')?
+        signalsDefinition?
     '}';
 
-single_frame:
-    frame_kind frame_name '{'
-        frame_properties
-        signal_definition?
+signalsDefinition:
+    Signals '{'
+        signalDefinition+
     '}';
 
-frame_kind:
-    'publish' |
-    'subscribe';
-
-frame_name:
-    Identifier;
-
-frame_properties:
-    'length' '=' integer ';'
-    ('min_period' '=' integer 'ms' ';')?
-    ('max_period' '=' integer 'ms' ';')?
-    ('event_triggered_frame' '=' Identifier';')? ;
-
-signal_definition:
-    'signals' '{'
-        (signal_name '{' signal_properties '}')+
+signalDefinition:
+    name=Identifier '{'
+        Size '=' size=integer ';'
+        InitValue '=' signalValue ';'
+        Offset '=' offset=integer ';'
+        (encoding=Identifier ';')?
     '}';
 
-signal_name:
-    Identifier;
+signalValue:
+    signalScalarValue |
+    signalArrayValue
+    ;
 
-signal_properties:
-    'size' '=' integer ';'
-    init_value
-    'offset' '=' integer ';'
-    (encoding_name ';')?;
+signalScalarValue:
+    integer
+    ;
 
-init_value:
-     (init_value_scalar | init_value_array) ';';
+signalArrayValue:
+    '{' integerList '}'
+    ;
 
-init_value_scalar:
-    'init_value' '=' integer;
-
-init_value_array:
-     'init_value' '=' '{' integer (',' integer)* '}';
-
-encoding_definition:
-    'encoding' '{'
-        (encoding_name '{'
-            (logical_value | physical_range | bcd_value | ascii_value)+
-        '}')+
+encodingsDefinition:
+    Encoding '{'
+        encodingDefinition+
     '}';
 
-encoding_name:
-    Identifier;
-
-logical_value:
-     'logical_value' ',' signal_value (',' text_info)? ';';
-
-physical_range:
-    'physical_value' ',' min_value ',' max_value ',' scale ',' offset (',' text_info)? ';' ;
-
-bcd_value:
-    'bcd_value';
-
-ascii_value:
-    'ascii_value';
-
-signal_value:
-    integer;
-
-min_value:
-    integer;
-
-max_value:
-    integer;
-
-scale:
-    real_or_integer;
-
-offset:
-    real_or_integer;
-
-text_info:
-    CharString;
-
-status_management:
-    'status_management' '{'
-        'response_error' '=' Identifier ';'
-        ('fault_state_signals' '=' Identifier (',' Identifier)* ';')?
+encodingDefinition:
+    encodingName=Identifier '{'
+        encodedValue+
     '}';
 
-free_text_definition:
-    'free_text' '{'
-        CharString
+encodedValue:
+    logicalEncodedValue ';' |
+    physicalEncodedRange ';' |
+    bcdEncodedValue ';' |
+    asciiEncodedValue ';'
+    ;
+
+logicalEncodedValue:
+    LogicalValue ',' value=integer (',' textInfo=CharString)?
+    ;
+
+physicalEncodedRange:
+    PhysicalValue ',' minValue=integer ',' maxValue=integer ',' scale=real ',' offset=real (',' textInfo=CharString)?
+    ;
+
+bcdEncodedValue:
+    BCDValue
+    ;
+
+asciiEncodedValue:
+    ASCIIValue
+    ;
+
+statusManagement:
+    StatusManagement '{'
+        ResponseError '=' responseErrorSignal=Identifier ';'
+        (FaultStateSignals '=' faultStateSignals=identifierList ';')?
     '}';
 
-real_or_integer:
-    Real |
-    integer;
+freeTextDefinition:
+    FreeText '{'
+        text=CharString
+    '}';
 
-integer:
-    DecInteger |
-    HexInteger;
+integerList:
+    integer (',' integer)*
+    ;
 
-YesOrNo:
-     '"yes"'
-    |'"no"';
+identifierList:
+    Identifier (',' Identifier)*;
 
-VersionString : '"' Real '"' ;
+integer: DecInteger | HexInteger;
 
-CharString: '"' (.)*? '"';
+real: integer | Real;
 
-Identifier : NonDigit ( NonDigit | Digit )* ;
+NodeCapabilityfile: 'node_capability_file';
+LINLanguageVersion: 'LIN_language_version';
+LINProtocolVersion: 'LIN_protocol_version';
+Node: 'node';
+General: 'general';
+Supplier: 'supplier';
+Function: 'function';
+Variant: 'variant';
+Bitrate: 'bitrate';
+SendsWakeUpSignal: 'sends_wake_up_signal';
+Automatic: 'automatic';
+Select: 'select';
+Min: 'min';
+Max: 'max';
+Kbps: 'kbps';
+Diagnostic: 'diagnostic';
+NAD: 'NAD';
+To: 'to';
+DiagnosticClass: 'diagnostic_class';
+P2Min: 'P2_min';
+STMin: 'ST_min';
+NAsTimeout: 'N_As_timeout';
+NCrTimeout: 'N_Cr_timeout';
+SupportSid: 'support_sid';
+MaxMessageLength: 'max_message_length';
+Frames: 'frames';
+Publish: 'publish';
+Subscribe: 'subscribe';
+Length: 'length';
+MinPeriod: 'min_period';
+MaxPeriod: 'max_period';
+Millisecond: 'ms';
+EventTriggeredFrame: 'event_triggered_frame';
+Signals: 'signals';
+InitValue: 'init_value';
+Size: 'size';
+Offset: 'offset';
+Encoding: 'encoding';
+BCDValue: 'bcd_value';
+ASCIIValue: 'ascii_value';
+LogicalValue: 'logical_value';
+PhysicalValue: 'physical_value';
+StatusManagement: 'status_management';
+ResponseError: 'response_error';
+FaultStateSignals: 'fault_state_signals';
+FreeText: 'free_text';
 
-Real : Digit+'.'Digit+ ;
+
+Identifier: [a-zA-Z][a-zA-Z0-9_]*;
+
+Real: Digit+'.'Digit+;
 
 DecInteger: Digit+;
 
 HexInteger: '0x'HexDigit+;
+
+CharString: '"' .*? '"';
 
 fragment NonDigit : [a-zA-Z_] ;
 
@@ -185,10 +224,10 @@ fragment Digit: [0-9];
 
 fragment HexDigit: [0-9A-Fa-f];
 
-Whitespace: [ \t]+ -> skip;
+Whitespace: [ \n\t\r]+ -> skip;
 
 Newline: ( '\r' '\n'? | '\n') -> skip;
 
 BlockComment: '/*' .*? '*/' -> skip;
 
-LineComment: '//' ~[\r\n]* -> skip;
+LineComment: '//' ~[\n\r]* -> skip;
