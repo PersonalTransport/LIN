@@ -2,7 +2,7 @@ package LIN.compiler.capability;
 
 import LIN.encoding.*;
 
-import static LIN.compiler.capability.NodeUtil.convert;
+import static LIN.compiler.capability.Util.convert;
 
 class EncodedValueVisitor extends NodeCapabilityFileBaseVisitor<EncodedValue> {
     @Override

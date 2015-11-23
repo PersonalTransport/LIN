@@ -5,7 +5,7 @@ import LIN.bitrate.Bitrate;
 import LIN.bitrate.FixedBitrate;
 import LIN.bitrate.SelectBitrate;
 
-import static LIN.compiler.capability.NodeUtil.convert;
+import static LIN.compiler.capability.Util.convert;
 
 class BitrateDefinitionVisitor extends NodeCapabilityFileBaseVisitor<Bitrate> {
     @Override

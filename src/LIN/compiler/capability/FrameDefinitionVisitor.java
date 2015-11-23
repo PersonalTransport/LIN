@@ -2,8 +2,9 @@ package LIN.compiler.capability;
 
 import LIN.Frame;
 import LIN.Slave;
+import LIN.compiler.description.DescriptionFileParser;
 
-import static LIN.compiler.capability.NodeUtil.convert;
+import static LIN.compiler.capability.Util.convert;
 
 class FrameDefinitionVisitor extends NodeCapabilityFileBaseVisitor<Frame> {
     private final Slave slave;
@@ -15,7 +16,7 @@ class FrameDefinitionVisitor extends NodeCapabilityFileBaseVisitor<Frame> {
 
     @Override
     public Frame visitFrameDefinition(NodeCapabilityFileParser.FrameDefinitionContext ctx) {
-        frame = new Frame(ctx.name.getText(),ctx.kind.getText(),convert(ctx.length));
+        frame = new Frame(ctx.name.getText(),convert(ctx.length));
 
         if(ctx.minPeriod != null)
             frame.setMinimumPeriod(convert(ctx.minPeriod));

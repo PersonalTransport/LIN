@@ -15,6 +15,10 @@ public class Signal {
         this.offset = offset;
     }
 
+    public Signal(String name, int size) {
+        this(name,size,0);
+    }
+
     public String getName() {
         return name;
     }
@@ -25,6 +29,10 @@ public class Signal {
 
     public int getOffset() {
         return offset;
+    }
+
+    public void setOffset(int offset) {
+        this.offset = offset;
     }
 
     public void setEncoding(Encoding encoding) {

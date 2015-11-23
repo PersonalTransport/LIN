@@ -10,13 +10,14 @@ import java.util.List;
 public class Slave {
 
     private String name;
-    private String protocol;
+    private String protocolVersion;
     private int supplier;
     private int function;
     private int variant;
     private boolean sendWakeUp;
     private Bitrate bitrate;
-    private ArrayList<Frame> frames;
+    private ArrayList<Frame> publishingFrames;
+    private ArrayList<Frame> subscribingFrames;
     private ArrayList<Encoding> encodings;
     private ArrayList<Integer> possibleNADs;
     private int diagnosticClass;
@@ -32,7 +33,8 @@ public class Slave {
 
     public Slave(String name) {
         this.name = name;
-        this.frames = new ArrayList<>();
+        this.publishingFrames = new ArrayList<>();
+        this.subscribingFrames = new ArrayList<>();
         this.encodings = new ArrayList<>();
         this.possibleNADs = new ArrayList<>();
         this.p2Min = 50;
@@ -48,12 +50,12 @@ public class Slave {
         return name;
     }
 
-    public void setProtocol(String protocol) {
-        this.protocol = protocol;
+    public void setProtocolVersion(String protocolVersion) {
+        this.protocolVersion = protocolVersion;
     }
 
-    public String getProtocol() {
-        return protocol;
+    public String getProtocolVersion() {
+        return protocolVersion;
     }
 
     public void setSupplier(int supplier) {
@@ -96,16 +98,20 @@ public class Slave {
         return bitrate;
     }
 
-    public void addFrame(Frame frame) {
-        frames.add(frame);
+    public void addPublishingFrame(Frame frame) {
+        this.publishingFrames.add(frame);
     }
 
-    public void removeFrame(Frame frame) {
-        frames.remove(frame);
+    public void removePublishingFrame(Frame frame) {
+        this.publishingFrames.remove(frame);
     }
 
-    public List<Frame> getFrames() {
-        return frames;
+    public void addSubscribingFrame(Frame frame) {
+        this.subscribingFrames.add(frame);
+    }
+
+    public void removeSubscribingFrame(Frame frame) {
+        this.subscribingFrames.remove(frame);
     }
 
     public void addEncoding(Encoding encoding) {
@@ -183,25 +189,26 @@ public class Slave {
         this.maxMessageLength = maxMessageLength;
     }
 
-    public Signal getSignal(String signalName) {
-        for(Frame frame: frames) {
-            Signal signal = frame.getSignal(signalName);
-            if(signal != null)
-                return signal;
+    public void setResponseErrorSignal(String responseErrorSignal) {
+        Signal signal = getPublishingSignal(responseErrorSignal);
+        if(signal != null) {
+            this.responseErrorSignal = signal;
+            return;
         }
-        return null;
-    }
-
-    public void setResponseErrorSignal(Signal responseErrorSignal) {
-        this.responseErrorSignal = responseErrorSignal;
+        throw new IllegalArgumentException("The slave node "+name+" does not publish the signal "+responseErrorSignal+"!");
     }
 
     public Signal getResponseErrorSignal() {
         return responseErrorSignal;
     }
 
-    public void addFaultStateSignal(Signal signal) {
-        this.faultStateSignals.add(signal);
+    public void addFaultStateSignal(String faultStateSignal) {
+        Signal signal = getPublishingSignal(faultStateSignal);
+        if(signal != null) {
+            this.faultStateSignals.add(signal);
+            return;
+        }
+        throw new IllegalArgumentException("The slave node "+name+" does not publish the signal "+faultStateSignal+"!");
     }
 
     public void removeFaultStateSignal(Signal signal) {
@@ -214,5 +221,14 @@ public class Slave {
 
     public String getFreeText() {
         return freeText;
+    }
+
+    public Signal getPublishingSignal(String signalName) {
+        for(Frame frame:publishingFrames) {
+            Signal signal = frame.getSignal(signalName);
+            if(signal != null)
+                return signal;
+        }
+        return null;
     }
 }

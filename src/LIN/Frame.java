@@ -6,16 +6,14 @@ import java.util.ArrayList;
 
 public class Frame {
     private String name;
-    private String type;
     private int length;
     private int minimumPeriod;
     private int maximumPeriod;
     private String eventTriggeredFrame;
     private ArrayList<Signal> signals;
 
-    public Frame(String name,String type,int length) {
+    public Frame(String name,int length) {
         this.name = name;
-        this.type = type;
         this.length = length;
         this.minimumPeriod = 0;
         this.maximumPeriod = Integer.MAX_VALUE;
@@ -24,10 +22,6 @@ public class Frame {
 
     public String getName() {
         return name;
-    }
-
-    public String getType() {
-        return type;
     }
 
     public int getLength() {

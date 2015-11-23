@@ -1,6 +1,6 @@
 package LIN.compiler.capability;
 
-class NodeUtil {
+class Util {
     static protected int convert(NodeCapabilityFileParser.IntegerContext ctx) {
         return Integer.decode(ctx.getText());
     }

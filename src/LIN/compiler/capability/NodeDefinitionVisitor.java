@@ -3,7 +3,7 @@ package LIN.compiler.capability;
 import LIN.Slave;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import static LIN.compiler.capability.NodeUtil.convert;
+import static LIN.compiler.capability.Util.convert;
 
 class NodeDefinitionVisitor extends NodeCapabilityFileBaseVisitor<Slave> {
         private Slave slave;
@@ -25,7 +25,7 @@ class NodeDefinitionVisitor extends NodeCapabilityFileBaseVisitor<Slave> {
 
         @Override
         public Slave visitGeneralDefinition(NodeCapabilityFileParser.GeneralDefinitionContext ctx) {
-            slave.setProtocol(ctx.version.getText().replace("\"",""));
+            slave.setProtocolVersion(ctx.version.getText().replace("\"",""));
             slave.setSupplier(convert(ctx.supplier));
             slave.setFunction(convert(ctx.function));
             slave.setVariant(convert(ctx.variant));
@@ -47,17 +47,20 @@ class NodeDefinitionVisitor extends NodeCapabilityFileBaseVisitor<Slave> {
 
             slave.setDiagnosticClass(convert(ctx.diagnosticClass));
 
-            if(ctx.p2Min != null)
-                slave.setP2Min(convert(ctx.p2Min));
+            NodeCapabilityFileParser.P2MinStMinNAsTimeoutNCrTimeoutContext p2MinStMinNAsTimeoutNCrTimeout = ctx.p2MinStMinNAsTimeoutNCrTimeout();
+            if(p2MinStMinNAsTimeoutNCrTimeout != null) {
+                if (p2MinStMinNAsTimeoutNCrTimeout.p2Min != null)
+                    slave.setP2Min(convert(p2MinStMinNAsTimeoutNCrTimeout.p2Min));
 
-            if(ctx.stMin != null)
-                slave.setSTMin(convert(ctx.stMin));
+                if (p2MinStMinNAsTimeoutNCrTimeout.stMin != null)
+                    slave.setSTMin(convert(p2MinStMinNAsTimeoutNCrTimeout.stMin));
 
-            if(ctx.nAsTimeout != null)
-                slave.setNAsTimeout(convert(ctx.nAsTimeout));
+                if (p2MinStMinNAsTimeoutNCrTimeout.nAsTimeout != null)
+                    slave.setNAsTimeout(convert(p2MinStMinNAsTimeoutNCrTimeout.nAsTimeout));
 
-            if(ctx.nCrTimeout != null)
-                slave.setNCrTimeout(convert(ctx.nCrTimeout));
+                if (p2MinStMinNAsTimeoutNCrTimeout.nCrTimeout != null)
+                    slave.setNCrTimeout(convert(p2MinStMinNAsTimeoutNCrTimeout.nCrTimeout));
+            }
 
 
             if(ctx.supportSids != null) {
@@ -83,19 +86,23 @@ class NodeDefinitionVisitor extends NodeCapabilityFileBaseVisitor<Slave> {
         @Override
         public Slave visitFramesDefinition(NodeCapabilityFileParser.FramesDefinitionContext ctx) {
             FrameDefinitionVisitor frameVisitor = new FrameDefinitionVisitor(slave);
-            for(NodeCapabilityFileParser.FrameDefinitionContext frameCtx:ctx.frameDefinition())
-                slave.addFrame(frameVisitor.visit(frameCtx));
+            for(NodeCapabilityFileParser.FrameDefinitionContext frameCtx:ctx.frameDefinition()) {
+                if(frameCtx.kind.getType() == NodeCapabilityFileLexer.Publish)
+                    slave.addPublishingFrame(frameVisitor.visit(frameCtx));
+                else
+                    slave.addSubscribingFrame(frameVisitor.visit(frameCtx));
+            }
 
             return slave;
         }
 
         @Override
         public Slave visitStatusManagement(NodeCapabilityFileParser.StatusManagementContext ctx) {
-            slave.setResponseErrorSignal(slave.getSignal(ctx.responseErrorSignal.getText()));
+            slave.setResponseErrorSignal(ctx.responseErrorSignal.getText()); // TODO error if null.
 
             if(ctx.faultStateSignals != null) {
                 for(TerminalNode signal : ctx.faultStateSignals.Identifier())
-                    slave.addFaultStateSignal(slave.getSignal(signal.getText())); // TODO error if null.
+                    slave.addFaultStateSignal(signal.getText()); // TODO error if null.
             }
             return slave;
         }
