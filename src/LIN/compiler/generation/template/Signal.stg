@@ -1,0 +1,102 @@
+//====================================================================================================================//
+scalarSignalReadPrototype(signal) ::= "l_<signal.type> l_<signal.type>_rd_<signal.name>()"
+scalarSignalReadImplementation(frame,signal) ::= <<
+<scalarSignalReadPrototype(signal)> {
+    return (l_<signal.type>)((frames[<frame.name>_ID].data64 >\> <signal.offset>) & <signal.mask>);
+}
+>>
+
+scalarSignalWritePrototype(signal) ::= "void l_<signal.type>_wr_<signal.name>(l_<signal.type> v)"
+scalarSignalWriteImplementation(frame,signal) ::= <<
+<scalarSignalWritePrototype(signal)> {
+    frames[<frame.name>_ID].data64 &= ~(<signal.mask>               \<\< <signal.offset>);
+    frames[<frame.name>_ID].data64 |= (uint64_t)(v & <signal.mask>) \<\< <signal.offset>;
+    // TODO checksum??
+}
+>>
+
+scalarSignalWriteInitialValue(signal) ::= "l_<signal.type>_wr_<signal.name>(<signal.value>);"
+
+//====================================================================================================================//
+bytesSignalReadPrototype(signal) ::= "void l_bytes_rd_<signal.name>(l_u8 start,l_u8 count,l_u8* const data)"
+bytesSignalReadImplementation(frame,signal) ::= <<
+<bytesSignalReadPrototype(signal)> {
+    // TODO check for count being to large??
+    for(l_u8 i=0;i\<count;++i)
+        data[i] = frames[<frame.name>_ID].data[<signal.offset>/8+start+i];
+}
+>>
+
+bytesSignalWritePrototype(signal) ::= "void l_bytes_wr_<signal.name>(l_u8 start,l_u8 count,const l_u8* const data)"
+bytesSignalWriteImplementation(frame,signal) ::= <<
+<bytesSignalWritePrototype(signal)> {
+    // TODO check for count being to large??
+    for(l_u8 i=0;i\<count;++i)
+        frames[<frame.name>_ID].data[<signal.offset>/8+start+i] = data[i];
+    // TODO checksum??
+}
+>>
+
+bytesSignalWriteInitialValue(signal) ::= <<
+l_u8 <signal.name>_value[] = {<signal.value:{v|<v>};separator=",">};
+l_bytes_wr_<signal.name>(0,<signal.size>/8,<signal.name>_initial_value);
+>>
+
+//====================================================================================================================//
+signalTestPrototype(signal) ::= "l_bool l_flg_tst_<signal.name>()"
+signalTestImplementation(signal) ::= <<
+<signalTestPrototype(signal)> {
+    return <signal.name>_flag;
+}
+>>
+
+signalClearPrototype(signal) ::= "l_bool l_flg_clr_<signal.name>()"
+signalClearImplementation(signal) ::= <<
+<signalClearPrototype(signal)> {
+    <signal.name>_flag = false;
+}
+>>
+
+//====================================================================================================================//
+signalReadPrototype(signal) ::= <%
+<if(signal.isScalar)>
+    <scalarSignalReadPrototype(signal)>
+<else>
+    <bytesSignalReadPrototype(signal)>
+<endif>
+%>
+
+signalReadImplementation(frame,signal) ::= <%
+<if(signal.isScalar)>
+    <scalarSignalReadImplementation(frame,signal)>
+<else>
+    <bytesSignalReadImplementation(frame,signal)>
+<endif>
+%>
+
+
+//====================================================================================================================//
+signalWritePrototype(signal) ::= <%
+<if(signal.isScalar)>
+    <scalarSignalWritePrototype(signal)>
+<else>
+    <bytesSignalWritePrototype(signal)>
+<endif>
+%>
+
+signalWriteImplementation(frame,signal) ::= <%
+<if(signal.isScalar)>
+    <scalarSignalWriteImplementation(frame,signal)>
+<else>
+    <bytesSignalWriteImplementation(frame,signal)>
+<endif>
+%>
+
+//====================================================================================================================//
+signalWriteInitialValue(signal) ::= <%
+<if(signal.isScalar)>
+    <scalarSignalWriteInitialValue(signal)>
+<else>
+    <bytesSignalWriteInitialValue(signal)>
+<endif>
+%>

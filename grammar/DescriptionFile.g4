@@ -131,14 +131,14 @@ eventTriggeredFrameDefinition:
 
 nodesAttributesDefinition:
     NodeAttributes '{'
-        nodeAttributesDefinition+
+        slaveDefinition+
     '}';
 
-nodeAttributesDefinition:
-    nodeName=Identifier '{'
-        LINProtocol '=' version=CharString ';'
-        ConfiguredNAD '=' integer ';'
-        (InitialNAD '=' integer ';')?
+slaveDefinition:
+    name=Identifier '{'
+        LINProtocol '=' protocolVersion=CharString ';'
+        ConfiguredNAD '=' configuredNAD=integer ';'
+        (InitialNAD '=' initialNAD=integer ';')?
         //LIN >= 2.x only
         ProductId '=' supplierId=integer ',' functionId=integer  (',' variant=integer)? ';'
         ResponseError '=' responseErrorSignal=Identifier ';'

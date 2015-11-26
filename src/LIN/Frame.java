@@ -11,6 +11,8 @@ public class Frame {
     private int maximumPeriod;
     private String eventTriggeredFrame;
     private ArrayList<Signal> signals;
+    private Slave publisher;
+    private ArrayList<Slave> subscribers;
 
     public Frame(String name,int length) {
         this.name = name;
@@ -18,6 +20,7 @@ public class Frame {
         this.minimumPeriod = 0;
         this.maximumPeriod = Integer.MAX_VALUE;
         this.signals = new ArrayList<>();
+        this.subscribers = new ArrayList<>();
     }
 
     public String getName() {
@@ -66,5 +69,26 @@ public class Frame {
 
     public void removeSignal(Signal signal) {
         this.signals.remove(signal);
+    }
+
+    public void setPublisher(Slave publisher) {
+        this.publisher = publisher;
+    }
+
+    public Slave getPublisher() {
+        return publisher;
+    }
+
+    public void addSubscriber(Slave slave) {
+        if(!subscribers.contains(slave))
+            subscribers.add(slave);
+    }
+
+    public void removeSubscriber(Slave slave) {
+        subscribers.remove(slave);
+    }
+
+    public ArrayList<Signal> getSignals() {
+        return this.signals;
     }
 }

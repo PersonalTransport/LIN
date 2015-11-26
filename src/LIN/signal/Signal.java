@@ -50,4 +50,8 @@ public class Signal {
     public SignalValue getInitialValue() {
         return initialValue;
     }
+
+    public boolean getIsScalar() {
+        return initialValue instanceof ScalarSignalValue;
+    }
 }

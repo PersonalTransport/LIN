@@ -1,12 +1,13 @@
-package LIN.compiler.capability;
+package LIN.compiler.capability.parser;
 
 import LIN.Frame;
 import LIN.Slave;
-import LIN.compiler.description.DescriptionFileParser;
+import LIN.compiler.capability.parser.NodeCapabilityFileParser.FrameDefinitionContext;
+import LIN.compiler.capability.parser.NodeCapabilityFileParser.SignalDefinitionContext;
 
-import static LIN.compiler.capability.Util.convert;
+import static LIN.compiler.capability.parser.Util.convert;
 
-class FrameDefinitionVisitor extends NodeCapabilityFileBaseVisitor<Frame> {
+public class FrameDefinitionVisitor extends NodeCapabilityFileBaseVisitor<Frame> {
     private final Slave slave;
     private Frame frame;
 
@@ -15,8 +16,8 @@ class FrameDefinitionVisitor extends NodeCapabilityFileBaseVisitor<Frame> {
     }
 
     @Override
-    public Frame visitFrameDefinition(NodeCapabilityFileParser.FrameDefinitionContext ctx) {
-        frame = new Frame(ctx.name.getText(),convert(ctx.length));
+    public Frame visitFrameDefinition(FrameDefinitionContext ctx) {
+        frame = new Frame(ctx.name.getText(), convert(ctx.length));
 
         if(ctx.minPeriod != null)
             frame.setMinimumPeriod(convert(ctx.minPeriod));
@@ -28,7 +29,7 @@ class FrameDefinitionVisitor extends NodeCapabilityFileBaseVisitor<Frame> {
 
         if(ctx.signalsDefinition() != null) {
             SignalDefinitionVisitor signalVisitor = new SignalDefinitionVisitor(slave);
-            for(NodeCapabilityFileParser.SignalDefinitionContext signalCtx:ctx.signalsDefinition().signalDefinition())
+            for(SignalDefinitionContext signalCtx:ctx.signalsDefinition().signalDefinition())
                 frame.addSignal(signalVisitor.visit(signalCtx));
         }
 

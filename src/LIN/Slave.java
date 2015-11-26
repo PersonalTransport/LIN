@@ -5,10 +5,8 @@ import LIN.encoding.Encoding;
 import LIN.signal.Signal;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class Slave {
-
     private String name;
     private String protocolVersion;
     private int supplier;
@@ -16,8 +14,7 @@ public class Slave {
     private int variant;
     private boolean sendWakeUp;
     private Bitrate bitrate;
-    private ArrayList<Frame> publishingFrames;
-    private ArrayList<Frame> subscribingFrames;
+    private ArrayList<Frame> frames;
     private ArrayList<Encoding> encodings;
     private ArrayList<Integer> possibleNADs;
     private int diagnosticClass;
@@ -33,8 +30,7 @@ public class Slave {
 
     public Slave(String name) {
         this.name = name;
-        this.publishingFrames = new ArrayList<>();
-        this.subscribingFrames = new ArrayList<>();
+        this.frames = new ArrayList<>();
         this.encodings = new ArrayList<>();
         this.possibleNADs = new ArrayList<>();
         this.p2Min = 50;
@@ -99,19 +95,19 @@ public class Slave {
     }
 
     public void addPublishingFrame(Frame frame) {
-        this.publishingFrames.add(frame);
-    }
-
-    public void removePublishingFrame(Frame frame) {
-        this.publishingFrames.remove(frame);
+        this.frames.add(frame);
+        frame.setPublisher(this);
     }
 
     public void addSubscribingFrame(Frame frame) {
-        this.subscribingFrames.add(frame);
+        this.frames.add(frame);
+        frame.addSubscriber(this);
     }
 
-    public void removeSubscribingFrame(Frame frame) {
-        this.subscribingFrames.remove(frame);
+    public void removeFrame(Frame frame) {
+        this.frames.remove(frame);
+        if(frame.getPublisher() == this)
+            frame.setPublisher(null);
     }
 
     public void addEncoding(Encoding encoding) {
@@ -138,32 +134,36 @@ public class Slave {
         return diagnosticClass;
     }
 
-    public void setP2Min(float p2Min) {
-        this.p2Min = p2Min;
+    public void setP2Min(float min) {
+        this.p2Min = min;
     }
 
     public float getP2Min() {
         return p2Min;
     }
 
-    public void setSTMin(float STMin) {
-        this.stMin = STMin;
+    public void setSTMin(float min) {
+        this.stMin = min;
     }
 
     public float getSTMin() {
         return stMin;
     }
 
-    public void setNAsTimeout(float NAsTimeout) {
-        this.nAsTimeout = NAsTimeout;
+    public void setNAsTimeout(float timeout) {
+        this.nAsTimeout = timeout;
     }
 
     public float getNAsTimeout() {
         return nAsTimeout;
     }
 
-    public void setNCrTimeout(float NCrTimeout) {
-        this.nCrTimeout = NCrTimeout;
+    public void setNCrTimeout(float timeout) {
+        this.nCrTimeout = timeout;
+    }
+
+    public float getNCrTimeout() {
+        return nCrTimeout;
     }
 
     public void addPossibleNad(int NAD) {
@@ -177,6 +177,7 @@ public class Slave {
     public void addSupportSID(int SID) {
         this.supportSIDs.add(SID);
     }
+
     public void removeSupportSID(int SID) {
         this.supportSIDs.remove(SID);
     }
@@ -224,11 +225,24 @@ public class Slave {
     }
 
     public Signal getPublishingSignal(String signalName) {
-        for(Frame frame:publishingFrames) {
+        for(Frame frame: frames) {
             Signal signal = frame.getSignal(signalName);
             if(signal != null)
                 return signal;
         }
         return null;
+    }
+
+    public ArrayList<Frame> getFrames() {
+        return frames;
+    }
+
+    public ArrayList<Frame> getPublishingFrames() {
+        ArrayList<Frame> publishingFrames = new ArrayList<>();
+        for(Frame frame:frames) {
+            if(frame.getPublisher() == this)
+                publishingFrames.add(frame);
+        }
+        return publishingFrames;
     }
 }

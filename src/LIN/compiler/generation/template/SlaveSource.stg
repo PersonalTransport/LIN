@@ -1,0 +1,89 @@
+import "signal.stg"
+
+slaveSource(interface,slave) ::= <<
+#include "<slave.name>.h"
+
+<slave.frames:{frame|#define <frame.name>_ID <i0><\n>}>
+
+volatile struct l_frame frames[] = {
+    <slave.frames:{frame|{0,<frame.length>\} /* <frame.name> */};separator=",\n">
+};
+
+<slave.frames:{frame|<frame.signals:{signal|volatile l_bool <signal.name>_flag;<\n>}>}>
+l_bool l_sys_init_<slave.name>() {
+    <slave.frames:{frame|<frame.signals:{signal|<signalWriteInitialValue(signal)><\n>}>}>
+    return false;
+}
+
+<slave.frames:{frame|<frame.signals:{signal|<signalReadImplementation(frame,signal)><\n>}>}>
+<slave.frames:{frame|<frame.signals:{signal|<signalWriteImplementation(frame,signal)><\n>}>}>
+<slave.frames:{frame|<frame.signals:{signal|<signalTestImplementation(signal)><\n>}>}>
+<slave.frames:{frame|<frame.signals:{signal|<signalClearImplementation(signal)><\n>}>}>
+
+<slave:(interface)()>
+>>
+
+UART2(slave) ::= <<
+#include \<xc.h>
+l_bool l_ifc_init_UART2() {
+    // BRG = FCY    /(4*BAUD_RATE) - 1
+    // BRG = 2000000/(4*9600     ) - 1 = 51
+    U2BRG = 51;
+
+    U2MODEbits.BRGH  = 1; // High Baud Rate
+    U2MODEbits.PDSEL = 0; // 8-bit data, no parity
+    U2MODEbits.STSEL = 0; // One stop bit
+
+    U2MODEbits.WAKE = 1;  // Start bit detect during sleep mode
+    U2MODEbits.ABAUD = 1; // Enable baud rate measurement
+
+    IEC1bits.U2RXIE = 1; // RX interrupt enabled
+	IEC1bits.U2TXIE = 1; // TX interrupt enabled
+    IEC4bits.U2ERIE = 1; // Error interrupt enabled
+
+	IPC7bits.U2RXIP  = 4; // Level 4 interrupt priority for RX
+	IPC7bits.U2TXIP  = 4; // Level 4 interrupt priority for TX
+    IPC16bits.U2ERIP = 5; // Level 5 interrupt priority for Error
+
+    U2STAbits.UTXISEL1 = 1; // Interrupt when the last character is shifted out of the Transmit Shift Register; all transmit operations are completed. Part(1/2)
+    U2STAbits.UTXISEL0 = 0; // Part (2/2)
+
+    U2STAbits.URXISEL = 0; // Interrupt is set when any character is received and transferred from the RSR to the receive buffer;
+                           // receive buffer has one or more characters
+
+    U2MODEbits.UARTEN = 1; // Enable the UART 2 module
+
+    IFS1bits.U2TXIF = 0; // Clear the TX interrupt flag
+	IFS1bits.U2RXIF = 0; // Clear the RX interrupt flag
+    IFS4bits.U2ERIF = 0; // Clear the error interrupt flag
+
+    return false;
+}
+
+void __attribute__((interrupt,no_auto_psv)) _U2ErrInterrupt() {
+    if(IFS4bits.U2ERIF) {
+        IFS4bits.U2ERIF = 0;
+        // Clear any errors
+        U2STAbits.OERR = 0;
+    }
+}
+
+void __attribute__((interrupt,no_auto_psv)) _U2TXInterrupt() {
+    if(IFS1bits.U2TXIF) {
+        // Clear TX interrupt flag
+        IFS1bits.U2TXIF = 0;
+    }
+}
+
+void __attribute__((interrupt,no_auto_psv)) _U2RXInterrupt() {
+    if(IFS1bits.U2RXIF) {
+        // Clear RX interrupt flag
+        IFS1bits.U2RXIF = 0;
+
+        while(U2STAbits.URXDA) {
+            // TODO do something with this data
+            char data = (char)U2RXREG;
+        }
+    }
+}
+>>

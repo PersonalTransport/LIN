@@ -1,15 +1,16 @@
-package LIN.compiler.capability;
+package LIN.compiler.capability.parser;
 
 import LIN.Slave;
+import LIN.compiler.capability.parser.NodeCapabilityFileParser.*;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import static LIN.compiler.capability.Util.convert;
+import static LIN.compiler.capability.parser.Util.convert;
 
-class NodeDefinitionVisitor extends NodeCapabilityFileBaseVisitor<Slave> {
+public class NodeDefinitionVisitor extends NodeCapabilityFileBaseVisitor<Slave> {
         private Slave slave;
 
         @Override
-        public Slave visitNodeDefinition(NodeCapabilityFileParser.NodeDefinitionContext ctx) {
+        public Slave visitNodeDefinition(NodeDefinitionContext ctx) {
             slave = new Slave(ctx.nodeName.getText());
             visit(ctx.generalDefinition());
             visit(ctx.diagnosticDefinition());
@@ -24,7 +25,7 @@ class NodeDefinitionVisitor extends NodeCapabilityFileBaseVisitor<Slave> {
         }
 
         @Override
-        public Slave visitGeneralDefinition(NodeCapabilityFileParser.GeneralDefinitionContext ctx) {
+        public Slave visitGeneralDefinition(GeneralDefinitionContext ctx) {
             slave.setProtocolVersion(ctx.version.getText().replace("\"",""));
             slave.setSupplier(convert(ctx.supplier));
             slave.setFunction(convert(ctx.function));
@@ -35,19 +36,19 @@ class NodeDefinitionVisitor extends NodeCapabilityFileBaseVisitor<Slave> {
         }
 
         @Override
-        public Slave visitDiagnosticDefinition(NodeCapabilityFileParser.DiagnosticDefinitionContext ctx) {
+        public Slave visitDiagnosticDefinition(DiagnosticDefinitionContext ctx) {
             if(ctx.nadList != null) {
-                for(NodeCapabilityFileParser.IntegerContext intCtx: ctx.nadList.integer())
+                for(IntegerContext intCtx: ctx.nadList.integer())
                     slave.addPossibleNad(convert(intCtx));
             }
             else {
-                for(int i=convert(ctx.startNAD); i<=convert(ctx.endNAD); ++i)
+                for(int i = convert(ctx.startNAD); i<= convert(ctx.endNAD); ++i)
                     slave.addPossibleNad(i);
             }
 
             slave.setDiagnosticClass(convert(ctx.diagnosticClass));
 
-            NodeCapabilityFileParser.P2MinStMinNAsTimeoutNCrTimeoutContext p2MinStMinNAsTimeoutNCrTimeout = ctx.p2MinStMinNAsTimeoutNCrTimeout();
+            P2MinStMinNAsTimeoutNCrTimeoutContext p2MinStMinNAsTimeoutNCrTimeout = ctx.p2MinStMinNAsTimeoutNCrTimeout();
             if(p2MinStMinNAsTimeoutNCrTimeout != null) {
                 if (p2MinStMinNAsTimeoutNCrTimeout.p2Min != null)
                     slave.setP2Min(convert(p2MinStMinNAsTimeoutNCrTimeout.p2Min));
@@ -64,7 +65,7 @@ class NodeDefinitionVisitor extends NodeCapabilityFileBaseVisitor<Slave> {
 
 
             if(ctx.supportSids != null) {
-                for(NodeCapabilityFileParser.IntegerContext intCtx:ctx.supportSids.integer())
+                for(IntegerContext intCtx:ctx.supportSids.integer())
                     slave.addSupportSID(convert(intCtx));
             }
 
@@ -75,18 +76,18 @@ class NodeDefinitionVisitor extends NodeCapabilityFileBaseVisitor<Slave> {
         }
 
         @Override
-        public Slave visitEncodingsDefinition(NodeCapabilityFileParser.EncodingsDefinitionContext ctx) {
+        public Slave visitEncodingsDefinition(EncodingsDefinitionContext ctx) {
             EncodingVisitor encodingVisitor = new EncodingVisitor();
-            for(NodeCapabilityFileParser.EncodingDefinitionContext encodingCtx:ctx.encodingDefinition())
+            for(EncodingDefinitionContext encodingCtx:ctx.encodingDefinition())
                 slave.addEncoding(encodingVisitor.visit(encodingCtx));
 
             return slave;
         }
 
         @Override
-        public Slave visitFramesDefinition(NodeCapabilityFileParser.FramesDefinitionContext ctx) {
+        public Slave visitFramesDefinition(FramesDefinitionContext ctx) {
             FrameDefinitionVisitor frameVisitor = new FrameDefinitionVisitor(slave);
-            for(NodeCapabilityFileParser.FrameDefinitionContext frameCtx:ctx.frameDefinition()) {
+            for(FrameDefinitionContext frameCtx:ctx.frameDefinition()) {
                 if(frameCtx.kind.getType() == NodeCapabilityFileLexer.Publish)
                     slave.addPublishingFrame(frameVisitor.visit(frameCtx));
                 else
@@ -97,7 +98,7 @@ class NodeDefinitionVisitor extends NodeCapabilityFileBaseVisitor<Slave> {
         }
 
         @Override
-        public Slave visitStatusManagement(NodeCapabilityFileParser.StatusManagementContext ctx) {
+        public Slave visitStatusManagement(StatusManagementContext ctx) {
             slave.setResponseErrorSignal(ctx.responseErrorSignal.getText()); // TODO error if null.
 
             if(ctx.faultStateSignals != null) {
@@ -108,7 +109,7 @@ class NodeDefinitionVisitor extends NodeCapabilityFileBaseVisitor<Slave> {
         }
 
         @Override
-        public Slave visitFreeTextDefinition(NodeCapabilityFileParser.FreeTextDefinitionContext ctx) {
+        public Slave visitFreeTextDefinition(FreeTextDefinitionContext ctx) {
             slave.setFreeText(ctx.text.getText());
             return slave;
         }
