@@ -2,8 +2,8 @@ package LIN2.compiler.parser.description;
 
 import LIN2.Cluster;
 import LIN2.Slave;
-import LIN2.frame.Frame;
 import LIN2.compiler.parser.description.DescriptionFileParser.*;
+import LIN2.frame.Frame;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 

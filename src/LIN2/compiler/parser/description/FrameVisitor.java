@@ -2,8 +2,10 @@ package LIN2.compiler.parser.description;
 
 import LIN2.Cluster;
 import LIN2.Node;
-import LIN2.frame.*;
 import LIN2.compiler.parser.description.DescriptionFileParser.*;
+import LIN2.frame.EventTriggeredFrame;
+import LIN2.frame.Frame;
+import LIN2.frame.UnconditionalFrame;
 import LIN2.signal.Signal;
 
 public class FrameVisitor extends DescriptionFileBaseVisitor<Frame> {

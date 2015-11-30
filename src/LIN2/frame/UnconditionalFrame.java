@@ -2,13 +2,9 @@ package LIN2.frame;
 
 import LIN2.Node;
 import LIN2.encoding.Encoding;
-import LIN2.signal.ArraySignalValue;
-import LIN2.signal.ScalarSignalValue;
 import LIN2.signal.Signal;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashSet;
 
 public class UnconditionalFrame extends Frame {
     private Node publisher;

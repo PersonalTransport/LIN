@@ -9,7 +9,6 @@ import LIN2.signal.Signal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.logging.FileHandler;
 
 public class Cluster {
     private Master master;

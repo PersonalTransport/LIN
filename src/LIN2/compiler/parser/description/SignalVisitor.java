@@ -1,7 +1,7 @@
 package LIN2.compiler.parser.description;
 
+import LIN2.compiler.parser.description.DescriptionFileParser.SignalDefinitionContext;
 import LIN2.signal.Signal;
-import LIN2.compiler.parser.description.DescriptionFileParser.*;
 
 public class SignalVisitor extends DescriptionFileBaseVisitor<Signal> {
 

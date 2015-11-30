@@ -1,7 +1,7 @@
 package LIN2.schedule;
 
-import LIN2.frame.Frame;
 import LIN2.Slave;
+import LIN2.frame.Frame;
 
 public class AssignFrameIdEntry extends Entry {
     private Slave slave;

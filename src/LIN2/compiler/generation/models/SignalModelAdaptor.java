@@ -2,7 +2,6 @@ package LIN2.compiler.generation.models;
 
 import LIN2.signal.ArraySignalValue;
 import LIN2.signal.Signal;
-import LIN2.signal.SignalValue;
 import org.stringtemplate.v4.Interpreter;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.misc.ObjectModelAdaptor;
