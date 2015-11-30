@@ -144,7 +144,8 @@ slaveDefinition:
         ResponseError '=' responseErrorSignal=Identifier ';'
         (FaultStateSignals '=' faultStateSignals=identifierList ';')?
         p2MinStMinNAsTimeoutNCrTimeout
-        (configurableFrames21Definition | configurableFrames20Definition)
+        configurableFrames21Definition
+        //(configurableFrames21Definition | configurableFrames20Definition)
     '}';
 
 configurableFrames21Definition:
@@ -174,20 +175,63 @@ scheduleTableDefinition:
     '}';
 
 scheduleTableEntry:
-    scheduleTableCommand Delay frameTime=real Millisecond ';'
+    unconditionalEntry |
+    masterReqEntry |
+    slaveRespEntry |
+    assignNADEntry |
+    conditionalChangeNADEntry |
+    dataDumpEntry |
+    saveConfigurationEntry |
+    assignFrameIdRangeEntry |
+    freeFormatEntry |
+    assignFrameIdEntry
     ;
 
-scheduleTableCommand:
-    frameName=Identifier |
-    MasterReq | //TODO what does this do.
-    SlaveResp | //TODO what does this do.
-    AssignNAD '{' nodeName=Identifier '}'  | //TODO what does this do.
-    ConditionalChangeNAD '{' NAD=integer ',' id=integer ',' byteV=integer ',' mask=integer ',' inv=integer ',' newNAD=integer '}' | //TODO what does this do.
-    DataDump '{' nodeName=Identifier ',' D1=integer ',' D2=integer ',' D3=integer ',' D4=integer ',' D5=integer '}' | //TODO what does this do.
-    SaveConfiguration '{' nodeName=Identifier '}' |
-    AssignFrameIdRange '{' nodeName=Identifier ',' startIndex=integer  (',' PIDIndex=integer ',' PIDIndexP1=integer ',' PIDIndexP2=integer ',' PIDIndexP3=integer)? '}' | //TODO what does this do.
-    FreeFormat '{' d1=integer ',' d2=integer ',' d3=integer ',' d4=integer ',' d5=integer ',' d6=integer ',' d7=integer ',' d8=integer '}' | //TODO what does this do.
-    AssignFrameId '{' nodeName=Identifier ',' frameName=Identifier '}' //TODO what does this do.
+unconditionalEntry:
+    frameName=Identifier Delay frameTime=real Millisecond ';'
+    ;
+
+masterReqEntry:
+    MasterReq Delay frameTime=real Millisecond ';'
+    ;
+
+slaveRespEntry:
+    SlaveResp Delay frameTime=real Millisecond ';'
+    ;
+
+assignNADEntry:
+    AssignNAD '{' nodeName=Identifier '}'
+    Delay frameTime=real Millisecond ';'
+    ;
+
+conditionalChangeNADEntry:
+    ConditionalChangeNAD '{' NAD=integer ',' id=integer ',' byteV=integer ',' mask=integer ',' inv=integer ',' newNAD=integer '}'
+    Delay frameTime=real Millisecond ';'
+    ;
+
+dataDumpEntry:
+    DataDump '{' nodeName=Identifier ',' D1=integer ',' D2=integer ',' D3=integer ',' D4=integer ',' D5=integer '}'
+    Delay frameTime=real Millisecond ';'
+     ;
+
+saveConfigurationEntry:
+    SaveConfiguration '{' nodeName=Identifier '}'
+    Delay frameTime=real Millisecond ';'
+    ;
+
+assignFrameIdRangeEntry:
+    AssignFrameIdRange '{' nodeName=Identifier ',' startIndex=integer  (',' PIDIndexP0=integer ',' PIDIndexP1=integer ',' PIDIndexP2=integer ',' PIDIndexP3=integer)? '}'
+    Delay frameTime=real Millisecond ';'
+    ;
+
+freeFormatEntry:
+    FreeFormat '{' d1=integer ',' d2=integer ',' d3=integer ',' d4=integer ',' d5=integer ',' d6=integer ',' d7=integer ',' d8=integer '}'
+    Delay frameTime=real Millisecond ';'
+    ;
+
+assignFrameIdEntry:
+    AssignFrameId '{' nodeName=Identifier ',' frameName=Identifier '}'
+    Delay frameTime=real Millisecond ';'
     ;
 
 signalGroupsDefinition:
@@ -214,7 +258,7 @@ signalRepresentationsDefinition:
     '}';
 
 signalRepresentationDefinition:
-    signalEncodingTypeName=Identifier ':' identifierList ';'
+    signalEncodingTypeName=Identifier ':' signals=identifierList ';'
     ;
 
 LINDescriptionFile: 'LIN_description_file';

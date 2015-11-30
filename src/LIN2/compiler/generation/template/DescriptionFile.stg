@@ -1,0 +1,95 @@
+descriptionFile(cluster) ::= <<
+LIN_description_file;
+LIN_protocol_version = "<cluster.master.protocol>";
+LIN_language_version = "<cluster.master.protocol>";
+LIN_speed = <cluster.master.bitrate> kbps;
+<if(cluster.master.channelName)>Channel_name = <cluster.master.channelName>;<endif>
+
+Nodes {
+    Master: <cluster.master.name>, <cluster.master.timebase> ms, <cluster.master.jitter> ms;
+    Slaves: <cluster.slaves:{slave|<slave.name>};separator=", ">;
+}
+
+Signals {
+    <cluster.signals:{signal|<signalDefinition(signal)>};separator="\n">
+}
+
+Frames {
+    <cluster.unconditionalFrames:{frame|<unconditionalFrameDefinition(frame)>};separator="\n">
+}
+
+Event_triggered_frames {
+    <cluster.eventTriggeredFrames:{frame|<eventTriggeredFrameDefinition(frame)>};separator="\n">
+}
+
+Node_attributes {
+    <cluster.slaves:{slave|<slaveDefinition(slave)>};separator="\n">
+}
+
+Schedule_tables {
+    <cluster.master.scheduleTables:{scheduleTable|<scheduleTableDefinition(scheduleTable)>};separator="\n">
+}
+>>
+
+signalDefinition(signal) ::= <%
+<signal.name>: <signal.size>,<\ >
+<if(signal.initialValue.value)>
+<signal.initialValue.value>
+<elseif(signal.initialValue.values)>
+{<signal.initialValue.values:{value|<value>};separator=", ">}
+<endif>,<\ >
+<signal.frame.publisher.name>
+<signal.frame.subscribers:{node|, <node.name>}>;
+%>
+
+unconditionalFrameDefinition(frame) ::= <<
+<frame.name>: <frame.ID.hex>, <frame.publisher.name>, <frame.length> {
+    <frame.signals:{signal|<signal.name>, <signal.offset>;};separator="\n">
+}
+>>
+
+eventTriggeredFrameDefinition(frame) ::= <% <frame.name> : <frame.scheduleTable.name>, <frame.ID.hex><frame.associatedFrames:{frame|, <frame.name>}>;%>
+
+slaveDefinition(slave) ::= <<
+<slave.name> {
+    LIN_protocol = "<slave.protocol>";
+    configured_NAD = <slave.configuredNAD.hex>;
+    <if(slave.initialNAD)>initial_NAD = <slave.initialNAD.hex>;<endif>
+    product_id = <slave.supplier.hex>, <slave.function.hex><if(slave.variant)>, <slave.variant><endif>;
+    response_error = <slave.responseError.name>;
+    <if(slave.faultStateSignals)>fault_state_signals = <slave.faultStateSignals:{signal|<signal.name>};separator=", ">;<endif>
+    <if(slave.P2Min)>P2_min = <slave.P2Min> ms;<endif>
+    <if(slave.STMin)>ST_min = <slave.STMin> ms;<endif>
+    <if(slave.NAsTimeout)> N_As_timeout = <slave.NAsTimeout> ms;<endif>
+    <if(slave.NCrTimeout)> N_Cr_timeout = <slave.NCrTimeout> ms;<endif>
+    configurable_frames {
+        <slave.frames:{frame|<frame.name>;};separator="\n">
+    }
+}
+>>
+
+scheduleTableDefinition(scheduleTable) ::= <<
+<scheduleTable.name> {
+    <scheduleTable.entries:{entry|<entry:(entry.type)()> delay <entry.frameTime> ms;};separator="\n">
+}
+>>
+
+unconditionalEntryDefinition(entry) ::= "<entry.frame.name>"
+
+masterReqEntryDefinition(entry) ::= "MasterReq"
+
+slaveRespEntryDefinition(entry) ::= "SlaveResp"
+
+assignNADEntryDefinition(entry) ::= "AssignNAD {<entry.slave.name>}"
+
+conditionalChangeNADEntryDefinition(entry) ::= "ConditionalChangeNAD {<entry.NAD>, <entry.Id>, <entry.byteV>, <entry.mask>, <entry.inv>, <entry.newNAD>}"
+
+dataDumpEntryDefinition(entry) ::= "DataDump {<entry.slave.name>, <entry.D1>, <entry.D2>, <entry.D3>, <entry.D4>, <entry.D5>}"
+
+saveConfigurationEntryDefinition(entry) ::= "SaveConfiguration {<entry.slave.name>}"
+
+assignFrameIdRangeEntryDefinition(entry) ::= <%AssignFrameIdRange {<entry.slave.name>, <entry.startIndex><entry.PIDs:{PID|<PID>};separator=", ">}%>
+
+freeFormatEntryDefinition(entry) ::= "FreeFormat {<entry.D1>, <entry.D2>, <entry.D3>, <entry.D4>, <entry.D5>, <entry.D6>, <entry.D7>, <entry.D8>}"
+
+assignFrameIdEntryDefinition(entry) ::= "AssignFrameId {<entry.slave.name>, <entry.frame.name>}"

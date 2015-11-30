@@ -1,0 +1,118 @@
+//====================================================================================================================//
+slaveDriverSource(slave) ::= <<
+<slave.frames:{frame|#define <frame.name>_ID <frame.ID.hex>};separator="\n">
+
+volatile struct l_frame frames[] = {
+    <slave.frames:{frame|{FRAME_PID(<frame.name>_ID),<frame.length>\}};separator=",\n">
+}
+
+l_bool l_sys_init() {
+    <slave.signals:{signal|<signal:(signal.signalWriteInitialValue)()>};separator="\n">
+}
+
+<slave.signals:{signal|<signal:(signal.signalImplementation)()>};separator="\n\n">
+
+>>
+//====================================================================================================================//
+
+
+
+//====================================================================================================================//
+signalFlagImplementation(signal) ::= <<
+volatile l_bool <signal.name>_flag;
+l_bool l_flg_tst_<signal.name>() {
+    return <signal.name>_flg;
+}
+void l_flg_clr_<signal.name>() {
+    <signal.name>_flg = false;
+}
+>>
+//====================================================================================================================//
+
+
+
+//====================================================================================================================//
+boolSignalImplementation(signal) ::= <<
+//===================================================<signal.name>===================================================//
+<signalFlagImplementation(signal)>
+l_bool l_bool_rd_<signal.name>() {
+    return (l_bool)((frames[<signal.frame.name>_ID].data64 >\> <signal.offset>) & <signal.signalMask.hex>ULL);
+}
+void l_bool_wr_<signal.name>(l_bool v) {
+    frames[<signal.frame.name>_ID].data64 &= ~(<signal.signalMask.hex>ULL \<\< <signal.offset>);
+    frames[<signal.frame.name>_ID].data64 |= ((uint64_t)v & <signal.signalMask.hex>ULL) \<\< <signal.offset>);
+    // TODO checksum??
+}
+//===================================================<signal.name>===================================================//
+>>
+
+boolSignalWriteInitialValue(signal) ::= "l_bool_wr_<signal.name>(<signal.initialValue.value>);"
+//====================================================================================================================//
+
+
+
+//====================================================================================================================//
+u8SignalImplementation(signal) ::= <<
+//===================================================<signal.name>===================================================//
+<signalFlagImplementation(signal)>
+l_u8 l_u8_rd_<signal.name>() {
+    return (l_u8)((frames[<signal.frame.name>_ID].data64 >\> <signal.offset>) & <signal.signalMask.hex>ULL);
+}
+void l_u8_wr_<signal.name>(l_u8 v) {
+    frames[<signal.frame.name>_ID].data64 &= ~(<signal.signalMask.hex>ULL \<\< <signal.offset>);
+    frames[<signal.frame.name>_ID].data64 |= ((uint64_t)v & <signal.signalMask.hex>ULL) \<\< <signal.offset>);
+    // TODO checksum??
+}
+//===================================================<signal.name>===================================================//
+>>
+
+u8SignalWriteInitialValue(signal) ::= "l_u8_wr_<signal.name>(<signal.initialValue.value>);"
+//====================================================================================================================//
+
+
+
+//====================================================================================================================//
+u16SignalImplementation(signal) ::= <<
+//===================================================<signal.name>===================================================//
+<signalFlagImplementation(signal)>
+l_u16 l_u16_rd_<signal.name>() {
+    return (l_u16)((frames[<signal.frame.name>_ID].data64 >\> <signal.offset>) & <signal.signalMask.hex>ULL);
+}
+void l_u16_wr_<signal.name>(l_u16 v) {
+    frames[<signal.frame.name>_ID].data64 &= ~(<signal.signalMask.hex>ULL \<\< <signal.offset>);
+    frames[<signal.frame.name>_ID].data64 |= ((uint64_t)v & <signal.signalMask.hex>ULL) \<\< <signal.offset>);
+    // TODO checksum??
+}
+//===================================================<signal.name>===================================================//
+>>
+
+u16SignalWriteInitialValue(signal) ::= "l_u16_wr_<signal.name>(<signal.initialValue.value>);"
+//====================================================================================================================//
+
+
+
+//====================================================================================================================//
+bytesSignalImplementation(signal) ::= <<
+//===================================================<signal.name>===================================================//
+<signalFlagImplementation(signal)>
+void l_bytes_rd_<signal.name>(l_u8 start,l_u8 count,l_u8* const data) {
+    // TODO check for count being to large??
+    for(l_u8 i=0;i\<count;++i)
+        data[i] = frames[<signal.frame.name>_ID].data[<signal.offset>/8+start+i];
+}
+void l_bytes_wr_<signal.name>(l_u8 start,l_u8 count,const l_u8* const data) {
+    // TODO check for count being to large??
+    for(l_u8 i=0;i\<count;++i)
+        frames[<signal.frame.name>_ID].data[<signal.offset>/8+start+i] = data[i];
+    // TODO checksum??
+}
+//===================================================<signal.name>===================================================//
+>>
+
+bytesSignalWriteInitialValue(signal) ::= <<
+{
+    l_u8 <signal.name>_data[] = {<signal.initialValue.values:{value|<value.hex>};separator=", ">};
+    l_bytes_wr_<signal.name>(0,(<signal.size>+7)/8,<signal.name>_data);
+}
+>>
+//====================================================================================================================//

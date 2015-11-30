@@ -1,0 +1,87 @@
+capabilityFile(slave) ::= <<
+node_capability_file;
+LIN_language_version = "2.2";
+node <slave.name> {
+    general {
+        LIN_protocol_version = "<slave.protocol>";
+        supplier = <slave.supplier.hex>;
+        function = <slave.function.hex>;
+        <if(slave.variant)>variant = <slave.variant>;<endif>
+        bitrate = automatic min 10 kbps max 20 kbps; // TODO add this
+        sends_wake_up_signal = <if(slave.sendsWakeUpSignal)>"yes"<else>"no"<endif>;
+    }
+
+    diagnostic {
+        NAD = <slave.configuredNAD.hex>; // TODO add more
+        diagnostic_class = 2; // TODO read this
+        <if(slave.P2Min)>P2_min = <slave.P2Min> ms;<endif>
+        <if(slave.STMin)>ST_min = <slave.STMin> ms;<endif>
+        <if(slave.NAsTimeout)>N_As_timeout = <slave.NAsTimeout> ms;<endif>
+        <if(slave.NCrTimeout)>N_Cr_timeout = <slave.NCrTimeout> ms;<endif>
+        //TODO support_sid
+        //TODO max_message_length
+    }
+
+    frames {
+        <slave.frames:{frame|<frameDefinition(slave,frame)>};separator="\n">
+    }
+    <if(slave.encodings)>
+
+    encoding {
+        <slave.encodings:{encoding|<encodingDefinition(encoding)>};separator="\n">
+    }
+    <endif>
+
+    status_management {
+        response_error = <slave.responseErrorSignal.name>;
+        <if(slave.FaultStateSignals)>
+        fault_state_signals = <slave.faultStateSignals:{signal|<signal.name>};separator=", ">;
+        <endif>
+    }
+    <if(slave.freeText)>
+
+    free_text {
+        "<slave.freeText>"
+    }
+    <endif>
+}
+>>
+
+frameDefinition(slave,frame) ::= <<
+<if(frame.publishedBy)>publish<else>subscribe<endif> <frame.name> {
+    length = <frame.length>;
+    <if(frame.minPeriod)>min_period = <frame.minPeriod> ms;<endif>
+    <if(frame.maxPeriod)>max_period = <frame.maxPeriod> ms;<endif>
+    <if(frame.signals)>
+    signals {
+        <frame.signals:{signal|<signalDefinition(signal)>};separator="\n">
+    }
+    <endif>
+}
+>>
+
+signalDefinition(signal) ::= <<
+<signal.name> { size = <signal.size>; initial_value = <signalInitialValue(signal.initialValue)>; offset = <signal.offset>;<if(signal.encoding)> <signal.encoding.name>;<endif> }
+>>
+
+signalInitialValue(initialValue) ::= <%
+<if(initialValue.values)>
+{ <initialValue.values:{value|<value.hex>};separator=", "> }
+<else>
+<initialValue.value.hex>
+<endif>
+%>
+
+encodingDefinition(encoding) ::= <<
+<encoding.name> {
+    <encoding.encodedValues:{encodedValue|<encodedValue:(encodedValue.encodedValueDefinition)()>};separator="\n">
+}
+>>
+
+asciiEncodedValueDefinition(encodedValue) ::= "ascii_value;"
+
+bcdEncodedValueDefinition(encodedValue) ::= "bcd_value;"
+
+logicalEncodedValueDefinition(encodedValue) ::= "logical_value, <encodedValue.value><if(encodedValue.textInfo)>, \"<encodedValue.textInfo>\"<endif>;"
+
+physicalEncodedValueDefinition(encodedValue) ::= "physical_value, <encodedValue.min>, <encodedValue.max>, <encodedValue.scale>, <encodedValue.offset><if(encodedValue.textInfo)>, \"<encodedValue.textInfo>\"<endif>;"
