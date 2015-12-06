@@ -3,6 +3,8 @@ slaveDriverHeader(slave) ::= <<
 #ifndef <slave.name>_SLAVE_DRIVER_H
 #define <slave.name>_SLAVE_DRIVER_H
 
+#include \<LIN.h>
+
 l_bool l_sys_init();
 
 <slave.signals:{signal|<signal:(signal.signalPrototype)()>};separator="\n\n">
