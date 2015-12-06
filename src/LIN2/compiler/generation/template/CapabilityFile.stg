@@ -14,8 +14,12 @@ node <slave.name> {
     diagnostic {
         <if(slave.NADSet)>
         NAD = <slave.NADSet:{NAD|<NAD.hex>};separator=", ">;
-        <else>
+        <elseif(slave.NADRange)>
         NAD = <slave.NADRange.begin.hex> to <slave.NADRange.end.hex>;
+        <elseif(slave.initialNAD)>
+        NAD = <slave.initialNAD.hex>;
+        <else>
+        NAD = <slave.configuredNAD.hex>;
         <endif>
         diagnostic_class = <slave.diagnosticClass>;
         <if(slave.P2Min)>P2_min = <slave.P2Min> ms;<endif>
