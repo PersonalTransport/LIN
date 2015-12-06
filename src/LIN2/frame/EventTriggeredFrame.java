@@ -15,8 +15,10 @@ public class EventTriggeredFrame extends Frame {
     }
 
     public void addAssociatedFrame(UnconditionalFrame frame) {
-        if(!associatedFrames.contains(frame))
+        if(!associatedFrames.contains(frame)) {
             this.associatedFrames.add(frame);
+            frame.setAssociatedEventTriggeredFrame(this);
+        }
     }
 
     public ArrayList<UnconditionalFrame> getAssociatedFrames() {

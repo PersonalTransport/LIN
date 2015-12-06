@@ -1,7 +1,13 @@
 package LIN2.compiler.parser.capability;
 
-import LIN2.bitrate.*;
-import LIN2.compiler.parser.capability.NodeCapabilityFileParser.*;
+import LIN2.bitrate.AutomaticBitrate;
+import LIN2.bitrate.Bitrate;
+import LIN2.bitrate.FixedBitrate;
+import LIN2.bitrate.SelectBitrate;
+import LIN2.compiler.parser.capability.NodeCapabilityFileParser.AutomaticBitrateDefinitionContext;
+import LIN2.compiler.parser.capability.NodeCapabilityFileParser.BitrateContext;
+import LIN2.compiler.parser.capability.NodeCapabilityFileParser.FixedBitrateDefinitionContext;
+import LIN2.compiler.parser.capability.NodeCapabilityFileParser.SelectBitrateDefinitionContext;
 
 public class BitrateVisitor extends NodeCapabilityFileBaseVisitor<Bitrate> {
     @Override

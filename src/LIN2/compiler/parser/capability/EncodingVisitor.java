@@ -1,6 +1,7 @@
 package LIN2.compiler.parser.capability;
 
-import LIN2.compiler.parser.capability.NodeCapabilityFileParser.*;
+import LIN2.compiler.parser.capability.NodeCapabilityFileParser.EncodedValueContext;
+import LIN2.compiler.parser.capability.NodeCapabilityFileParser.EncodingDefinitionContext;
 import LIN2.encoding.Encoding;
 
 public class EncodingVisitor extends NodeCapabilityFileBaseVisitor<Encoding> {

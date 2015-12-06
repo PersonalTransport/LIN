@@ -5,12 +5,13 @@ import LIN2.bitrate.FixedBitrate;
 import LIN2.schedule.ScheduleTable;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Master extends Node {
     private float timebase;
     private float jitter;
     private String channelName;
-    private ArrayList<ScheduleTable> scheduleTables;
+    private List<ScheduleTable> scheduleTables;
 
     public Master(String name, float bitrate, float timebase, float jitter) {
         super(name);
@@ -64,7 +65,7 @@ public class Master extends Node {
         return null;
     }
 
-    public ArrayList<ScheduleTable> getScheduleTables() {
+    public List<ScheduleTable> getScheduleTables() {
         return scheduleTables;
     }
 }

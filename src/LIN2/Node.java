@@ -8,8 +8,9 @@ import LIN2.frame.UnconditionalFrame;
 import LIN2.signal.Signal;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class Node {
     private String name;
@@ -18,7 +19,7 @@ public class Node {
     private int function;
     private int variant;
     private Bitrate bitrate;
-    private ArrayList<Frame> frames;
+    private List<Frame> frames;
 
     public Node(String name) {
         this.name = name;
@@ -90,12 +91,20 @@ public class Node {
         return null;
     }
 
-    public ArrayList<Frame> getFrames() {
+    public List<Frame> getFrames() {
         return frames;
     }
 
-    public Collection<UnconditionalFrame> getUnconditionalFrames() {
-        LinkedHashSet<UnconditionalFrame> unconditionalFrames = new LinkedHashSet<>();
+    public UnconditionalFrame getUnconditionalFrame(String name) {
+        for(Frame frame:frames) {
+            if (frame instanceof UnconditionalFrame && frame.getName().equals(name))
+                return (UnconditionalFrame) frame;
+        }
+        return null;
+    }
+
+    public Set<UnconditionalFrame> getUnconditionalFrames() {
+        HashSet<UnconditionalFrame> unconditionalFrames = new HashSet<>();
         for(Frame frame:frames) {
             if(frame instanceof UnconditionalFrame)
                 unconditionalFrames.add((UnconditionalFrame) frame);
@@ -103,8 +112,16 @@ public class Node {
         return unconditionalFrames;
     }
 
-    public Collection<EventTriggeredFrame> getEventTriggeredFrames() {
-        LinkedHashSet<EventTriggeredFrame> eventTriggeredFrames = new LinkedHashSet<>();
+    public EventTriggeredFrame getEventTriggeredFrame(String name) {
+        for(Frame frame:frames) {
+            if (frame instanceof EventTriggeredFrame && frame.getName().equals(name))
+                return (EventTriggeredFrame) frame;
+        }
+        return null;
+    }
+
+    public Set<EventTriggeredFrame> getEventTriggeredFrames() {
+        HashSet<EventTriggeredFrame> eventTriggeredFrames = new HashSet<>();
         for(Frame frame:frames) {
             if(frame instanceof EventTriggeredFrame)
                 eventTriggeredFrames.add((EventTriggeredFrame) frame);
@@ -124,8 +141,8 @@ public class Node {
         return null;
     }
 
-    public Collection<Signal> getSignals() {
-        LinkedHashSet<Signal> signals = new LinkedHashSet<>();
+    public Set<Signal> getSignals() {
+        HashSet<Signal> signals = new HashSet<>();
         for(Frame frame:frames) {
             if(frame instanceof UnconditionalFrame)
                 signals.addAll(((UnconditionalFrame)frame).getSignals());
@@ -145,8 +162,8 @@ public class Node {
         return null;
     }
 
-    public Collection<Encoding> getEncodings() {
-        LinkedHashSet<Encoding> encodings = new LinkedHashSet<>();
+    public Set<Encoding> getEncodings() {
+        HashSet<Encoding> encodings = new HashSet<>();
         for(Frame frame:frames) {
             if(frame instanceof UnconditionalFrame)
                 encodings.addAll(((UnconditionalFrame)frame).getEncodings());

@@ -6,16 +6,15 @@ import LIN2.frame.Frame;
 import LIN2.frame.UnconditionalFrame;
 import LIN2.signal.Signal;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Cluster {
     private Master master;
-    private ArrayList<Slave> slaves;
+    private Set<Slave> slaves;
 
     public Cluster() {
-        this.slaves = new ArrayList<>();
+        this.slaves = new HashSet<>();
     }
 
     public Master getMaster() {
@@ -27,15 +26,18 @@ public class Cluster {
     }
 
     public void addSlave(Slave slave) {
-        if(!slaves.contains(slave))
-            slaves.add(slave);
+        slaves.add(slave);
+    }
+
+    public void removeSlave(Slave slave) {
+        slaves.remove(slave);
     }
 
     public Node getNode(String nodeName) {
         Slave slave = getSlave(nodeName);
         if(slave != null)
             return slave;
-        return master.getName().equals(nodeName) ? master : null;
+        return (master != null && master.getName().equals(nodeName)) ? master : null;
     }
 
     public Slave getSlave(String slaveName) {
@@ -46,7 +48,7 @@ public class Cluster {
         return null;
     }
 
-    public ArrayList<Slave> getSlaves() {
+    public Set<Slave> getSlaves() {
         return slaves;
     }
 
@@ -59,8 +61,15 @@ public class Cluster {
         return (master != null) ? master.getFrame(frameName) : null;
     }
 
-    public Collection<Frame> getFrames() {
-        LinkedHashSet<Frame> frames = new LinkedHashSet<>();
+    public Set<Node> getNodes() {
+        HashSet<Node> nodes = new HashSet<>();
+        nodes.add(master);
+        nodes.addAll(slaves);
+        return nodes;
+    }
+
+    public Set<Frame> getFrames() {
+        HashSet<Frame> frames = new HashSet<>();
         for(Slave slave:slaves)
             frames.addAll(slave.getFrames());
         if(master != null)
@@ -68,8 +77,17 @@ public class Cluster {
         return frames;
     }
 
-    public Collection<UnconditionalFrame> getUnconditionalFrames() {
-        LinkedHashSet<UnconditionalFrame> unconditionalFrames = new LinkedHashSet<>();
+    public UnconditionalFrame getUnconditionalFrame(String name) {
+        for(Slave slave:slaves) {
+            UnconditionalFrame frame = slave.getUnconditionalFrame(name);
+            if(frame != null)
+                return frame;
+        }
+        return (master != null) ? master.getUnconditionalFrame(name) : null;
+    }
+
+    public Set<UnconditionalFrame> getUnconditionalFrames() {
+        HashSet<UnconditionalFrame> unconditionalFrames = new HashSet<>();
         for(Slave slave:slaves)
             unconditionalFrames.addAll(slave.getUnconditionalFrames());
         if(master != null)
@@ -77,8 +95,17 @@ public class Cluster {
         return unconditionalFrames;
     }
 
-    public Collection<EventTriggeredFrame> getEventTriggeredFrames() {
-        LinkedHashSet<EventTriggeredFrame> eventTriggeredFrames = new LinkedHashSet<>();
+    public EventTriggeredFrame getEventTriggeredFrame(String name) {
+        for(Slave slave:slaves) {
+            EventTriggeredFrame frame = slave.getEventTriggeredFrame(name);
+            if(frame != null)
+                return frame;
+        }
+        return (master != null) ? master.getEventTriggeredFrame(name) : null;
+    }
+
+    public Set<EventTriggeredFrame> getEventTriggeredFrames() {
+        HashSet<EventTriggeredFrame> eventTriggeredFrames = new HashSet<>();
         for(Slave slave:slaves)
             eventTriggeredFrames.addAll(slave.getEventTriggeredFrames());
         if(master != null)
@@ -95,8 +122,8 @@ public class Cluster {
         return (master != null) ? master.getSignal(signalName) : null;
     }
 
-    public Collection<Signal> getSignals() {
-        LinkedHashSet<Signal> signals = new LinkedHashSet<>();
+    public Set<Signal> getSignals() {
+        HashSet<Signal> signals = new HashSet<>();
         for(Slave slave:slaves)
             signals.addAll(slave.getSignals());
         if(master != null)
@@ -113,8 +140,8 @@ public class Cluster {
         return (master != null) ? master.getEncoding(encodingName) : null;
     }
 
-    public Collection<Encoding> getEncodings() {
-        LinkedHashSet<Encoding> encodings = new LinkedHashSet<>();
+    public Set<Encoding> getEncodings() {
+        HashSet<Encoding> encodings = new HashSet<>();
         for(Slave slave:slaves)
             encodings.addAll(slave.getEncodings());
         if(master != null)

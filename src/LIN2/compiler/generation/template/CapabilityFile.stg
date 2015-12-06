@@ -69,6 +69,9 @@ frameDefinition(slave,frame) ::= <<
     length = <frame.length>;
     <if(frame.minPeriod)>min_period = <frame.minPeriod> ms;<endif>
     <if(frame.maxPeriod)>max_period = <frame.maxPeriod> ms;<endif>
+    <if(frame.associatedEventTriggeredFrame)>
+    event_triggered_frame = <frame.associatedEventTriggeredFrame.name>;
+    <endif>
     <if(frame.signals)>
     signals {
         <frame.signals:{signal|<signalDefinition(signal)>};separator="\n">

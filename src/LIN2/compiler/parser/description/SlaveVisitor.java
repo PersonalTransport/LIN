@@ -30,6 +30,8 @@ public class SlaveVisitor extends DescriptionFileBaseVisitor<Slave> {
         if(ctx.variant != null)
             slave.setVariant(Util.convert(ctx.variant));
 
+        slave.setBitrate(cluster.getMaster().getBitrate()); // TODO is this the best way to get this info??
+
         P2MinStMinNAsTimeoutNCrTimeoutContext timeoutCtx = ctx.p2MinStMinNAsTimeoutNCrTimeout();
         if(timeoutCtx.p2Min != null)
             slave.setP2Min(Util.convert(timeoutCtx.p2Min));

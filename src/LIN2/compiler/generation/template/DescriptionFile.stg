@@ -60,8 +60,8 @@ slaveDefinition(slave) ::= <<
     <if(slave.faultStateSignals)>fault_state_signals = <slave.faultStateSignals:{signal|<signal.name>};separator=", ">;<endif>
     <if(slave.P2Min)>P2_min = <slave.P2Min> ms;<endif>
     <if(slave.STMin)>ST_min = <slave.STMin> ms;<endif>
-    <if(slave.NAsTimeout)> N_As_timeout = <slave.NAsTimeout> ms;<endif>
-    <if(slave.NCrTimeout)> N_Cr_timeout = <slave.NCrTimeout> ms;<endif>
+    <if(slave.NAsTimeout)>N_As_timeout = <slave.NAsTimeout> ms;<endif>
+    <if(slave.NCrTimeout)>N_Cr_timeout = <slave.NCrTimeout> ms;<endif>
     configurable_frames {
         <slave.frames:{frame|<frame.name>;};separator="\n">
     }

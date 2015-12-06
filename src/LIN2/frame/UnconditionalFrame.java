@@ -4,17 +4,20 @@ import LIN2.Node;
 import LIN2.encoding.Encoding;
 import LIN2.signal.Signal;
 
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class UnconditionalFrame extends Frame {
     private Node publisher;
-    private ArrayList<Signal> signals;
-    private ArrayList<Node> subscribers;
+    private Set<Signal> signals;
+    private Set<Node> subscribers;
+    private EventTriggeredFrame associatedEventTriggeredFrame;
 
     public UnconditionalFrame(String name) {
         super(name);
-        this.signals = new ArrayList<>();
-        this.subscribers = new ArrayList<>();
+        this.signals = new HashSet<>();
+        this.subscribers = new HashSet<>();
+        this.associatedEventTriggeredFrame = null;
     }
 
     public void setPublisher(Node publisher) {
@@ -47,12 +50,12 @@ public class UnconditionalFrame extends Frame {
     public Signal getSignal(String signalName) {
         for(Signal signal:signals) {
             if(signal.getName().equals(signalName))
-                return  signal;
+                return signal;
         }
         return null;
     }
 
-    public ArrayList<Signal> getSignals() {
+    public Set<Signal> getSignals() {
         return signals;
     }
 
@@ -65,11 +68,11 @@ public class UnconditionalFrame extends Frame {
         return null;
     }
 
-    public ArrayList<Encoding> getEncodings() {
-        ArrayList<Encoding> encodings = new ArrayList<>();
+    public Set<Encoding> getEncodings() {
+        HashSet<Encoding> encodings = new HashSet<>();
         for(Signal signal:signals) {
             Encoding encoding = signal.getEncoding();
-            if(encoding != null && !encodings.contains(encoding))
+            if(encoding != null)
                 encodings.add(encoding);
         }
         return encodings;
@@ -80,7 +83,17 @@ public class UnconditionalFrame extends Frame {
             this.subscribers.add(subscriber);
     }
 
-    public ArrayList<Node> getSubscribers() {
+    public Set<Node> getSubscribers() {
         return subscribers;
+    }
+
+
+    public EventTriggeredFrame getAssociatedEventTriggeredFrame() {
+        return associatedEventTriggeredFrame;
+    }
+
+    public void setAssociatedEventTriggeredFrame(EventTriggeredFrame associatedEventTriggeredFrame) {
+        this.associatedEventTriggeredFrame = associatedEventTriggeredFrame;
+        associatedEventTriggeredFrame.addAssociatedFrame(this);
     }
 }

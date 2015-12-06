@@ -1,13 +1,22 @@
 package LIN2.compiler.parser.capability;
 
+import LIN2.Cluster;
 import LIN2.Slave;
 import LIN2.compiler.parser.capability.NodeCapabilityFileParser.*;
+import LIN2.frame.EventTriggeredFrame;
+import LIN2.frame.UnconditionalFrame;
 import LIN2.util.Range;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.HashSet;
 
 public class SlaveVisitor extends NodeCapabilityFileBaseVisitor<Slave> {
+    private final Cluster cluster;
+
+    public SlaveVisitor(Cluster cluster) {
+        this.cluster = cluster;
+    }
+
     @Override
     public Slave visitNodeDefinition(NodeDefinitionContext ctx) {
         Slave slave =  new Slave(ctx.nodeName.getText());
@@ -56,9 +65,19 @@ public class SlaveVisitor extends NodeCapabilityFileBaseVisitor<Slave> {
         if(diagnosticCtx.maxMessageLength != null)
             slave.setMaxMessageLength(Util.convert(diagnosticCtx.maxMessageLength));
 
-        FrameVisitor frameVisitor = new FrameVisitor(ctx, slave);
-        for(FrameDefinitionContext frameCtx:ctx.framesDefinition().frameDefinition())
+        FrameVisitor frameVisitor = new FrameVisitor(ctx, cluster, slave);
+        for(FrameDefinitionContext frameCtx:ctx.framesDefinition().frameDefinition()) {
             slave.addFrame(frameVisitor.visit(frameCtx));
+        }
+
+        // Connect associated frames
+        for(FrameDefinitionContext frameCtx:ctx.framesDefinition().frameDefinition()) {
+            UnconditionalFrame frame = slave.getUnconditionalFrame(frameCtx.name.getText());
+            if(frameCtx.eventTriggeredFrame != null) {
+                EventTriggeredFrame eventFrame = slave.getEventTriggeredFrame(frameCtx.eventTriggeredFrame.getText());
+                eventFrame.addAssociatedFrame(frame);
+            }
+        }
 
         StatusManagementContext statusManagementCtx = ctx.statusManagement();
         slave.setResponseErrorSignal(slave.getSignal(statusManagementCtx.responseErrorSignal.getText())); // TODO check for null

@@ -2,6 +2,7 @@ package LIN2.compiler;
 
 
 import LIN2.Cluster;
+import LIN2.Node;
 import LIN2.Slave;
 import LIN2.bitrate.Bitrate;
 import LIN2.compiler.generation.models.*;
@@ -23,10 +24,12 @@ import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 public class Compiler {
-    private static void addModelAdaptors(STGroup group) {
+    public static void addModelAdaptors(STGroup group) {
         group.registerModelAdaptor(Frame.class,new FrameModelAdaptor());
         group.registerModelAdaptor(Entry.class,new FrameEntryModelAdaptor());
         group.registerModelAdaptor(Integer.class,new IntegerModelAdaptor());
@@ -34,20 +37,21 @@ public class Compiler {
         group.registerModelAdaptor(SignalValue.class,new SignalValueModelAdaptor());
         group.registerModelAdaptor(EncodedValue.class,new EncodedValueModelAdaptor());
         group.registerModelAdaptor(Bitrate.class,new BitrateModelAdaptor());
+
     }
 
     public static void main(String [] args) throws IOException {
         for(String arg : args) {
             System.out.println(arg);
             if(arg.endsWith(".ncf")) {
-
+                Cluster cluster = new Cluster();
                 NodeCapabilityFileLexer lexer = new NodeCapabilityFileLexer(new ANTLRInputStream(new FileInputStream(arg)));
                 CommonTokenStream tokens = new CommonTokenStream(lexer);
                 NodeCapabilityFileParser parser = new NodeCapabilityFileParser(tokens);
 
                 NodeCapabilityFileParser.NodeCapabilityFileContext context = parser.nodeCapabilityFile();
 
-                SlaveVisitor slaveVisitor = new SlaveVisitor();
+                SlaveVisitor slaveVisitor = new SlaveVisitor(cluster);
                 for(NodeCapabilityFileParser.NodeDefinitionContext nodeCtx:context.nodeDefinition()) {
                     Slave slave = slaveVisitor.visit(nodeCtx);
 
@@ -74,23 +78,14 @@ public class Compiler {
                     STGroup capabilityFileGroup = new STGroupFile("LIN2/compiler/generation/template/CapabilityFile.stg");
                     addModelAdaptors(capabilityFileGroup);
 
-                    System.out.println("//-------------------------------------------------------------------------------------------------------------//");
-                    ST capabilityFile = capabilityFileGroup.getInstanceOf("capabilityFile");
-                    capabilityFile.add("slave", cluster.getSlave("LSM"));
-                    System.out.println(capabilityFile.render());
-                    System.out.println("//-------------------------------------------------------------------------------------------------------------//");
+                    for(Node slave:cluster.getNodes()) {
+                        ST capabilityFile = capabilityFileGroup.getInstanceOf("capabilityFile");
+                        capabilityFile.add("slave", slave);
 
-//                    System.out.println("//-------------------------------------------------------------------------------------------------------------//");
-//                    ST slaveHeader = group.getInstanceOf("slaveDriverHeader");
-//                    slaveHeader.add("slave",cluster.getSlave("LSM"));
-//                    System.out.println(slaveHeader.render());
-//                    System.out.println("//-------------------------------------------------------------------------------------------------------------//");
-//
-//                    System.out.println("//-------------------------------------------------------------------------------------------------------------//");
-//                    ST slaveSource = group.getInstanceOf("slaveDriverSource");
-//                    slaveSource.add("slave",cluster.getSlave("LSM"));
-//                    System.out.println(slaveSource.render());
-//                    System.out.println("//-------------------------------------------------------------------------------------------------------------//");
+                        PrintWriter output = new PrintWriter(new FileOutputStream("examples/"+slave.getName()+".ncf"));
+                        output.print(capabilityFile.render());
+                        output.close();
+                    }
                 }
             }
         }

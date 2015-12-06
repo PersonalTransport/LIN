@@ -1,7 +1,6 @@
 package LIN2.compiler.generation.models;
 
 import LIN2.Node;
-import LIN2.Slave;
 import LIN2.frame.Frame;
 import org.stringtemplate.v4.Interpreter;
 import org.stringtemplate.v4.ST;

@@ -1,10 +1,11 @@
 package LIN2;
 
-import LIN2.bitrate.Bitrate;
 import LIN2.signal.Signal;
 import LIN2.util.Range;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Slave extends Node {
     private boolean sendsWakeUpSignal;
@@ -17,18 +18,18 @@ public class Slave extends Node {
     private Float nAsTimeout;
     private Float nCrTimeout;
     private Signal responseErrorSignal;
-    private ArrayList<Signal> faultStateSignals;
+    private Set<Signal> faultStateSignals;
     private String freeText;
     private int diagnosticClass;
-    private ArrayList<Integer> supportSIDs;
+    private Set<Integer> supportSIDs;
     private int maxMessageLength;
 
     public Slave(String name) {
         super(name);
         this.nAsTimeout = 1000f;
         this.nCrTimeout = 1000f;
-        this.faultStateSignals = new ArrayList<>();
-        this.supportSIDs = new ArrayList<Integer>(Arrays.asList(new Integer[]{0xB2, 0xB7}));
+        this.faultStateSignals = new HashSet<>();
+        this.supportSIDs = new HashSet<>(Arrays.asList(0xB2, 0xB7));
         this.maxMessageLength = 4095;
     }
 
@@ -123,7 +124,7 @@ public class Slave extends Node {
         this.faultStateSignals.remove(signal);
     }
 
-    public ArrayList<Signal> getFaultStateSignals() {
+    public Set<Signal> getFaultStateSignals() {
         return faultStateSignals;
     }
 
@@ -144,17 +145,15 @@ public class Slave extends Node {
     }
 
     public void addSupportedSID(int SID) {
-        if(!supportSIDs.contains(SID))
-            supportSIDs.add(SID);
+        supportSIDs.add(SID);
     }
 
-    public void setSupportSIDs(List<Integer> supportSIDs) {
+    public void setSupportSIDs(Set<Integer> supportSIDs) {
         this.supportSIDs.clear();
-        this.supportSIDs.addAll(new LinkedHashSet<>(supportSIDs));
+        this.supportSIDs.addAll(supportSIDs);
     }
 
-
-    public ArrayList<Integer> getSupportSIDs() {
+    public Set<Integer> getSupportSIDs() {
         return supportSIDs;
     }
 
