@@ -24,7 +24,7 @@ public class Master extends Node {
     public void setBitrate(Bitrate bitrate) {
         if(!(bitrate instanceof FixedBitrate))
             throw new IllegalArgumentException("master bitrate must be a fixed bitrate.");
-        setBitrate(bitrate);
+        super.setBitrate(bitrate);
     }
 
     public float getTimebase() {

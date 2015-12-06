@@ -2,7 +2,7 @@ descriptionFile(cluster) ::= <<
 LIN_description_file;
 LIN_protocol_version = "<cluster.master.protocol>";
 LIN_language_version = "<cluster.master.protocol>";
-LIN_speed = <cluster.master.bitrate> kbps;
+LIN_speed = <cluster.master.bitrate.value> kbps;
 <if(cluster.master.channelName)>Channel_name = <cluster.master.channelName>;<endif>
 
 Nodes {
