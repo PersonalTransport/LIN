@@ -6,7 +6,7 @@ node <slave.name> {
         LIN_protocol_version = "<slave.protocol>";
         supplier = <slave.supplier.hex>;
         function = <slave.function.hex>;
-        <if(slave.variant)>variant = <slave.variant>;<endif>
+        variant = <slave.variant>;
         bitrate = <slave.bitrate:(slave.bitrate.bitrateDefinition)()>;
         sends_wake_up_signal = <if(slave.sendsWakeUpSignal)>"yes"<else>"no"<endif>;
     }

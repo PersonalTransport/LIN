@@ -16,7 +16,7 @@ public class Node {
     private String protocol;
     private int supplier;
     private int function;
-    private Integer variant;
+    private int variant;
     private Bitrate bitrate;
     private ArrayList<Frame> frames;
 
@@ -25,7 +25,7 @@ public class Node {
         this.protocol = "2.2";
         this.supplier = Integer.MIN_VALUE; // Invalid
         this.function = Integer.MIN_VALUE; // Invalid
-        this.variant = null; // not set
+        this.variant = 0;
         this.frames = new ArrayList<>();
     }
 
@@ -57,11 +57,11 @@ public class Node {
         return function;
     }
 
-    public void setVariant(Integer variant) {
+    public void setVariant(int variant) {
         this.variant = variant;
     }
 
-    public Integer getVariant() {
+    public int getVariant() {
         return variant;
     }
 
