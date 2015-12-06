@@ -26,8 +26,8 @@ node <slave.name> {
         <if(slave.STMin)>ST_min = <slave.STMin> ms;<endif>
         <if(slave.NAsTimeout)>N_As_timeout = <slave.NAsTimeout> ms;<endif>
         <if(slave.NCrTimeout)>N_Cr_timeout = <slave.NCrTimeout> ms;<endif>
-        support_sid { <slave.supportSIDs:{SID|<SID.hex>};separator=", "> };
-        max_message_length = <slave.maxMessageLength>;
+        <if(slave.supportSIDs)>support_sid { <slave.supportSIDs:{SID|<SID.hex>};separator=", "> };<endif>
+        <if(slave.maxMessageLength)>max_message_length = <slave.maxMessageLength>;<endif>
     }
 
     frames {
