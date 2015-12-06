@@ -67,6 +67,7 @@ install_manifest.txt
 *.iml
 bin/
 out/
+lib/
 
 # QtCreator
 CMakeLists.txt.user
