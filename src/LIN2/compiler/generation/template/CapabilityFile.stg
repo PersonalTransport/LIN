@@ -7,19 +7,23 @@ node <slave.name> {
         supplier = <slave.supplier.hex>;
         function = <slave.function.hex>;
         <if(slave.variant)>variant = <slave.variant>;<endif>
-        bitrate = automatic min 10 kbps max 20 kbps; // TODO add this
+        bitrate = <slave.bitrate:(slave.bitrate.bitrateDefinition)()>;
         sends_wake_up_signal = <if(slave.sendsWakeUpSignal)>"yes"<else>"no"<endif>;
     }
 
     diagnostic {
-        NAD = <slave.configuredNAD.hex>; // TODO add more
-        diagnostic_class = 2; // TODO read this
+        <if(slave.NADSet)>
+        NAD = <slave.NADSet:{NAD|<NAD.hex>};separator=", ">;
+        <else>
+        NAD = <slave.NADRange.begin.hex> to <slave.NADRange.end.hex>;
+        <endif>
+        diagnostic_class = <slave.diagnosticClass>;
         <if(slave.P2Min)>P2_min = <slave.P2Min> ms;<endif>
         <if(slave.STMin)>ST_min = <slave.STMin> ms;<endif>
         <if(slave.NAsTimeout)>N_As_timeout = <slave.NAsTimeout> ms;<endif>
         <if(slave.NCrTimeout)>N_Cr_timeout = <slave.NCrTimeout> ms;<endif>
-        //TODO support_sid
-        //TODO max_message_length
+        support_sid = { <slave.supportSIDs:{SID|<SID.hex>};separator=", "> };
+        max_message_length = <slave.maxMessageLength>;
     }
 
     frames {
@@ -47,6 +51,15 @@ node <slave.name> {
 }
 >>
 
+fixedBitrateDefinition(bitrate) ::= <%<bitrate.value> kbps%>
+
+selectBitrateDefinition(bitrate) ::= <%select { <bitrate.bitrates:{bitrate|<bitrate> kbps};separator=", "> }%>
+
+automaticBitrateDefinition(bitrate) ::= <%automatic
+<if(bitrate.min)> min <bitrate.min> kbps<endif>
+<if(bitrate.min)> max <bitrate.max> kbps<endif>
+%>
+
 frameDefinition(slave,frame) ::= <<
 <if(frame.publishedBy)>publish<else>subscribe<endif> <frame.name> {
     length = <frame.length>;
@@ -61,7 +74,7 @@ frameDefinition(slave,frame) ::= <<
 >>
 
 signalDefinition(signal) ::= <<
-<signal.name> { size = <signal.size>; initial_value = <signalInitialValue(signal.initialValue)>; offset = <signal.offset>;<if(signal.encoding)> <signal.encoding.name>;<endif> }
+<signal.name> { size = <signal.size>; init_value = <signalInitialValue(signal.initialValue)>; offset = <signal.offset>;<if(signal.encoding)> <signal.encoding.name>;<endif> }
 >>
 
 signalInitialValue(initialValue) ::= <%

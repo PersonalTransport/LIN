@@ -1,28 +1,38 @@
 package LIN2;
 
+import LIN2.bitrate.Bitrate;
 import LIN2.signal.Signal;
+import LIN2.util.Range;
 
-import java.util.ArrayList;
+import java.util.*;
 
 public class Slave extends Node {
     private boolean sendsWakeUpSignal;
     private int configuredNAD;
     private Integer initialNAD;
+    private Set<Integer> NADSet;
+    private Range<Integer> NADRange;
     private Float p2Min;
     private Float STMin;
     private Float nAsTimeout;
     private Float nCrTimeout;
     private Signal responseErrorSignal;
     private ArrayList<Signal> faultStateSignals;
+    private String freeText;
+    private int diagnosticClass;
+    private ArrayList<Integer> supportSIDs;
+    private int maxMessageLength;
 
     public Slave(String name) {
         super(name);
         this.nAsTimeout = 1000f;
         this.nCrTimeout = 1000f;
         this.faultStateSignals = new ArrayList<>();
+        this.supportSIDs = new ArrayList<Integer>(Arrays.asList(new Integer[]{0xB2, 0xB7}));
+        this.maxMessageLength = 4095;
     }
 
-    public boolean isSendsWakeUpSignal() {
+    public boolean getSendsWakeUpSignal() {
         return sendsWakeUpSignal;
     }
 
@@ -44,6 +54,24 @@ public class Slave extends Node {
 
     public Integer getInitialNAD() {
         return initialNAD;
+    }
+
+    public void setNADRange(Range<Integer> NADRange) {
+        this.NADRange = NADRange;
+        this.NADSet = null;
+    }
+
+    public Range<Integer> getNADRange() {
+        return NADRange;
+    }
+
+    public void setNADSet(Set<Integer> NADSet) {
+        this.NADRange = null;
+        this.NADSet = NADSet;
+    }
+
+    public Set<Integer> getNADSet() {
+        return NADSet;
     }
 
     public Float getP2Min() {
@@ -97,5 +125,48 @@ public class Slave extends Node {
 
     public ArrayList<Signal> getFaultStateSignals() {
         return faultStateSignals;
+    }
+
+    public void setFreeText(String freeText) {
+        this.freeText = freeText;
+    }
+
+    public String getFreeText() {
+        return freeText;
+    }
+
+    public void setDiagnosticClass(int diagnosticClass) {
+        this.diagnosticClass = diagnosticClass;
+    }
+
+    public int getDiagnosticClass() {
+        return diagnosticClass;
+    }
+
+    public void addSupportedSID(int SID) {
+        if(!supportSIDs.contains(SID))
+            supportSIDs.add(SID);
+    }
+
+    public void setSupportSIDs(List<Integer> supportSIDs) {
+        this.supportSIDs.clear();
+        this.supportSIDs.addAll(new LinkedHashSet<>(supportSIDs));
+    }
+
+
+    public ArrayList<Integer> getSupportSIDs() {
+        return supportSIDs;
+    }
+
+    public void removeSupportedSID(int SID) {
+        supportSIDs.remove(SID);
+    }
+
+    public int getMaxMessageLength() {
+        return maxMessageLength;
+    }
+
+    public void setMaxMessageLength(int maxMessageLength) {
+        this.maxMessageLength = maxMessageLength;
     }
 }

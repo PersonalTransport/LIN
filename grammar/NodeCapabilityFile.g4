@@ -25,12 +25,12 @@ nodeDefinition:
 
 generalDefinition:
     General '{'
-        LINProtocolVersion '=' version=CharString ';'
+        LINProtocolVersion '=' protocol=CharString ';'
         Supplier '=' supplier=integer ';'
         Function '=' function=integer ';'
         Variant '=' variant=integer ';'
         Bitrate '=' bitrateDefinition ';'
-        SendsWakeUpSignal '=' sendsWakeUp=('"yes"'|'"no"') ';'
+        SendsWakeUpSignal '=' (sendsWakeUp='"yes"'|'"no"') ';'
     '}';
 
 bitrateDefinition:
@@ -82,7 +82,7 @@ signalsDefinition:
 signalDefinition:
     name=Identifier '{'
         Size '=' size=integer ';'
-        InitValue '=' signalValue ';'
+        InitValue '=' initialValue=signalValue ';'
         Offset '=' offset=integer ';'
         (encoding=Identifier ';')?
     '}';

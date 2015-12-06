@@ -1,5 +1,6 @@
 package LIN2;
 
+import LIN2.bitrate.Bitrate;
 import LIN2.encoding.Encoding;
 import LIN2.frame.EventTriggeredFrame;
 import LIN2.frame.Frame;
@@ -16,6 +17,7 @@ public class Node {
     private int supplier;
     private int function;
     private Integer variant;
+    private Bitrate bitrate;
     private ArrayList<Frame> frames;
 
     public Node(String name) {
@@ -61,6 +63,14 @@ public class Node {
 
     public Integer getVariant() {
         return variant;
+    }
+
+    public Bitrate getBitrate() {
+        return bitrate;
+    }
+
+    public void setBitrate(Bitrate bitrate) {
+        this.bitrate = bitrate;
     }
 
     public void addFrame(Frame frame) {

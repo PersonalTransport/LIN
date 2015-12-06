@@ -6,6 +6,8 @@ public abstract class Frame {
     private String name;
     private int length;
     private int ID;
+    private Integer minPeriod;
+    private Integer maxPeriod;
 
     public Frame(String name) {
         this.name = name;
@@ -29,6 +31,22 @@ public abstract class Frame {
 
     public int getID() {
         return ID;
+    }
+
+    public void setMinPeriod(Integer minPeriod) {
+        this.minPeriod = minPeriod;
+    }
+
+    public Integer getMinPeriod() {
+        return minPeriod;
+    }
+
+    public void setMaxPeriod(Integer maxPeriod) {
+        this.maxPeriod = maxPeriod;
+    }
+
+    public Integer getMaxPeriod() {
+        return maxPeriod;
     }
 
     public abstract boolean publishedBy(Node node);

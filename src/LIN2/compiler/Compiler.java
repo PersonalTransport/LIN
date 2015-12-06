@@ -2,7 +2,12 @@ package LIN2.compiler;
 
 
 import LIN2.Cluster;
+import LIN2.Slave;
+import LIN2.bitrate.Bitrate;
 import LIN2.compiler.generation.models.*;
+import LIN2.compiler.parser.capability.NodeCapabilityFileLexer;
+import LIN2.compiler.parser.capability.NodeCapabilityFileParser;
+import LIN2.compiler.parser.capability.SlaveVisitor;
 import LIN2.compiler.parser.description.ClusterVisitor;
 import LIN2.compiler.parser.description.DescriptionFileLexer;
 import LIN2.compiler.parser.description.DescriptionFileParser;
@@ -28,40 +33,65 @@ public class Compiler {
         group.registerModelAdaptor(Signal.class,new SignalModelAdaptor());
         group.registerModelAdaptor(SignalValue.class,new SignalValueModelAdaptor());
         group.registerModelAdaptor(EncodedValue.class,new EncodedValueModelAdaptor());
+        group.registerModelAdaptor(Bitrate.class,new BitrateModelAdaptor());
     }
 
     public static void main(String [] args) throws IOException {
         for(String arg : args) {
             System.out.println(arg);
+            if(arg.endsWith(".ncf")) {
 
-            DescriptionFileLexer lexer = new DescriptionFileLexer(new ANTLRInputStream(new FileInputStream(arg)));
-            CommonTokenStream tokens = new CommonTokenStream(lexer);
-            DescriptionFileParser parser = new DescriptionFileParser(tokens);
+                NodeCapabilityFileLexer lexer = new NodeCapabilityFileLexer(new ANTLRInputStream(new FileInputStream(arg)));
+                CommonTokenStream tokens = new CommonTokenStream(lexer);
+                NodeCapabilityFileParser parser = new NodeCapabilityFileParser(tokens);
 
-            DescriptionFileParser.DescriptionFileContext context = parser.descriptionFile();
-            if(parser.getNumberOfSyntaxErrors() <= 0) {
-                Cluster cluster = new ClusterVisitor().visit(context);
+                NodeCapabilityFileParser.NodeCapabilityFileContext context = parser.nodeCapabilityFile();
 
-                STGroup capabilityFileGroup = new STGroupFile("LIN2/compiler/generation/template/CapabilityFile.stg");
-                addModelAdaptors(capabilityFileGroup);
+                SlaveVisitor slaveVisitor = new SlaveVisitor();
+                for(NodeCapabilityFileParser.NodeDefinitionContext nodeCtx:context.nodeDefinition()) {
+                    Slave slave = slaveVisitor.visit(nodeCtx);
 
-                System.out.println("//-------------------------------------------------------------------------------------------------------------//");
-                ST capabilityFile = capabilityFileGroup.getInstanceOf("capabilityFile");
-                capabilityFile.add("slave",cluster.getSlave("LSM"));
-                System.out.println(capabilityFile.render());
-                System.out.println("//-------------------------------------------------------------------------------------------------------------//");
+                    STGroup capabilityFileGroup = new STGroupFile("LIN2/compiler/generation/template/CapabilityFile.stg");
+                    addModelAdaptors(capabilityFileGroup);
 
-                /*System.out.println("//-------------------------------------------------------------------------------------------------------------//");
-                ST slaveHeader = group.getInstanceOf("slaveDriverHeader");
-                slaveHeader.add("slave",cluster.getSlave("LSM"));
-                System.out.println(slaveHeader.render());
-                System.out.println("//-------------------------------------------------------------------------------------------------------------//");
+                    System.out.println("//-------------------------------------------------------------------------------------------------------------//");
+                    ST capabilityFile = capabilityFileGroup.getInstanceOf("capabilityFile");
+                    capabilityFile.add("slave", slave);
+                    System.out.println(capabilityFile.render());
+                    System.out.println("//-------------------------------------------------------------------------------------------------------------//");
+                }
+            }
+            else if(arg.endsWith(".ldf")) {
 
-                System.out.println("//-------------------------------------------------------------------------------------------------------------//");
-                ST slaveSource = group.getInstanceOf("slaveDriverSource");
-                slaveSource.add("slave",cluster.getSlave("LSM"));
-                System.out.println(slaveSource.render());
-                System.out.println("//-------------------------------------------------------------------------------------------------------------//");*/
+                DescriptionFileLexer lexer = new DescriptionFileLexer(new ANTLRInputStream(new FileInputStream(arg)));
+                CommonTokenStream tokens = new CommonTokenStream(lexer);
+                DescriptionFileParser parser = new DescriptionFileParser(tokens);
+
+                DescriptionFileParser.DescriptionFileContext context = parser.descriptionFile();
+                if (parser.getNumberOfSyntaxErrors() <= 0) {
+                    Cluster cluster = new ClusterVisitor().visit(context);
+
+                    STGroup capabilityFileGroup = new STGroupFile("LIN2/compiler/generation/template/CapabilityFile.stg");
+                    addModelAdaptors(capabilityFileGroup);
+
+                    System.out.println("//-------------------------------------------------------------------------------------------------------------//");
+                    ST capabilityFile = capabilityFileGroup.getInstanceOf("capabilityFile");
+                    capabilityFile.add("slave", cluster.getSlave("LSM"));
+                    System.out.println(capabilityFile.render());
+                    System.out.println("//-------------------------------------------------------------------------------------------------------------//");
+
+//                    System.out.println("//-------------------------------------------------------------------------------------------------------------//");
+//                    ST slaveHeader = group.getInstanceOf("slaveDriverHeader");
+//                    slaveHeader.add("slave",cluster.getSlave("LSM"));
+//                    System.out.println(slaveHeader.render());
+//                    System.out.println("//-------------------------------------------------------------------------------------------------------------//");
+//
+//                    System.out.println("//-------------------------------------------------------------------------------------------------------------//");
+//                    ST slaveSource = group.getInstanceOf("slaveDriverSource");
+//                    slaveSource.add("slave",cluster.getSlave("LSM"));
+//                    System.out.println(slaveSource.render());
+//                    System.out.println("//-------------------------------------------------------------------------------------------------------------//");
+                }
             }
         }
     }
