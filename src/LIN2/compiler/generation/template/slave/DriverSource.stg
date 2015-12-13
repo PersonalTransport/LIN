@@ -1,0 +1,19 @@
+import "../common/DriverSource.stg"
+
+//====================================================================================================================//
+slaveDriverSource(slave) ::= <<
+#include \<<slave.name>.h>
+#include \<xc.h>
+
+<driverSource(slave)>
+
+l_bool l_sys_init() {
+    <commonSystemInit(slave)>
+}
+
+l_bool l_ifc_init_UART1() {
+    <commonUART1Init(slave)>
+}
+
+>>
+//====================================================================================================================//

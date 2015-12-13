@@ -1,0 +1,50 @@
+import "../common/DriverHeader.stg"
+
+//====================================================================================================================//
+masterDriverHeader(master) ::= <<
+#ifndef <master.name>_MASTER_DRIVER_H
+#define <master.name>_MASTER_DRIVER_H
+
+#include \<stdlib.h>
+<driverHeader(master)>
+
+enum l_schedule_entry_type {
+    ASSIGN_FRAME_ID_ENTRY,
+    ASSIGN_FRAME_ID_RANGE_ENTRY,
+    ASSIGN_NAD_ENTRY,
+    CONDITIONAL_CHANGE_NAD_ENTRY,
+    DATA_DUMP_ENTRY,
+    FREE_FORMAT_ENTRY,
+    MASTER_REQ_ENTRY,
+    SAVE_CONFIGURATION_ENTRY,
+    SLAVE_RESP_ENTRY,
+    UNCONDITIONAL_ENTRY
+};
+
+struct l_schedule_entry {
+    enum l_schedule_entry_type type;
+    l_u8 ticks;
+    struct l_schedule_entry *next;
+    union {
+        l_u8 unconditional;
+    }data;
+};
+
+struct l_schedule {
+    l_u8 size;
+    struct l_schedule_entry *entries;
+};
+
+extern struct l_schedule _L_NULL_SCHEDULE;
+<master.scheduleTables:{schedule|extern struct l_schedule _<schedule.name>;};separator="\n">
+
+#define L_NULL_SCHEDULE &_L_NULL_SCHEDULE
+<master.scheduleTables:{schedule|#define <schedule.name> &_<schedule.name>};separator="\n">
+
+void l_sch_set_UART1(struct l_schedule *schedule, l_u8 entry);
+
+l_u8 l_sch_tick_UART1();
+
+#endif //<master.name>_MASTER_DRIVER_H
+>>
+//====================================================================================================================//

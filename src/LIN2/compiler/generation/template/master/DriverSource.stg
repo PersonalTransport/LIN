@@ -1,0 +1,227 @@
+import "../common/DriverSource.stg"
+
+//====================================================================================================================//
+masterDriverSource(master) ::= <<
+#include \<<master.name>.h>
+#include \<xc.h>
+
+<driverSource(master)>
+
+
+struct l_schedule _L_NULL_SCHEDULE = {0,NULL};
+
+<master.scheduleTables:{schedule|<scheduleDefinition(schedule)>};separator="\n\n">
+
+struct l_schedule_instance {
+    struct l_schedule *schedule;
+    l_u8 entry;
+    l_u8 tick;
+};
+volatile static struct l_schedule_instance current = {L_NULL_SCHEDULE,   0,0};
+volatile static struct l_schedule_instance next    = {NULL,0,0};
+
+volatile static enum {
+	TX_IDLE,
+	TX_BREAK_SYNC,
+	TX_PID,
+	TX_DATA,
+	TX_CHECKSUM
+} transmit_state = TX_IDLE;
+
+l_bool l_sys_init() {
+    <commonSystemInit(master)>
+    return false;
+}
+
+l_bool l_ifc_init_UART1() {
+    <commonUART1Init(master)>
+    return false;
+}
+
+void l_sch_set_UART1(struct l_schedule *schedule, l_u8 entry) {
+    next.schedule = schedule;
+    next.entry    = (entry > 0) ? entry-1 : 0; // TODO check if the entry is in the schedule??
+    next.tick     = 0;
+}
+
+l_u8 l_sch_tick_UART1() {
+    // TODO
+    if(next.schedule != NULL && current.tick == 0) {
+        current = next;
+        next.schedule = NULL;
+    }
+
+    if(current.schedule != L_NULL_SCHEDULE && current.schedule != NULL && current.tick == 0) {
+        // TODO begin transmission
+        while(!U1STAbits.TRMT); // Wait for tx to complete.
+
+        transmit_state = TX_BREAK_SYNC; // Set the state to TX break and sync.
+
+        // Send the break and sync.
+        U1STAbits.UTXBRK = 1; // Enable a break sequence.
+        U1STAbits.UTXEN  = 1; // Signal the send 2 clock cycles from now.
+        U1TXREG = 0x00;  // Value is ignored.
+        U1TXREG = 0x55; // Send the sync character.
+    }
+
+    if(current.tick >= current.schedule->entries[current.entry].ticks-1) {
+        current.tick = 0;
+        current.entry = (current.entry \< current.schedule->size) ? current.entry+1 : 0;
+        return current.entry+1;
+    }
+    else {
+        current.tick++;
+        return 0;
+    }
+}
+
+void __attribute__((interrupt,no_auto_psv)) _U1TXInterrupt() {
+    if(IFS0bits.U1TXIF) {
+        // Clear TX interrupt flag.
+        IFS0bits.U1TXIF = 0;
+
+        struct l_schedule_entry *entry = &current.schedule->entries[current.entry];
+
+        switch (transmit_state) {
+            case(TX_BREAK_SYNC): {
+                transmit_state = TX_PID;
+                switch(entry->type) {
+                    case UNCONDITIONAL_ENTRY: {
+                        l_u8 PID = frames[entry->data.unconditional].PID;
+                        U1STAbits.UTXEN = 1;         // Signal the send 2 clock cycles from now.
+                        U1TXREG = PID;
+                        break;
+                    }
+                }
+                break;
+            }
+            case(TX_PID): {
+                transmit_state = TX_DATA;
+
+                // TODO send the real data
+                break;
+            }
+            case(TX_DATA): {
+                transmit_state = TX_CHECKSUM;
+
+                // TODO send the real checksum
+                break;
+            }
+            case(TX_CHECKSUM): {
+                transmit_state = TX_IDLE; // Go back to idle because TX is done.
+                break;
+            }
+        }
+    }
+}
+
+
+>>
+//====================================================================================================================//
+
+scheduleDefinition(schedule) ::= <<
+struct l_schedule_entry <schedule.name>_entries[] = {
+    <schedule.entries:{entry|<entry:(entry.type)()>};separator=",\n">
+};
+struct l_schedule _<schedule.name> = {<schedule.entryCount>,<schedule.name>_entries};
+>>
+
+// TODO
+assignFrameIdEntryDefinition(entry) ::= <<
+{ASSIGN_FRAME_ID_ENTRY,<entry.ticks>}
+>>
+
+// TODO
+assignFrameIdRangeEntryDefinition(entry) ::= <<
+{ASSIGN_FRAME_ID_RANGE_ENTRY,<entry.ticks>}
+>>
+
+// TODO
+assignNADEntryDefinition(entry) ::= <<
+{ASSIGN_NAD_ENTRY,<entry.ticks>}
+>>
+
+// TODO
+conditionalChangeNadEntryDefinition(entry) ::= <<
+{CONDITIONAL_CHANGE_NAD_ENTRY,<entry.ticks>}
+>>
+
+// TODO
+dataDumpEntryDefinition(entry) ::= <<
+{DATA_DUMP_ENTRY,<entry.ticks>}
+>>
+
+// TODO
+freeFormatEntryDefinition(entry) ::= <<
+{FREE_FORMAT_ENTRY,<entry.ticks>}
+>>
+
+// TODO
+masterReqEntryDefinition(entry) ::= <<
+{MASTER_REQ_ENTRY,<entry.ticks>}
+>>
+
+// TODO
+saveConfigurationEntryDefinition(entry) ::= <<
+{SAVE_CONFIGURATION_ENTRY,<entry.ticks>}
+>>
+
+// TODO
+slaveRespEntryDefinition(entry) ::= <<
+{SLAVE_RESP_ENTRY,<entry.ticks>}
+>>
+
+// TODO
+unconditionalEntryDefinition(entry) ::= <<
+{UNCONDITIONAL_ENTRY,<entry.ticks>,.data.unconditional = {<entry.frame.name>_ID}}
+>>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*    switch(current.schedule) {
+<master.scheduleTables:{schedule|
+
+        case <schedule.name>: {
+            switch(current.entry) {
+<schedule.entries:{entry|
+
+                case <i0>: {
+                    if(current.tick >= <entry.ticksMinusOne>) {
+                        current.tick = 0;
+                        current.entry = <entry.nextEntry>;
+                        return <entry.nextEntryPlusOne>;
+                    \}
+                    else {
+                        <!<entry:(entry.type)()>!>
+                        //TODO write data
+                        current.tick++;
+                        return 0;
+                    \}
+                \}}>
+            \}
+            break;
+        \}}>
+    }*/
+

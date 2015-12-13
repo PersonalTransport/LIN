@@ -1,17 +1,17 @@
-//====================================================================================================================//
-slaveDriverHeader(slave) ::= <<
-#ifndef <slave.name>_SLAVE_DRIVER_H
-#define <slave.name>_SLAVE_DRIVER_H
+driverHeader(node) ::= <<
+#include \<stdint.h>
+#include \<stdbool.h>
 
-#include \<LIN.h>
+typedef bool l_bool;        //- 0 is false, and non-zero (>0) is true.
+typedef uint8_t l_u8;       //- Unsigned 8 bit integer.
+typedef uint16_t l_u16;     //- Unsigned 16 bit integer.
+
+<node.signals:{signal|<signal:(signal.signalPrototype)()>};separator="\n\n">
 
 l_bool l_sys_init();
 
-<slave.signals:{signal|<signal:(signal.signalPrototype)()>};separator="\n\n">
-
-#endif //<slave.name>_SLAVE_DRIVER_H
+l_bool l_ifc_init_UART1();
 >>
-//====================================================================================================================//
 
 
 //====================================================================================================================//

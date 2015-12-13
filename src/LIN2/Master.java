@@ -53,8 +53,10 @@ public class Master extends Node {
     }
 
     public void addScheduleTable(ScheduleTable table) {
-        if(!scheduleTables.contains(table))
+        if(!scheduleTables.contains(table)) {
             scheduleTables.add(table);
+            table.setMaster(this);
+        }
     }
 
     public ScheduleTable getScheduleTable(String tableName) {

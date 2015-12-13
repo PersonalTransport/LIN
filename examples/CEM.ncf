@@ -1,0 +1,85 @@
+node_capability_file;
+LIN_language_version = "2.2";
+node CEM {
+    general {
+        LIN_protocol_version = "2.2";
+        supplier = 0x12;
+        function = 0x12;
+        variant = 0;
+        bitrate = 19.2 kbps;
+        sends_wake_up_signal = "no";
+    }
+
+    diagnostic {
+        NAD = 7;
+        diagnostic_class = 1;
+        max_message_length = 4095;
+    }
+
+    frames {
+        subscribe LSM_Frm1 {
+            length = 2;
+            event_triggered_frame = Node_Status_Event;
+            signals {
+                LeftIntLightsSwitch { size = 8; init_value = 0x0; offset = 8; LightEncoding; }
+            }
+        }
+        subscribe Node_Status_Event {
+            length = 0;
+        }
+        subscribe LSM_Frm2 {
+            length = 1;
+            signals {
+                LSMerror { size = 1; init_value = 0x0; offset = 0; ErrorEncoding; }
+                IntTest { size = 2; init_value = 0x0; offset = 1; FaultStateEncoding; }
+            }
+        }
+        subscribe RSM_Frm1 {
+            length = 2;
+            event_triggered_frame = Node_Status_Event;
+            signals {
+                RightIntLightsSwitch { size = 8; init_value = 0x0; offset = 8; LightEncoding; }
+            }
+        }
+        subscribe RSM_Frm2 {
+            length = 1;
+            signals {
+                RSMerror { size = 1; init_value = 0x0; offset = 0; ErrorEncoding; }
+            }
+        }
+        publish CEM_Frm1 {
+            length = 1;
+            signals {
+                InternalLightsRequest { size = 2; init_value = 0x0; offset = 0; Dig2Bit; }
+            }
+        }
+    }
+
+    encoding {
+        FaultStateEncoding {
+            logical_value, 0, "No test result";
+            logical_value, 1, "failed";
+            logical_value, 2, "passed";
+            logical_value, 3, "not used";
+        }
+        Dig2Bit {
+            logical_value, 0, "off";
+            logical_value, 1, "on";
+            logical_value, 2, "error";
+            logical_value, 3, "void";
+        }
+        LightEncoding {
+            logical_value, 0, "Off";
+            physical_value, 1, 254, 1.0, 100.0, "lux";
+            logical_value, 255, "error";
+        }
+        ErrorEncoding {
+            logical_value, 0, "OK";
+            logical_value, 1, "error";
+        }
+    }
+
+    status_management {
+        response_error = RSMerror;
+    }
+}
