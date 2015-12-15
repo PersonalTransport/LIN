@@ -150,6 +150,18 @@ public class Node {
         return signals;
     }
 
+    public Set<Signal> getPublishedSignals() {
+        HashSet<Signal> signals = new HashSet<>();
+        for(Frame frame:frames) {
+            if(frame instanceof UnconditionalFrame) {
+                UnconditionalFrame uf = (UnconditionalFrame)frame;
+                if(uf.getPublisher() == this)
+                    signals.addAll(uf.getSignals());
+            }
+        }
+        return signals;
+    }
+
     public Encoding getEncoding(String encodingName) {
         for(Frame frame:frames) {
             if (frame instanceof UnconditionalFrame) {
