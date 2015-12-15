@@ -5,7 +5,21 @@ slaveDriverHeader(slave) ::= <<
 #ifndef <slave.name>_SLAVE_DRIVER_H
 #define <slave.name>_SLAVE_DRIVER_H
 
-<driverHeader(slave)>
+#include \<stdlib.h>
+#include \<stdint.h>
+#include \<stdbool.h>
+
+<commonTypedefs()>
+
+<slave.signals:{signal|<signalFlagPrototype(signal)>};separator="\n\n">
+
+<slave.publishedSignals:{signal|<signal:(signal.signalType_WritePrototype)()>};separator="\n\n">
+
+<slave.signals:{signal|<signal:(signal.signalType_ReadPrototype)()>};separator="\n\n">
+
+l_bool l_sys_init();
+
+l_bool l_ifc_init_UART1();
 
 #endif //<slave.name>_SLAVE_DRIVER_H
 >>

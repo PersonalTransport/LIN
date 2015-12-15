@@ -5,15 +5,56 @@ slaveDriverSource(slave) ::= <<
 #include \<<slave.name>.h>
 #include \<xc.h>
 
-<driverSource(slave)>
+#define NOT_SPECIFIED 0
+#define <slave.name> 1
+
+#define L_FRAME_PID(id) (~((id \<\< 6) ^ (id \<\< 4) ^ (id \<\< 3) ^ (id \<\< 2)) & 0x80) |\
+                         (((id \<\< 6) ^ (id \<\< 5) ^ (id \<\< 4) ^ (id \<\< 2)) & 0x40) |\
+                         (id & 0x3F)
+
+<slave.frames:{frame|#define <frame.name>_INDEX <i0>};separator="\n">
+
+static struct l_frame frames[] = {
+<slave.frames:{frame|
+    {
+        .PID = L_FRAME_PID(<frame.ID>),
+        .length = <frame.length>,
+        .publisher = <publisherName(slave,frame)>,
+        .data.scalar = 0ULL // TODO initial data
+    \}};separator=",\n">
+};
+
+<slave.signals:{signal|static l_bool <signal.name>_flag;};separator="\n">
+
+<slave.signals:{signal|<signalFlagImplementation(signal)>};separator="\n\n">
+
+<slave.publishedSignals:{signal|<signal:(signal.signalType_WriteImplementation)()>};separator="\n\n">
+
+<slave.signals:{signal|<signal:(signal.signalType_ReadImplementation)()>};separator="\n\n">
 
 l_bool l_sys_init() {
-    <commonSystemInit(slave)>
+    return false;
 }
 
 l_bool l_ifc_init_UART1() {
-    <commonUART1Init(slave)>
+    <commonUART1Setup()>
+    return false;
 }
 
+void __attribute__((interrupt,no_auto_psv)) _U1TXInterrupt() {
+    if(IFS0bits.U1TXIF) {
+        // Clear TX interrupt flag.
+        IFS0bits.U1TXIF = 0;
+    }
+}
+
+void __attribute__((interrupt,no_auto_psv)) _U1RXInterrupt() {
+    if(IFS0bits.U1RXIF) {
+        // Clear RX interrupt flag.
+        IFS0bits.U1RXIF = 0;
+    }
+}
 >>
 //====================================================================================================================//
+
+publisherName(slave,frame) ::= "<if(frame.published_by_slave)><slave.name><else>NOT_SPECIFIED<endif>"

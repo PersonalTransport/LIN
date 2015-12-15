@@ -11,10 +11,11 @@ import org.stringtemplate.v4.misc.STNoSuchPropertyException;
 public class FrameModelAdaptor extends ObjectModelAdaptor {
     @Override
     public synchronized Object getProperty(Interpreter interp, ST self, Object o, Object property, String propertyName) throws STNoSuchPropertyException {
-        Object nodeObj = self.getAttribute("slave");
-        // TODO remove this stuff!
-        if(propertyName.equals("publishedBy") && nodeObj != null && nodeObj instanceof Node)
-            return ((Frame)o).publishedBy((Node)nodeObj);
+        if(propertyName.startsWith("published_by_")) {
+            String name = propertyName.replace("published_by_","");
+            Object node = self.getAttribute(name);
+            return (((Frame)o).publishedBy((Node)node));
+        }
         return super.getProperty(interp, self, o, property, propertyName);
     }
 }
