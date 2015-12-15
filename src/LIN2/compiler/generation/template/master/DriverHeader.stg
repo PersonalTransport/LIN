@@ -9,28 +9,7 @@ masterDriverHeader(cluster) ::= <<
 #include \<stdint.h>
 #include \<stdbool.h>
 
-typedef bool l_bool;        //- 0 is false, and non-zero (>0) is true.
-typedef uint8_t l_u8;       //- Unsigned 8 bit integer.
-typedef uint16_t l_u16;     //- Unsigned 16 bit integer.
-
-enum l_node {
-    <cluster.nodes:{node|<node.name>};separator=",\n">,
-    NOT_SPECIFIED
-};
-
-enum l_frame_id {
-    <cluster.frames:{frame|<frame.name> = <frame.ID>};separator=",\n">
-};
-
-struct l_frame {
-    l_u8 PID;
-    l_u8 length;
-    enum l_node publisher;
-    union {
-        l_u8 array[8];
-        uint64_t scalar;
-    } data;
-};
+<commonTypedefs()>
 
 enum l_schedule_entry_type {
     ASSIGN_FRAME_ID_ENTRY,//??
@@ -46,7 +25,7 @@ enum l_schedule_entry_type {
 };
 
 struct l_schedule_entry {
-    enum l_schedule_entry_type type;
+    enum l_schedule_entry_type type; // TODO could be 4 bit unsigned
     l_u8 ticks;
     union {
         struct l_frame *frame;

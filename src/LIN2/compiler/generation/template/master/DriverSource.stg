@@ -5,21 +5,26 @@ masterDriverSource(cluster) ::= <<
 #include \<<cluster.master.name>.h>
 #include \<xc.h>
 
+#define NOT_SPECIFIED 0
+<cluster.nodes:{node|#define <node.name> <i>};separator="\n">
+
 #define L_FRAME_PID(id) (~((id \<\< 6) ^ (id \<\< 4) ^ (id \<\< 3) ^ (id \<\< 2)) & 0x80) |\
-                       (((id \<\< 6) ^ (id \<\< 5) ^ (id \<\< 4) ^ (id \<\< 2)) & 0x40) |\
-                       (id & 0x3F)
+                         (((id \<\< 6) ^ (id \<\< 5) ^ (id \<\< 4) ^ (id \<\< 2)) & 0x40) |\
+                         (id & 0x3F)
 
 <cluster.frames:{frame|#define <frame.name>_INDEX <i0>};separator="\n">
 
 static struct l_frame frames[] = {
 <cluster.frames:{frame|
     {
-        .PID = L_FRAME_PID(<frame.name>),
+        .PID = L_FRAME_PID(<frame.ID>),
         .length = <frame.length>,
         .publisher = <if(frame.publisher)><frame.publisher.name><else>NOT_SPECIFIED<endif>,
         .data.scalar = 0ULL // TODO initial data
     \}};separator=",\n">
 };
+
+<cluster.signals:{signal|static l_bool <signal.name>_flag;};separator="\n">
 
 struct l_schedule _L_NULL_SCHEDULE = {0,NULL};
 
@@ -29,8 +34,6 @@ static struct l_schedule_entry _<schedule.name>_entries[] = {
 \};
 struct l_schedule _<schedule.name> = {<schedule.entryCount>,_<schedule.name>_entries\};
 };separator="\n">
-<cluster.signals:{signal|static l_bool <signal.name>_flag;};separator="\n">
-
 <cluster.signals:{signal|<signalFlagImplementation(signal)>};separator="\n\n">
 
 <cluster.master.publishedSignals:{signal|<signal:(signal.signalType_WriteImplementation)()>};separator="\n\n">
