@@ -132,12 +132,11 @@ l_u8 l_sch_tick_UART1() {
         return 0;
     }
 
-    if(current.tick == 0) {
-        struct l_schedule_entry *entry = current.entry;
-        switch(entry->type) {
-            case UNCONDITIONAL_ENTRY: {
-                struct l_frame *frame = entry->data.frame;
-
+    struct l_schedule_entry *entry = current.entry;
+    switch(entry->type) {
+        case UNCONDITIONAL_ENTRY: {
+            struct l_frame *frame = entry->data.frame;
+            if(current.tick == 0) {
                 tx_buffer.data[0] = frame->PID;
                 l_u16 checksum = frame->PID; // TODO check if frame is classic checksum!
 
@@ -155,30 +154,29 @@ l_u8 l_sch_tick_UART1() {
                     tx_buffer.data[frame_length+1] = (l_u8)~checksum;
                     tx_buffer.size = 2 + frame_length;
                 }
-                break;
+
+                while(!U1STAbits.TRMT); // Wait for tx to complete.
+
+                // Send the break and sync.
+                U1STAbits.UTXBRK = 1; // Enable a break sequence.
+                U1STAbits.UTXEN  = 1; // Signal the send 2 clock cycles from now.
+                U1TXREG = 0x00;  // Value is ignored.
+                U1TXREG = 0x55; // Send the sync character.
             }
-            // TODO add the rest!
+
+            if(current.tick >= entry->ticks-1) {
+                // TODO read RX data
+                current.tick = 0;
+                current.index = (current.index \< current.schedule->size-1) ? current.index+1 : 0;
+                current.entry = &current.schedule->entries[current.index];
+                return current.index+1;
+            }
+            break;
         }
-        while(!U1STAbits.TRMT); // Wait for tx to complete.
-
-        // Send the break and sync.
-        U1STAbits.UTXBRK = 1; // Enable a break sequence.
-        U1STAbits.UTXEN  = 1; // Signal the send 2 clock cycles from now.
-        U1TXREG = 0x00;  // Value is ignored.
-        U1TXREG = 0x55; // Send the sync character.
+        // TODO add the rest!
     }
 
-    if(current.tick >= current.entry->ticks-1) {
-        current.tick = 0;
-        current.index = (current.index \< current.schedule->size-1) ? current.index+1 : 0;
-        current.entry = &current.schedule->entries[current.index];
-        return current.index+1;
-    }
-    else {
-        current.tick++;
-        return 0;
-    }
-
+    current.tick++;
     return 0;
 }
 
