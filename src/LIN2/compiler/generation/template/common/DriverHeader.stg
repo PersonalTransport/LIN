@@ -1,69 +1,15 @@
-driverHeader(node) ::= <<
-#include \<stdint.h>
-#include \<stdbool.h>
+boolReadPrototype(signal) ::= "l_bool l_bool_rd_<signal.name>();"
+u8ReadPrototype(signal) ::= "l_u8 l_u8_rd_<signal.name>();"
+u16ReadPrototype(signal) ::= "l_u16 l_u16_rd_<signal.name>();"
+bytesReadPrototype(signal) ::= "void l_bytes_rd_<signal.name>(l_u8 start,l_u8 count,l_u8* const data);"
 
-typedef bool l_bool;        //- 0 is false, and non-zero (>0) is true.
-typedef uint8_t l_u8;       //- Unsigned 8 bit integer.
-typedef uint16_t l_u16;     //- Unsigned 16 bit integer.
+boolWritePrototype(signal) ::= "void l_bool_wr_<signal.name>(l_bool v);"
+u8WritePrototype(signal) ::= "void l_u8_wr_<signal.name>(l_u8 v);"
+u16WritePrototype(signal) ::= "void l_u16_wr_<signal.name>(l_16 v);"
+bytesWritePrototype(signal) ::= "void l_bytes_wr_<signal.name>(l_u8 start,l_u8 count,const l_u8* const data);"
 
-<node.signals:{signal|<signal:(signal.signalPrototype)()>};separator="\n\n">
-
-l_bool l_sys_init();
-
-l_bool l_ifc_init_UART1();
->>
-
-
-//====================================================================================================================//
 signalFlagPrototype(signal) ::= <<
 l_bool l_flg_tst_<signal.name>();
+
 void l_flg_clr_<signal.name>();
 >>
-//====================================================================================================================//
-
-
-//====================================================================================================================//
-boolSignalPrototype(signal) ::= <<
-//===================================================<signal.name>===================================================//
-<signalFlagPrototype(signal)>
-l_bool l_bool_rd_<signal.name>();
-void l_bool_wr_<signal.name>(l_bool v);
-//===================================================<signal.name>===================================================//
->>
-//====================================================================================================================//
-
-
-
-//====================================================================================================================//
-u8SignalPrototype(signal) ::= <<
-//===================================================<signal.name>===================================================//
-<signalFlagPrototype(signal)>
-l_u8 l_u8_rd_<signal.name>();
-void l_u8_wr_<signal.name>(l_u8 v);
-//===================================================<signal.name>===================================================//
->>
-//====================================================================================================================//
-
-
-
-//====================================================================================================================//
-u16SignalPrototype(signal) ::= <<
-//===================================================<signal.name>===================================================//
-<signalFlagPrototype(signal)>
-l_u16 l_u16_rd_<signal.name>();
-void l_u16_wr_<signal.name>(l_u16 v);
-//===================================================<signal.name>===================================================//
->>
-//====================================================================================================================//
-
-
-
-//====================================================================================================================//
-bytesSignalPrototype(signal) ::= <<
-//===================================================<signal.name>===================================================//
-<signalFlagPrototype(signal)>
-void l_bytes_rd_<signal.name>(l_u8 start,l_u8 count,l_u8* const data);
-void l_bytes_wr_<signal.name>(l_u8 start,l_u8 count,const l_u8* const data);
-//===================================================<signal.name>===================================================//
->>
-//====================================================================================================================//

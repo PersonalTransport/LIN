@@ -1,61 +1,165 @@
 import "../common/DriverSource.stg"
 
 //====================================================================================================================//
-masterDriverSource(master) ::= <<
-#include \<<master.name>.h>
+masterDriverSource(cluster) ::= <<
+#include \<<cluster.master.name>.h>
 #include \<xc.h>
 
-<driverSource(master)>
+#define L_FRAME_PID(id) (~((id \<\< 6) ^ (id \<\< 4) ^ (id \<\< 3) ^ (id \<\< 2)) & 0x80) |\
+                       (((id \<\< 6) ^ (id \<\< 5) ^ (id \<\< 4) ^ (id \<\< 2)) & 0x40) |\
+                       (id & 0x3F)
 
+<cluster.frames:{frame|#define <frame.name>_INDEX <i0>};separator="\n">
+
+static struct l_frame frames[] = {
+<cluster.frames:{frame|
+    {
+        .PID = L_FRAME_PID(<frame.name>),
+        .length = <frame.length>,
+        .publisher = <if(frame.publisher)><frame.publisher.name><else>NOT_SPECIFIED<endif>,
+        .data.scalar = 0ULL // TODO initial data
+    \}};separator=",\n">
+};
 
 struct l_schedule _L_NULL_SCHEDULE = {0,NULL};
 
-<master.scheduleTables:{schedule|<scheduleDefinition(schedule)>};separator="\n\n">
+<cluster.master.scheduleTables:{schedule|
+static struct l_schedule_entry _<schedule.name>_entries[] = {
+    <schedule.entries:{entry|<entry:(entry.polymorphic_Initialization)()>};separator=",\n">
+\};
+struct l_schedule _<schedule.name> = {<schedule.entryCount>,_<schedule.name>_entries\};
+};separator="\n">
+<cluster.signals:{signal|static l_bool <signal.name>_flag;};separator="\n">
 
-struct l_schedule_instance {
-    struct l_schedule *schedule;
-    l_u8 entry;
-    l_u8 tick;
-};
-volatile static struct l_schedule_instance current = {L_NULL_SCHEDULE,   0,0};
-volatile static struct l_schedule_instance next    = {NULL,0,0};
+<cluster.signals:{signal|<signalFlagImplementation(signal)>};separator="\n\n">
 
-volatile static enum {
-	TX_IDLE,
-	TX_BREAK_SYNC,
-	TX_PID,
-	TX_DATA,
-	TX_CHECKSUM
-} transmit_state = TX_IDLE;
+<cluster.master.publishedSignals:{signal|<signal:(signal.signalType_WriteImplementation)()>};separator="\n\n">
+
+<cluster.signals:{signal|<signal:(signal.signalType_ReadImplementation)()>};separator="\n\n">
 
 l_bool l_sys_init() {
-    <commonSystemInit(master)>
     return false;
 }
 
 l_bool l_ifc_init_UART1() {
-    <commonUART1Init(master)>
+    //========================================================================//
+    AD1PCFGLbits.PCFG4 = 1; // Set RB2 to digital
+    AD1PCFGLbits.PCFG5 = 1; // Set RB3 to digital
+    TRISBbits.TRISB2  = 0;  // Turn RB2 into output for UART1 TX
+    TRISBbits.TRISB3  = 1;  // Turn RB3 into input for UART1 RX
+    //========================================================================//
+
+    //========================================================================//
+    //Setup peripheral pin select (http://ww1.microchip.com/downloads/en/DeviceDoc/70234B.pdf#page=12)
+    //Input setup                 (http://ww1.microchip.com/downloads/en/DeviceDoc/39940d.pdf#page=130)
+    //Output setup                (http://ww1.microchip.com/downloads/en/DeviceDoc/39940d.pdf#page=131)
+
+    //Unlock the registers by setting bit 6 of OSCCON to 0 (http://ww1.microchip.com/downloads/en/DeviceDoc/39940d.pdf#page=110)
+    __builtin_write_OSCCONL(OSCCON & ~(1\<\<6));
+
+    //Configure Output Functions
+    RPOR1bits.RP2R = 3; //Assign U1TX To Pin RP2
+
+    //Configure Input Functions
+    RPINR18bits.U1RXR = 3; //Assign U1RX To Pin RP3
+
+    //Lock the registers by setting bit 6 of OSCCON to 1 (http://ww1.microchip.com/downloads/en/DeviceDoc/39940d.pdf#page=110)
+    __builtin_write_OSCCONL(OSCCON | (1\<\<6));
+    //========================================================================//
+
+    //========================================================================//
+    // Section 21. UART http://ww1.microchip.com/downloads/en/DeviceDoc/en026583.pdf
+
+    // TODO make this adjustable.
+    // BRG = FCY    /(4*BAUD_RATE) - 1
+    // RGB = 2000000/(4*9600     ) - 1 = 51
+    U1BRG = 51; // Set Baud Rate to 9600
+
+    U1MODEbits.BRGH  = 1; // High Baud Rate
+    U1MODEbits.PDSEL = 0; // 8-bit data, no parity
+    U1MODEbits.STSEL = 0; // One stop bit
+
+    IEC0bits.U1RXIE = 1; // RX interrupt enabled
+    IEC0bits.U1TXIE = 1; // TX interrupt enabled
+    IPC2bits.U1RXIP = 6; // Level 6 interrupt priority for RX
+    IPC3bits.U1TXIP = 5; // Level 5 interrupt priority for TX
+
+    //may want to try 0b10
+    U1STAbits.UTXISEL1 = 1; // Interrupt when the last character is shifted out of the Transmit Shift Register; all transmit operations are completed. Part(1/2)
+    U1STAbits.UTXISEL0 = 0; // Part (2/2)
+
+    U1MODEbits.UARTEN = 1; // Enable the UART 1 module
+
+    IFS0bits.U1TXIF = 0; // Clear the TX interrupt flag
+    IFS0bits.U1RXIF = 0; // Clear the RX interrupt flag
+
+    //========================================================================//
     return false;
 }
 
-void l_sch_set_UART1(struct l_schedule *schedule, l_u8 entry) {
-    next.schedule = schedule;
-    next.entry    = (entry > 0) ? entry-1 : 0; // TODO check if the entry is in the schedule??
-    next.tick     = 0;
+struct l_schedule_instance {
+    struct l_schedule *schedule;
+    l_u8 tick;
+    l_u8 index;
+    struct l_schedule_entry *entry;
+};
+
+static struct l_schedule_instance current = {L_NULL_SCHEDULE,0,0,NULL};
+static struct l_schedule_instance next    = {NULL,0,0,NULL};
+
+void l_sch_set_UART1(struct l_schedule *schedule,l_u8 entry) {
+    if(schedule != NULL) {
+        next.schedule = schedule;
+        next.tick     = 0;
+        next.index    = (entry > 0) ? entry-1 : 0; // TODO check if the entry is in the schedule??
+        next.entry    =  &schedule->entries[next.index];
+    }
 }
 
+static struct {
+    l_u8 data[10];
+    l_u8 size;
+    l_u8 index;
+} tx_buffer;
+
 l_u8 l_sch_tick_UART1() {
-    // TODO
     if(next.schedule != NULL && current.tick == 0) {
         current = next;
         next.schedule = NULL;
     }
 
-    if(current.schedule != L_NULL_SCHEDULE && current.schedule != NULL && current.tick == 0) {
-        // TODO begin transmission
-        while(!U1STAbits.TRMT); // Wait for tx to complete.
+    if(current.schedule == L_NULL_SCHEDULE) {
+        return 0;
+    }
 
-        transmit_state = TX_BREAK_SYNC; // Set the state to TX break and sync.
+    if(current.tick == 0) {
+        struct l_schedule_entry *entry = current.entry;
+        switch(entry->type) {
+            case UNCONDITIONAL_ENTRY: {
+                struct l_frame *frame = entry->data.frame;
+
+                tx_buffer.data[0] = frame->PID;
+                l_u16 checksum = frame->PID; // TODO check if frame is classic checksum!
+
+                tx_buffer.size = 1;
+                tx_buffer.index = 0;
+
+                if(frame->publisher == <cluster.master.name>) {
+                    l_u8 frame_length = frame->length;
+                    for(l_u8 i=0;i\<frame_length;++i) {
+                        tx_buffer.data[i+1] = frame->data.array[i];
+                        checksum += frame->data.array[i];
+                        if(checksum >= 256)
+                            checksum = checksum - 255;
+                    }
+                    tx_buffer.data[frame_length+1] = (l_u8)~checksum;
+                    tx_buffer.size = 2 + frame_length;
+                }
+                break;
+            }
+            // TODO add the rest!
+        }
+        while(!U1STAbits.TRMT); // Wait for tx to complete.
 
         // Send the break and sync.
         U1STAbits.UTXBRK = 1; // Enable a break sequence.
@@ -64,164 +168,98 @@ l_u8 l_sch_tick_UART1() {
         U1TXREG = 0x55; // Send the sync character.
     }
 
-    if(current.tick >= current.schedule->entries[current.entry].ticks-1) {
+    if(current.tick >= current.entry->ticks-1) {
         current.tick = 0;
-        current.entry = (current.entry \< current.schedule->size) ? current.entry+1 : 0;
-        return current.entry+1;
+        current.index = (current.index \< current.schedule->size-1) ? current.index+1 : 0;
+        current.entry = &current.schedule->entries[current.index];
+        return current.index+1;
     }
     else {
         current.tick++;
         return 0;
     }
+
+    return 0;
 }
 
 void __attribute__((interrupt,no_auto_psv)) _U1TXInterrupt() {
     if(IFS0bits.U1TXIF) {
         // Clear TX interrupt flag.
         IFS0bits.U1TXIF = 0;
-
-        struct l_schedule_entry *entry = &current.schedule->entries[current.entry];
-
-        switch (transmit_state) {
-            case(TX_BREAK_SYNC): {
-                transmit_state = TX_PID;
-                switch(entry->type) {
-                    case UNCONDITIONAL_ENTRY: {
-                        l_u8 PID = frames[entry->data.unconditional].PID;
-                        U1STAbits.UTXEN = 1;         // Signal the send 2 clock cycles from now.
-                        U1TXREG = PID;
-                        break;
-                    }
-                }
-                break;
-            }
-            case(TX_PID): {
-                transmit_state = TX_DATA;
-
-                // TODO send the real data
-                break;
-            }
-            case(TX_DATA): {
-                transmit_state = TX_CHECKSUM;
-
-                // TODO send the real checksum
-                break;
-            }
-            case(TX_CHECKSUM): {
-                transmit_state = TX_IDLE; // Go back to idle because TX is done.
-                break;
-            }
+        if(tx_buffer.index \< tx_buffer.size) {
+            l_u8 data = tx_buffer.data[tx_buffer.index];
+            U1STAbits.UTXEN = 1; // Signal the send 2 clock cycles from now.
+            U1TXREG = data;
+            tx_buffer.index++;
         }
     }
 }
 
-
+void __attribute__((interrupt,no_auto_psv)) _U1RXInterrupt() {
+    if(IFS0bits.U1RXIF) {
+        // Clear RX interrupt flag.
+        IFS0bits.U1RXIF = 0;
+    }
+}
 >>
 //====================================================================================================================//
 
-scheduleDefinition(schedule) ::= <<
-struct l_schedule_entry <schedule.name>_entries[] = {
-    <schedule.entries:{entry|<entry:(entry.type)()>};separator=",\n">
-};
-struct l_schedule _<schedule.name> = {<schedule.entryCount>,<schedule.name>_entries};
->>
 
-// TODO
-assignFrameIdEntryDefinition(entry) ::= <<
-{ASSIGN_FRAME_ID_ENTRY,<entry.ticks>}
->>
-
-// TODO
-assignFrameIdRangeEntryDefinition(entry) ::= <<
-{ASSIGN_FRAME_ID_RANGE_ENTRY,<entry.ticks>}
->>
-
-// TODO
-assignNADEntryDefinition(entry) ::= <<
-{ASSIGN_NAD_ENTRY,<entry.ticks>}
->>
-
-// TODO
-conditionalChangeNadEntryDefinition(entry) ::= <<
-{CONDITIONAL_CHANGE_NAD_ENTRY,<entry.ticks>}
->>
-
-// TODO
-dataDumpEntryDefinition(entry) ::= <<
-{DATA_DUMP_ENTRY,<entry.ticks>}
->>
-
-// TODO
-freeFormatEntryDefinition(entry) ::= <<
-{FREE_FORMAT_ENTRY,<entry.ticks>}
->>
-
-// TODO
-masterReqEntryDefinition(entry) ::= <<
-{MASTER_REQ_ENTRY,<entry.ticks>}
->>
-
-// TODO
-saveConfigurationEntryDefinition(entry) ::= <<
-{SAVE_CONFIGURATION_ENTRY,<entry.ticks>}
->>
-
-// TODO
-slaveRespEntryDefinition(entry) ::= <<
-{SLAVE_RESP_ENTRY,<entry.ticks>}
->>
-
-// TODO
-unconditionalEntryDefinition(entry) ::= <<
-{UNCONDITIONAL_ENTRY,<entry.ticks>,.data.unconditional = {<entry.frame.name>_ID}}
->>
+//====================================================================================================================//
+// TODO implement this!
+assignFrameIdEntryInitialization(entry) ::= "{.type = ASSIGN_FRAME_ID_ENTRY,.ticks = <entry.ticks>}"
+//====================================================================================================================//
 
 
+//====================================================================================================================//
+// TODO implement this!
+assignFrameIdRangeEntryInitialization(entry) ::= "{.type = ASSIGN_FRAME_ID_RANGE_ENTRY,.ticks = <entry.ticks>}"
+//====================================================================================================================//
 
 
+//====================================================================================================================//
+// TODO implement this!
+assignNADEntryInitialization(entry) ::= "{.type = ASSIGN_NAD_ENTRY,.ticks = <entry.ticks>}"
+//====================================================================================================================//
 
 
+//====================================================================================================================//
+// TODO implement this!
+conditionalChangeNADEntryInitialization(entry) ::= "{.type = CONDITIONAL_CHANGE_NAD_ENTRY,.ticks = <entry.ticks>}"
+//====================================================================================================================//
 
 
+//====================================================================================================================//
+// TODO implement this!
+dataDumpEntryInitialization(entry) ::= "{.type = DATA_DUMP_ENTRY,.ticks = <entry.ticks>}"
+//====================================================================================================================//
 
 
+//====================================================================================================================//
+// TODO implement this!
+freeFormatEntryInitialization(entry) ::= "{.type = FREE_FORMAT_ENTRY,.ticks = <entry.ticks>}"
+//====================================================================================================================//
 
 
+//====================================================================================================================//
+// TODO implement this!
+masterReqEntryInitialization(entry) ::= "{.type = MASTER_REQ_ENTRY,.ticks = <entry.ticks>}"
+//====================================================================================================================//
 
 
+//====================================================================================================================//
+// TODO implement this!
+saveConfigurationEntryInitialization(entry) ::= "{.type = SAVE_CONFIGURATION_ENTRY,.ticks = <entry.ticks>}"
+//====================================================================================================================//
 
 
+//====================================================================================================================//
+// TODO implement this!
+slaveRespEntryInitialization(entry) ::= "{.type = SLAVE_RESP_ENTRY,.ticks = <entry.ticks>}"
+//====================================================================================================================//
 
 
-
-
-
-
-
-
-
-/*    switch(current.schedule) {
-<master.scheduleTables:{schedule|
-
-        case <schedule.name>: {
-            switch(current.entry) {
-<schedule.entries:{entry|
-
-                case <i0>: {
-                    if(current.tick >= <entry.ticksMinusOne>) {
-                        current.tick = 0;
-                        current.entry = <entry.nextEntry>;
-                        return <entry.nextEntryPlusOne>;
-                    \}
-                    else {
-                        <!<entry:(entry.type)()>!>
-                        //TODO write data
-                        current.tick++;
-                        return 0;
-                    \}
-                \}}>
-            \}
-            break;
-        \}}>
-    }*/
-
+//====================================================================================================================//
+// TODO implement this!
+unconditionalEntryInitialization(entry) ::= "{.type = UNCONDITIONAL_ENTRY,.ticks = <entry.ticks>,.data.frame = &frames[<entry.frame.name>_INDEX]}"
+//====================================================================================================================//
