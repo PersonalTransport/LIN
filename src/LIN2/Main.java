@@ -22,12 +22,12 @@ import java.io.IOException;
 public class Main {
     public static void addModelAdaptors(STGroup group) {
         group.registerModelAdaptor(Frame.class,new FrameModelAdaptor());
-        group.registerModelAdaptor(Entry.class,new FrameEntryModelAdaptor());
+        group.registerModelAdaptor(Entry.class,new PolymorphismModelAdaptor());
         group.registerModelAdaptor(Integer.class,new IntegerModelAdaptor());
         group.registerModelAdaptor(Signal.class,new SignalModelAdaptor());
         group.registerModelAdaptor(SignalValue.class,new SignalValueModelAdaptor());
-        group.registerModelAdaptor(EncodedValue.class,new EncodedValueModelAdaptor());
-        group.registerModelAdaptor(Bitrate.class,new BitrateModelAdaptor());
+        group.registerModelAdaptor(EncodedValue.class,new PolymorphismModelAdaptor());
+        group.registerModelAdaptor(Bitrate.class,new PolymorphismModelAdaptor());
 
     }
     public static void main(String[] args) throws IOException {

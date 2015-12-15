@@ -8,9 +8,10 @@ import org.stringtemplate.v4.misc.ObjectModelAdaptor;
 import org.stringtemplate.v4.misc.STNoSuchPropertyException;
 
 
-public class SignalValueModelAdaptor extends ObjectModelAdaptor {
+public class SignalValueModelAdaptor extends PolymorphismModelAdaptor {
     @Override
     public synchronized Object getProperty(Interpreter interp, ST self, Object o, Object property, String propertyName) throws STNoSuchPropertyException {
+        // TODO let PolymorphismModelAdaptor take care of this
         if(propertyName.equals("values") && o instanceof ArraySignalValue)
             return ((ArraySignalValue)o).getValues();
         else if(propertyName.equals("value") && o instanceof ScalarSignalValue)

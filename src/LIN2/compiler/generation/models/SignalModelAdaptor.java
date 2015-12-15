@@ -12,16 +12,10 @@ public class SignalModelAdaptor extends ObjectModelAdaptor {
     @Override
     public synchronized Object getProperty(Interpreter interp, ST self, Object o, Object property, String propertyName) throws STNoSuchPropertyException {
         Signal signal = (Signal)o;
-        if(propertyName.equals("signalWriteInitialValue")) {
-            return getPrefix(signal)+"SignalWriteInitialValue";
+        if(propertyName.startsWith("signalType_")) {
+            return  getPrefix(signal) + propertyName.replace("signalType_","");
         }
-        else if(propertyName.startsWith("signalPrototype")) {
-            return getPrefix(signal)+"SignalPrototype";
-        }
-        else if(propertyName.startsWith("signalImplementation")) {
-            return getPrefix(signal)+"SignalImplementation";
-        }
-        else if(propertyName.equals("signalMask")) {
+        else if(propertyName.equals("signalMask")) { // TODO move this to signal??
             int signalMask = 0;
             for(int i=0;i<signal.getSize();++i)
                 signalMask |= (1 << i);
