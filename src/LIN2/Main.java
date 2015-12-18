@@ -21,6 +21,7 @@ import java.io.IOException;
 
 public class Main {
     public static void addModelAdaptors(STGroup group) {
+        group.registerModelAdaptor(Node.class,new NodeModelAdaptor());
         group.registerModelAdaptor(Frame.class,new FrameModelAdaptor());
         group.registerModelAdaptor(Entry.class,new PolymorphismModelAdaptor());
         group.registerModelAdaptor(Integer.class,new IntegerModelAdaptor());
