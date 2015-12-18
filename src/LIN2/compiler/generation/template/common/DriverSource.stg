@@ -107,7 +107,7 @@ IPC3bits.U1TXIP = 5; // Level 5 interrupt priority for TX
 U1STAbits.UTXISEL1 = 1; // Interrupt when the last character is shifted out of the Transmit Shift Register; all transmit operations are completed. Part(1/2)
 U1STAbits.UTXISEL0 = 0; // Part (2/2)
 
-U1MODEbits.UARTEN = 1; // Enable the UART 1 module
+//U1MODEbits.UARTEN = 1; // Enable the UART 1 module
 
 IFS0bits.U1TXIF = 0; // Clear the TX interrupt flag
 IFS0bits.U1RXIF = 0; // Clear the RX interrupt flag
