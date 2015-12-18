@@ -100,8 +100,8 @@ U1MODEbits.STSEL = 0; // One stop bit
 
 IEC0bits.U1RXIE = 1; // RX interrupt enabled
 IEC0bits.U1TXIE = 1; // TX interrupt enabled
-IPC2bits.U1RXIP = 6; // Level 6 interrupt priority for RX
-IPC3bits.U1TXIP = 5; // Level 5 interrupt priority for TX
+IPC2bits.U1RXIP = 4; // Level 4 interrupt priority for RX
+IPC3bits.U1TXIP = 4; // Level 4 interrupt priority for TX
 
 //may want to try 0b10
 U1STAbits.UTXISEL1 = 1; // Interrupt when the last character is shifted out of the Transmit Shift Register; all transmit operations are completed. Part(1/2)
