@@ -16,10 +16,10 @@ slaveDriverSource(slave) ::= <<
 
 static struct l_frame frames[] = {
 <slave.frames:{frame|
-    {
+    {   // <frame.name>
         .PID = L_FRAME_PID(<frame.ID>),
         .length = <frame.length>,
-        .publisher = <publisherName(slave,frame)>,
+        .publisher = <if(slave.publishes_frame)><slave.name><else>NOT_SPECIFIED<endif>,
         .data.scalar = 0ULL // TODO initial data
     \}};separator=",\n">
 };
@@ -57,4 +57,3 @@ void __attribute__((interrupt,no_auto_psv)) _U1RXInterrupt() {
 >>
 //====================================================================================================================//
 
-publisherName(slave,frame) ::= "<if(frame.published_by_slave)><slave.name><else>NOT_SPECIFIED<endif>"
