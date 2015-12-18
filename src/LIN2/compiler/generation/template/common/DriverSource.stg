@@ -91,8 +91,8 @@ __builtin_write_OSCCONL(OSCCON | (1\<\<6));
 
 // TODO make this adjustable.
 // BRG = FCY    /(4*BAUD_RATE) - 1
-// RGB = 2000000/(4*9600     ) - 1 = 51
-U1BRG = 51; // Set Baud Rate to 9600
+// RGB = 2000000/(4*10000     ) - 1 = 49
+U1BRG = 49; // Set Baud Rate to 10000
 
 U1MODEbits.BRGH  = 1; // High Baud Rate
 U1MODEbits.PDSEL = 0; // 8-bit data, no parity
