@@ -89,12 +89,6 @@ void l_sch_set_UART1(struct l_schedule *schedule,l_u8 entry) {
     }
 }
 
-static struct {
-    l_u8 data[10];
-    l_u8 size;
-    l_u8 index;
-} tx_buffer;
-
 l_u8 l_sch_tick_UART1() {
     if(next.schedule != NULL && current.tick == 0) {
         current = next;
