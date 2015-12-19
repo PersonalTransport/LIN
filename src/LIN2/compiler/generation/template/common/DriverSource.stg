@@ -25,28 +25,24 @@ boolWriteImplementation(signal) ::= <<
 void l_bool_wr_<signal.name>(l_bool v) {
     frames[<signal.frame.name>_INDEX].data.scalar &= ~(<signal.signalMask.hex>ULL \<\< <signal.offset>);
     frames[<signal.frame.name>_INDEX].data.scalar |= (((uint64_t)v & <signal.signalMask.hex>ULL) \<\< <signal.offset>);
-    <signal.name>_flag = true;
 }>>
 
 u8WriteImplementation(signal) ::= <<
 void l_u8_wr_<signal.name>(l_u8 v) {
     frames[<signal.frame.name>_INDEX].data.scalar &= ~(<signal.signalMask.hex>ULL \<\< <signal.offset>);
     frames[<signal.frame.name>_INDEX].data.scalar |= (((uint64_t)v & <signal.signalMask.hex>ULL) \<\< <signal.offset>);
-    <signal.name>_flag = true;
 }>>
 
 u16WriteImplementation(signal) ::= <<
 void l_u16_wr_<signal.name>(l_16 v) {
     frames[<signal.frame.name>_INDEX].data.scalar &= ~(<signal.signalMask.hex>ULL \<\< <signal.offset>);
     frames[<signal.frame.name>_INDEX].data.scalar |= (((uint64_t)v & <signal.signalMask.hex>ULL) \<\< <signal.offset>);
-    <signal.name>_flag = true;
 }>>
 
 bytesWriteImplementation(signal) ::= <<
 void l_bytes_wr_<signal.name>(l_u8 start,l_u8 count,const l_u8* const data) {
     frames[<signal.frame.name>_INDEX].data.scalar &= ~(<signal.signalMask.hex>ULL \<\< <signal.offset>);
     frames[<signal.frame.name>_INDEX].data.scalar |= (((uint64_t)v & <signal.signalMask.hex>ULL) \<\< <signal.offset>);
-    <signal.name>_flag = true;
 }>>
 
 
@@ -103,7 +99,6 @@ IEC0bits.U1TXIE = 1; // TX interrupt enabled
 IPC2bits.U1RXIP = 4; // Level 4 interrupt priority for RX
 IPC3bits.U1TXIP = 4; // Level 4 interrupt priority for TX
 
-//may want to try 0b10
 U1STAbits.UTXISEL1 = 1; // Interrupt when the last character is shifted out of the Transmit Shift Register; all transmit operations are completed. Part(1/2)
 U1STAbits.UTXISEL0 = 0; // Part (2/2)
 
