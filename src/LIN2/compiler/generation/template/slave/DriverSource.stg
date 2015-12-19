@@ -109,6 +109,11 @@ void __attribute__((interrupt,no_auto_psv)) _U1TXInterrupt() {
     if(IFS0bits.U1TXIF) {
         // Clear TX interrupt flag.
         IFS0bits.U1TXIF = 0;
+
+        l_ifc_tx_UART1();
+
+        if(U1STAbits.FERR)
+            U1STAbits.FERR = 0;
     }
 }
 
@@ -117,48 +122,8 @@ void __attribute__((interrupt,no_auto_psv)) _U1RXInterrupt() {
         // Clear RX interrupt flag.
         IFS0bits.U1RXIF = 0;
 
-        if(rx_buffer.state == L_BREAK_SYNC) {
-            rx_buffer.state = L_PID;
-            rx_buffer.size = 0;
-            rx_buffer.index = 0;
-            break_ticks = 44*U1BRG+44;
-        }
+        l_ifc_rx_UART1();
 
-        while(U1STAbits.URXDA) {
-            switch(rx_buffer.state) {
-                case L_PID: {
-                    rx_buffer.PID = (l_u8)U1RXREG;
-
-                    <slave.frames:{frame|<subscribe(slave,frame)>};separator="\nelse ">
-                    else {
-                        rx_buffer.state = L_IDLE;
-                        rx_buffer.size = 0;
-                        rx_buffer.index = 0;
-                    }
-                    break;
-                }
-                case L_DATA: {
-                    if(rx_buffer.index \< rx_buffer.size) {
-                        rx_buffer.data[rx_buffer.index] = (l_u8)U1RXREG;;
-                        rx_buffer.index++;
-                    }
-                    else {
-                        rx_buffer.state = L_CHECKSUM;
-                    }
-                    break;
-                }
-                case L_CHECKSUM: {
-                    rx_buffer.state = L_IDLE;
-                    l_u8 checksum = (l_u8)U1RXREG;
-                    // TODO check the checksum!
-                    break;
-                }
-                case L_IDLE: {
-                    l_u8 data = (l_u8)U1RXREG; // Just eat the data that this node does not care about!
-                    break;
-                }
-            }
-        }
         if(U1STAbits.FERR)
             U1STAbits.FERR = 0;
     }
