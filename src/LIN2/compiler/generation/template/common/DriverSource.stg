@@ -109,3 +109,231 @@ IFS0bits.U1RXIF = 0; // Clear the RX interrupt flag
 
 //========================================================================//
 >>
+
+txUART1Implementation(node) ::= <<
+static inline void setup_tx(l_u8 PID) {
+    tx_buffer.PID = PID;
+
+    if(PID == 0xff) {
+        // TODO special
+    }
+<node.frames:{frame|
+<if(node.publishes_frame)>
+    else if(PID == frames[<frame.name>_INDEX].PID) {
+    <if(node.master)>
+        tx_buffer.state = L_BREAK_SYNC;
+    <else>
+        tx_buffer.state = L_DATA;
+    <endif>
+        tx_buffer.size = <frame.length>;
+        tx_buffer.index = 0;
+
+        l_u16 checksum = PID; // TODO check if classic checksum!
+        for(l_u8 i=0;i\<<frame.length>;++i) {
+            tx_buffer.data.array[i] = frames[<frame.name>_INDEX].data.array[i];
+            checksum += frames[<frame.name>_INDEX].data.array[i];
+            if(checksum >= 256)
+                checksum -= 255;
+        \}
+        tx_buffer.checksum = (l_u8)~checksum;
+    \}
+<endif>
+}>
+    else {
+<if(node.master)>
+        tx_buffer.state = L_BREAK_SYNC;
+<else>
+        tx_buffer.state = L_IDLE;
+<endif>
+        tx_buffer.size  = 0;
+        tx_buffer.index = 0;
+    }
+}
+
+static inline void cleanup_tx() {
+    // TODO reset all state??
+    if(tx_buffer.PID == 0xff) {
+        // TODO special
+    }
+<node.frames:{frame|
+<if(node.publishes_frame && frame.signals)>
+    else if(tx_buffer.PID == frames[<frame.name>_INDEX].PID) {
+<frame.signals:{signal|
+
+        <signal.name>_flag = true;}>
+    \}<endif>
+}>
+}
+
+void l_ifc_tx_UART1() {
+    switch(tx_buffer.state) {
+        case L_BREAK_SYNC: {
+            tx_buffer.state = L_PID;
+            <if(node.master)>
+            while(!U1STAbits.TRMT); // Wait for tx to complete.
+
+            // Send the break and sync.
+            U1STAbits.UTXBRK = 1; // Enable a break sequence.
+            U1STAbits.UTXEN  = 1; // Signal the send 2 clock cycles from now.
+            U1TXREG = 0x00;  // Value is ignored.
+            U1TXREG = 0x55; // Send the sync character.
+            <endif>
+            break;
+        }
+        case L_PID: {
+            tx_buffer.state = L_DATA;
+            tx_buffer.index = 0;
+
+            <if(node.master)>
+            U1STAbits.UTXEN  = 1; // Signal the send 2 clock cycles from now.
+            U1TXREG = tx_buffer.PID; // Send the PID.
+            <endif>
+            break;
+        }
+        case L_DATA: {
+            if(tx_buffer.index \< tx_buffer.size) {
+                U1STAbits.UTXEN  = 1; // Signal the send 2 clock cycles from now.
+                U1TXREG = tx_buffer.data.array[tx_buffer.index]; // Send the data.
+                tx_buffer.index++;
+                break;
+            }
+            else {
+                tx_buffer.state = L_CHECKSUM;
+            }
+            // careful purposefully falling through to L_CHECKSUM!
+        }
+        case L_CHECKSUM: {
+            tx_buffer.state = L_IDLE;
+            if(tx_buffer.size > 0) {
+                tx_buffer.size  = 0;
+                tx_buffer.index = 0;
+
+                U1STAbits.UTXEN  = 1; // Signal the send 2 clock cycles from now.
+                U1TXREG = tx_buffer.checksum;
+
+                <if(node.slave)>
+                cleanup_tx();
+                <endif>
+            }
+            break;
+        }
+        case L_IDLE: {
+            break;
+        }
+    }
+}
+>>
+
+rxUART1Implementation(node) ::= <<
+static inline void setup_rx(l_u8 PID) {
+    rx_buffer.PID = PID;
+
+    if(PID == 0xff) {
+        // TODO special
+    }
+<node.frames:{frame|
+<if(!node.publishes_frame)>
+    else if(PID == frames[<frame.name>_INDEX].PID) {
+        rx_buffer.state = L_DATA;
+        rx_buffer.size = <frame.length>;
+        rx_buffer.index = 0;
+    \}
+<endif>
+}>
+    else {
+        rx_buffer.state = L_IDLE;
+        rx_buffer.size  = 0;
+        rx_buffer.index = 0;
+    }
+}
+
+static inline void cleanup_rx() {
+    // TODO reset all state??
+
+    if(rx_buffer.PID == 0xff) {
+        // TODO special
+    }
+<node.frames:{frame|
+<if(!node.publishes_frame)>
+    else if(rx_buffer.PID == frames[<frame.name>_INDEX].PID) {
+        l_u16 checksum = rx_buffer.PID; // TODO check if classic checksum!
+        for(l_u8 i=0;i\<<frame.length>;++i) {
+            checksum += rx_buffer.data.array[i];
+            if(checksum >= 256)
+                checksum -= 255;
+        \}
+        if((l_u8)~checksum == rx_buffer.checksum) {
+<frame.signals:{signal|
+            <signal.name>_flag = true;
+}>
+            frames[<frame.name>_INDEX].data.scalar = rx_buffer.data.scalar;
+        \}
+        else {
+            return; // TODO what should happen on error.
+        \}
+    \}<endif>
+}>
+}
+
+void l_ifc_rx_UART1() {
+    <if(!node.master)>
+    if(rx_buffer.state == L_BREAK_SYNC) {
+        rx_buffer.state = L_PID;
+        rx_buffer.size = 0;
+        rx_buffer.index = 0;
+        break_ticks = 44*U1BRG+44;
+    }
+    <endif>
+    while(U1STAbits.URXDA) {
+        switch(rx_buffer.state) {
+            case L_BREAK_SYNC: {
+                rx_buffer.state = L_PID;
+                break;
+            }
+            case L_PID: {
+                rx_buffer.state = L_DATA;
+                rx_buffer.index = 0;
+
+                rx_buffer.PID = (l_u8)U1RXREG;
+                <if(node.slave)>
+
+                setup_tx(rx_buffer.PID);
+                setup_rx(rx_buffer.PID);
+                // TODO wait??
+                l_ifc_tx_UART1();
+                <endif>
+
+                break;
+            }
+            case L_DATA: {
+                if(rx_buffer.index \< rx_buffer.size) {
+                    rx_buffer.data.array[rx_buffer.index] = (l_u8)U1RXREG;
+                    rx_buffer.index++;
+                    break;
+                }
+                else {
+                    rx_buffer.state = L_CHECKSUM;
+                }
+                // careful purposefully falling through to L_CHECKSUM!
+            }
+            case L_CHECKSUM: {
+                rx_buffer.state = L_IDLE;
+                if(rx_buffer.size > 0) {
+                    rx_buffer.checksum = (l_u8)U1RXREG;
+
+                    rx_buffer.size  = 0;
+                    rx_buffer.index = 0;
+                    <if(node.slave)>
+                    cleanup_rx();
+                    <endif>
+                }
+                break;
+            }
+            case L_IDLE: {
+                l_u8 data = (l_u8)U1RXREG; // Just eat the data that this node does not care about!
+                break;
+            }
+        }
+    }
+}
+>>

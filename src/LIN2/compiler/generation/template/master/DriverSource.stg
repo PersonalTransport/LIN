@@ -18,8 +18,6 @@ static struct l_frame frames[] = {
 <cluster.frames:{frame|
     {
         .PID = L_FRAME_PID(<frame.ID>),
-        .length = <frame.length>,
-        .publisher = <if(frame.publisher)><frame.publisher.name><else>NOT_SPECIFIED<endif>,
         .data.scalar = 0ULL // TODO initial data
     \}};separator=",\n">
 };
@@ -70,6 +68,10 @@ l_bool l_ifc_init_UART1() {
     return false;
 }
 
+<txUART1Implementation(cluster.master)>
+
+<rxUART1Implementation(cluster.master)>
+
 struct l_schedule_instance {
     struct l_schedule *schedule;
     l_u8 tick;
@@ -104,35 +106,15 @@ l_u8 l_sch_tick_UART1() {
         case UNCONDITIONAL_ENTRY: {
             struct l_frame *frame = entry->data.frame;
             if(current.tick == 0) {
-                tx_buffer.data[0] = frame->PID;
-                l_u16 checksum = frame->PID; // TODO check if frame is classic checksum!
-
-                tx_buffer.size = 1;
-                tx_buffer.index = 0;
-
-                if(frame->publisher == <cluster.master.name>) {
-                    l_u8 frame_length = frame->length;
-                    for(l_u8 i=0;i\<frame_length;++i) {
-                        tx_buffer.data[i+1] = frame->data.array[i];
-                        checksum += frame->data.array[i];
-                        if(checksum >= 256)
-                            checksum = checksum - 255;
-                    }
-                    tx_buffer.data[frame_length+1] = (l_u8)~checksum;
-                    tx_buffer.size = 2 + frame_length;
-                }
-
-                while(!U1STAbits.TRMT); // Wait for tx to complete.
-
-                // Send the break and sync.
-                U1STAbits.UTXBRK = 1; // Enable a break sequence.
-                U1STAbits.UTXEN  = 1; // Signal the send 2 clock cycles from now.
-                U1TXREG = 0x00;  // Value is ignored.
-                U1TXREG = 0x55; // Send the sync character.
+                setup_tx(frame->PID);
+                setup_rx(frame->PID);
+                l_ifc_tx_UART1();
             }
 
             if(current.tick >= entry->ticks-1) {
-                // TODO read RX data
+                // TODO copy data over!
+                cleanup_tx();
+                cleanup_rx();
                 current.tick = 0;
                 current.index = (current.index \< current.schedule->size-1) ? current.index+1 : 0;
                 current.entry = &current.schedule->entries[current.index];

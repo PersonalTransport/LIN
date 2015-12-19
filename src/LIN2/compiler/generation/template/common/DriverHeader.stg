@@ -5,8 +5,6 @@ typedef uint16_t l_u16;     //- Unsigned 16 bit integer.
 
 struct l_frame {
     l_u8 PID;
-    l_u8 length; // TODO could be 4 bit unsigned
-    l_u8 publisher; // TODO could be 4(ish) bit unsigned
     union {
         l_u8 array[8];
         uint64_t scalar;
