@@ -22,6 +22,14 @@ extern struct l_schedule _L_NULL_SCHEDULE;
 <node.publishedSignals:{signal|<signal:(signal.signalType_WritePrototype)()>};separator="\n\n">
 
 <node.signals:{signal|<signal:(signal.signalType_ReadPrototype)()>};separator="\n\n">
+
+l_bool l_sys_init();
+
+l_bool l_ifc_init_UART1();
+
+void l_ifc_tx_UART1();
+
+void l_ifc_rx_UART1();
 >>
 
 boolReadPrototype(signal) ::= "l_bool l_bool_rd_<signal.name>();"
