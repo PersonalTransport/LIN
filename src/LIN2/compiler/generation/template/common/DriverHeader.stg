@@ -1,4 +1,8 @@
-commonTypedefs() ::= <<
+commonDriver(node) ::= <<
+#include \<stdlib.h>
+#include \<stdint.h>
+#include \<stdbool.h>
+
 typedef bool l_bool;        //- 0 is false, and non-zero (>0) is true.
 typedef uint8_t l_u8;       //- Unsigned 8 bit integer.
 typedef uint16_t l_u16;     //- Unsigned 16 bit integer.
@@ -10,6 +14,12 @@ struct l_frame {
         uint64_t scalar;
     } data;
 };
+
+<node.signals:{signal|<signalFlagPrototype(signal)>};separator="\n\n">
+
+<node.publishedSignals:{signal|<signal:(signal.signalType_WritePrototype)()>};separator="\n\n">
+
+<node.signals:{signal|<signal:(signal.signalType_ReadPrototype)()>};separator="\n\n">
 >>
 
 boolReadPrototype(signal) ::= "l_bool l_bool_rd_<signal.name>();"

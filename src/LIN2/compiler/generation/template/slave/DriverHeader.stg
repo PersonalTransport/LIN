@@ -5,17 +5,7 @@ slaveDriverHeader(slave) ::= <<
 #ifndef <slave.name>_SLAVE_DRIVER_H
 #define <slave.name>_SLAVE_DRIVER_H
 
-#include \<stdlib.h>
-#include \<stdint.h>
-#include \<stdbool.h>
-
-<commonTypedefs()>
-
-<slave.signals:{signal|<signalFlagPrototype(signal)>};separator="\n\n">
-
-<slave.publishedSignals:{signal|<signal:(signal.signalType_WritePrototype)()>};separator="\n\n">
-
-<slave.signals:{signal|<signal:(signal.signalType_ReadPrototype)()>};separator="\n\n">
+<commonDriver(slave)>
 
 l_bool l_sys_init();
 
