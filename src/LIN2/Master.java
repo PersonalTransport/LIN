@@ -70,4 +70,8 @@ public class Master extends Node {
     public List<ScheduleTable> getScheduleTables() {
         return scheduleTables;
     }
+
+    public boolean isMaster() {
+        return true;
+    }
 }

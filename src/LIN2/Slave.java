@@ -168,4 +168,8 @@ public class Slave extends Node {
     public void setMaxMessageLength(int maxMessageLength) {
         this.maxMessageLength = maxMessageLength;
     }
+
+    public boolean isSlave() {
+        return true;
+    }
 }
