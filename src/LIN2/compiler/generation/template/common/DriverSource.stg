@@ -1,3 +1,54 @@
+driverCommon(node) ::= <<
+#define MIN_BAUD 10000
+#define MAX_BAUD 20000
+
+#if (13*FCY/MIN_BAUD)  > 0xFFFF
+#   error "FCY/MAX_BAUD is too large for a 16-bit timer!"
+#endif
+
+#define L_FRAME_PID(id) (~((id \<\< 6) ^ (id \<\< 4) ^ (id \<\< 3) ^ (id \<\< 2)) & 0x80) |\
+                         (((id \<\< 6) ^ (id \<\< 5) ^ (id \<\< 4) ^ (id \<\< 2)) & 0x40) |\
+                         (id & 0x3F)
+
+<node.frames:{frame|#define <frame.name>_INDEX <i0>};separator="\n">
+
+enum l_buffer_state {
+    L_BREAK_SYNC,
+    L_PID,
+    L_DATA,
+    L_CHECKSUM,
+    L_IDLE
+};
+
+static struct {
+    enum l_buffer_state state;
+    l_u8 PID;
+    union {
+            l_u8 array[8];
+            uint64_t scalar;
+    } data;
+    l_u8 checksum;
+    l_u8 size;
+    l_u8 index;
+} tx_buffer, rx_buffer;
+
+static struct l_frame frames[] = {
+<node.frames:{frame|
+    {   // <frame.name>
+        .PID = L_FRAME_PID(<frame.ID>),
+        .data.scalar = 0ULL // TODO initial data
+    \}};separator=",\n">
+};
+
+<node.signals:{signal|static l_bool <signal.name>_flag;};separator="\n">
+
+<node.signals:{signal|<signalFlagImplementation(signal)>};separator="\n\n">
+
+<node.publishedSignals:{signal|<signal:(signal.signalType_WriteImplementation)()>};separator="\n\n">
+
+<node.signals:{signal|<signal:(signal.signalType_ReadImplementation)()>};separator="\n\n">
+>>
+
 boolReadImplementation(signal) ::= <<
 l_bool l_bool_rd_<signal.name>() {
     return (l_bool)((frames[<signal.frame.name>_INDEX].data.scalar >\> <signal.offset>) & <signal.signalMask.hex>ULL);
