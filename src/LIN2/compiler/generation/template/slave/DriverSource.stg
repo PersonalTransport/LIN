@@ -54,10 +54,14 @@ enum l_buffer_state {
 static struct {
     enum l_buffer_state state;
     l_u8 PID;
-    l_u8 data[8];
+    union {
+            l_u8 array[8];
+            uint64_t scalar;
+    } data;
+    l_u8 checksum;
     l_u8 size;
     l_u8 index;
-} rx_buffer;
+} tx_buffer, rx_buffer;
 
 l_u16 break_ticks = 0;
 
