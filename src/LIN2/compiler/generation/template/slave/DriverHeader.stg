@@ -21,6 +21,10 @@ l_bool l_sys_init();
 
 l_bool l_ifc_init_UART1();
 
+void l_ifc_tx_UART1();
+
+void l_ifc_rx_UART1();
+
 #endif //<slave.name>_SLAVE_DRIVER_H
 >>
 //====================================================================================================================//
