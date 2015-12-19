@@ -7,13 +7,15 @@ typedef bool l_bool;        //- 0 is false, and non-zero (>0) is true.
 typedef uint8_t l_u8;       //- Unsigned 8 bit integer.
 typedef uint16_t l_u16;     //- Unsigned 16 bit integer.
 
-struct l_frame {
-    l_u8 PID;
-    union {
-        l_u8 array[8];
-        uint64_t scalar;
-    } data;
-};
+<if(node.master)>
+struct l_schedule;
+
+extern struct l_schedule _L_NULL_SCHEDULE;
+<cluster.master.scheduleTables:{schedule|extern struct l_schedule _<schedule.name>;};separator="\n">
+
+#define L_NULL_SCHEDULE &_L_NULL_SCHEDULE
+<cluster.master.scheduleTables:{schedule|#define <schedule.name> &_<schedule.name>};separator="\n">
+<endif>
 
 <node.signals:{signal|<signalFlagPrototype(signal)>};separator="\n\n">
 

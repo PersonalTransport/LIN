@@ -20,6 +20,14 @@ enum l_buffer_state {
     L_IDLE
 };
 
+struct l_frame {
+    l_u8 PID;
+    union {
+        l_u8 array[8];
+        uint64_t scalar;
+    } data;
+};
+
 static struct {
     enum l_buffer_state state;
     l_u8 PID;
@@ -40,7 +48,7 @@ static struct l_frame frames[] = {
     \}};separator=",\n">
 };
 
-<node.signals:{signal|static l_bool <signal.name>_flag;};separator="\n">
+<node.signals:{signal|static l_bool <signal.name>_flag = false;};separator="\n">
 
 <node.signals:{signal|<signalFlagImplementation(signal)>};separator="\n\n">
 
