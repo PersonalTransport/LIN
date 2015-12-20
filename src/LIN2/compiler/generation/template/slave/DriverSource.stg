@@ -7,50 +7,6 @@ slaveDriverSource(slave) ::= <<
 
 <driverCommon(slave)>
 
-l_bool l_ifc_init_UART1() {
-    <commonUART1Setup()>
-
-    T1CONbits.TON = 1;
-    T1CONbits.TCKPS = 0;
-    T1CONbits.TCS = 0;
-    T1CONbits.TGATE = 0;
-    T1CONbits.TSYNC = 0;
-
-    //Unlock the registers by setting bit 6 of OSCCON to 0 (http://ww1.microchip.com/downloads/en/DeviceDoc/39940d.pdf#page=110)
-    __builtin_write_OSCCONL(OSCCON & ~(1\<\<6));
-
-    //Configure Input Functions
-    //RPINR18bits.U1RXR = 3; //Assign U1RX To Pin RP3
-    RPINR7bits.IC1R = 3; //Assign IC1 To Pin RP3
-
-    //Lock the registers by setting bit 6 of OSCCON to 1 (http://ww1.microchip.com/downloads/en/DeviceDoc/39940d.pdf#page=110)
-    __builtin_write_OSCCONL(OSCCON | (1\<\<6));
-
-    while(IC1CON1bits.ICBNE != 0)
-        (unsigned int)IC1BUF;
-
-    IC1CON1bits.ICSIDL = 0x00;
-    IC1CON1bits.ICTSEL = 0x07;
-    IC1CON1bits.ICI    = 0x00;
-    IC1CON1bits.ICM    = 0x02;
-
-    IC1CON2bits.IC32 = 0x00;
-    IC1CON2bits.ICTRIG = 0x01;
-    IC1CON2bits.SYNCSEL = 0xb;
-
-    IC1TMR = 0;
-    IEC0bits.IC1IE = 1;
-    IPC0bits.IC1IP = 7;
-
-    rx_buffer.state = L_IDLE;
-
-    return false;
-}
-
-<txUART1Implementation(slave)>
-
-<rxUART1Implementation(slave)>
-
 void __attribute__((interrupt,no_auto_psv)) _U1TXInterrupt() {
     if(IFS0bits.U1TXIF) {
         // Clear TX interrupt flag.

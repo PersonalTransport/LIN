@@ -93,9 +93,9 @@ static struct l_schedule_entry _<schedule.name>_entries[] = {
 \};
 struct l_schedule _<schedule.name> = {<schedule.entryCount>,_<schedule.name>_entries\};
 };separator="\n">
-
 static struct l_schedule_instance current = {L_NULL_SCHEDULE,0,0,NULL};
 static struct l_schedule_instance next    = {NULL,0,0,NULL};
+
 <else>
 l_u16 break_ticks = 0; // TODO remove this because it is an hardware implementation detail.
 <endif>
@@ -112,6 +112,51 @@ l_bool l_sys_init() {
     return false;
 }
 
+l_bool l_ifc_init_UART1() {
+    <commonUART1Setup()>
+<if(node.master)>
+    U1MODEbits.UARTEN = 1; // Enable the UART 1 module
+<else>
+    T1CONbits.TON = 1;
+    T1CONbits.TCKPS = 0;
+    T1CONbits.TCS = 0;
+    T1CONbits.TGATE = 0;
+    T1CONbits.TSYNC = 0;
+
+    //Unlock the registers by setting bit 6 of OSCCON to 0 (http://ww1.microchip.com/downloads/en/DeviceDoc/39940d.pdf#page=110)
+    __builtin_write_OSCCONL(OSCCON & ~(1\<\<6));
+
+    //Configure Input Functions
+    //RPINR18bits.U1RXR = 3; //Assign U1RX To Pin RP3
+    RPINR7bits.IC1R = 3; //Assign IC1 To Pin RP3
+
+    //Lock the registers by setting bit 6 of OSCCON to 1 (http://ww1.microchip.com/downloads/en/DeviceDoc/39940d.pdf#page=110)
+    __builtin_write_OSCCONL(OSCCON | (1\<\<6));
+
+    while(IC1CON1bits.ICBNE != 0)
+        (unsigned int)IC1BUF;
+
+    IC1CON1bits.ICSIDL = 0x00;
+    IC1CON1bits.ICTSEL = 0x07;
+    IC1CON1bits.ICI    = 0x00;
+    IC1CON1bits.ICM    = 0x02;
+
+    IC1CON2bits.IC32 = 0x00;
+    IC1CON2bits.ICTRIG = 0x01;
+    IC1CON2bits.SYNCSEL = 0xb;
+
+    IC1TMR = 0;
+    IEC0bits.IC1IE = 1;
+    IPC0bits.IC1IP = 7;
+
+    rx_buffer.state = L_IDLE;
+<endif>
+    return false;
+}
+
+<txUART1Implementation(node)>
+
+<rxUART1Implementation(node)>
 >>
 
 boolReadImplementation(signal) ::= <<
@@ -453,3 +498,62 @@ void l_ifc_rx_UART1() {
     }
 }
 >>
+
+//====================================================================================================================//
+// TODO implement this!
+assignFrameIdEntryInitialization(entry) ::= "{.type = ASSIGN_FRAME_ID_ENTRY,.ticks = <entry.ticks>}"
+//====================================================================================================================//
+
+
+//====================================================================================================================//
+// TODO implement this!
+assignFrameIdRangeEntryInitialization(entry) ::= "{.type = ASSIGN_FRAME_ID_RANGE_ENTRY,.ticks = <entry.ticks>}"
+//====================================================================================================================//
+
+
+//====================================================================================================================//
+// TODO implement this!
+assignNADEntryInitialization(entry) ::= "{.type = ASSIGN_NAD_ENTRY,.ticks = <entry.ticks>}"
+//====================================================================================================================//
+
+
+//====================================================================================================================//
+// TODO implement this!
+conditionalChangeNADEntryInitialization(entry) ::= "{.type = CONDITIONAL_CHANGE_NAD_ENTRY,.ticks = <entry.ticks>}"
+//====================================================================================================================//
+
+
+//====================================================================================================================//
+// TODO implement this!
+dataDumpEntryInitialization(entry) ::= "{.type = DATA_DUMP_ENTRY,.ticks = <entry.ticks>}"
+//====================================================================================================================//
+
+
+//====================================================================================================================//
+// TODO implement this!
+freeFormatEntryInitialization(entry) ::= "{.type = FREE_FORMAT_ENTRY,.ticks = <entry.ticks>}"
+//====================================================================================================================//
+
+
+//====================================================================================================================//
+// TODO implement this!
+masterReqEntryInitialization(entry) ::= "{.type = MASTER_REQ_ENTRY,.ticks = <entry.ticks>}"
+//====================================================================================================================//
+
+
+//====================================================================================================================//
+// TODO implement this!
+saveConfigurationEntryInitialization(entry) ::= "{.type = SAVE_CONFIGURATION_ENTRY,.ticks = <entry.ticks>}"
+//====================================================================================================================//
+
+
+//====================================================================================================================//
+// TODO implement this!
+slaveRespEntryInitialization(entry) ::= "{.type = SLAVE_RESP_ENTRY,.ticks = <entry.ticks>}"
+//====================================================================================================================//
+
+
+//====================================================================================================================//
+// TODO implement this!
+unconditionalEntryInitialization(entry) ::= "{.type = UNCONDITIONAL_ENTRY,.ticks = <entry.ticks>,.data.frame = &frames[<entry.frame.name>_INDEX]}"
+//====================================================================================================================//
