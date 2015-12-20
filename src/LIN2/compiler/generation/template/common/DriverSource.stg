@@ -219,6 +219,12 @@ static inline void setup_tx(l_u8 PID) {
     if(PID == 0xff) {
         // TODO special
     }
+    else if(PID == 0x3C) {
+        // TODO master request
+    }
+    else if(PID == 0x3D) {
+        // TODO slave response
+    }
 <node.frames:{frame|
 <if(node.publishes_frame)>
     else if(PID == frames[<frame.name>_INDEX].PID) {
@@ -253,8 +259,14 @@ static inline void setup_tx(l_u8 PID) {
 }
 
 static inline void cleanup_tx() {
-    if(tx_buffer.PID == 0xff) {
+    if(PID == 0xff) {
         // TODO special
+    }
+    else if(PID == 0x3C) {
+        // TODO master request
+    }
+    else if(PID == 0x3D) {
+        // TODO slave response
     }
 <node.frames:{frame|
 <if(node.publishes_frame && frame.signals)>
@@ -335,6 +347,12 @@ static inline void setup_rx(l_u8 PID) {
     if(PID == 0xff) {
         // TODO special
     }
+    else if(PID == 0x3C) {
+        // TODO master request
+    }
+    else if(PID == 0x3D) {
+        // TODO slave response
+    }
 <node.frames:{frame|
 <if(!node.publishes_frame)>
     else if(PID == frames[<frame.name>_INDEX].PID) {
@@ -352,8 +370,14 @@ static inline void setup_rx(l_u8 PID) {
 }
 
 static inline void cleanup_rx() {
-    if(rx_buffer.PID == 0xff) {
+    if(PID == 0xff) {
         // TODO special
+    }
+    else if(PID == 0x3C) {
+        // TODO master request
+    }
+    else if(PID == 0x3D) {
+        // TODO slave response
     }
 <node.frames:{frame|
 <if(!node.publishes_frame)>
