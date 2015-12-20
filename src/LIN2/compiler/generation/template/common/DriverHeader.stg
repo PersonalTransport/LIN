@@ -11,10 +11,10 @@ typedef uint16_t l_u16;     //- Unsigned 16 bit integer.
 struct l_schedule;
 
 extern struct l_schedule _L_NULL_SCHEDULE;
-<cluster.master.scheduleTables:{schedule|extern struct l_schedule _<schedule.name>;};separator="\n">
+<node.scheduleTables:{schedule|extern struct l_schedule _<schedule.name>;};separator="\n">
 
 #define L_NULL_SCHEDULE &_L_NULL_SCHEDULE
-<cluster.master.scheduleTables:{schedule|#define <schedule.name> &_<schedule.name>};separator="\n">
+<node.scheduleTables:{schedule|#define <schedule.name> &_<schedule.name>};separator="\n">
 <endif>
 
 <node.signals:{signal|<signalFlagPrototype(signal)>};separator="\n\n">
