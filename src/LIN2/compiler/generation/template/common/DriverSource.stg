@@ -109,6 +109,18 @@ l_u16 break_ticks = 0; // TODO remove this because it is an hardware implementat
 <node.signals:{signal|<signal:(signal.signalType_ReadImplementation)()>};separator="\n\n">
 
 l_bool l_sys_init() {
+    tx_buffer.PID = 0xFF;
+    tx_buffer.size = 0;
+    tx_buffer.index = 0;
+    tx_buffer.data.scalar = 0;
+    tx_buffer.state = L_IDLE;
+
+    rx_buffer.PID = 0xFF;
+    rx_buffer.size = 0;
+    rx_buffer.index = 0;
+    rx_buffer.data.scalar = 0;
+    rx_buffer.state = L_IDLE;
+
     return false;
 }
 
@@ -196,8 +208,6 @@ l_bool l_ifc_init_UART1() {
     IC1TMR = 0;
     IEC0bits.IC1IE = 1;
     IPC0bits.IC1IP = 7;
-
-    rx_buffer.state = L_IDLE;
 <endif>
 
     return false;
@@ -243,7 +253,6 @@ static inline void setup_tx(l_u8 PID) {
 }
 
 static inline void cleanup_tx() {
-    // TODO reset all state??
     if(tx_buffer.PID == 0xff) {
         // TODO special
     }
@@ -255,6 +264,11 @@ static inline void cleanup_tx() {
         <signal.name>_flag = true;}>
     \}<endif>
 }>
+    tx_buffer.PID = 0xFF;
+    tx_buffer.size = 0;
+    tx_buffer.index = 0;
+    tx_buffer.data.scalar = 0;
+    tx_buffer.state = L_IDLE;
 }
 
 void l_ifc_tx_UART1() {
@@ -338,8 +352,6 @@ static inline void setup_rx(l_u8 PID) {
 }
 
 static inline void cleanup_rx() {
-    // TODO reset all state??
-
     if(rx_buffer.PID == 0xff) {
         // TODO special
     }
@@ -363,6 +375,11 @@ static inline void cleanup_rx() {
         \}
     \}<endif>
 }>
+    rx_buffer.PID = 0xFF;
+    rx_buffer.size = 0;
+    rx_buffer.index = 0;
+    rx_buffer.data.scalar = 0;
+    rx_buffer.state = L_IDLE;
 }
 
 void l_ifc_rx_UART1() {
