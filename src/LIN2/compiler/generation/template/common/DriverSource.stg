@@ -113,25 +113,73 @@ l_bool l_sys_init() {
 }
 
 l_bool l_ifc_init_UART1() {
-    <commonUART1Setup()>
-<if(node.master)>
-    U1MODEbits.UARTEN = 1; // Enable the UART 1 module
-<else>
+    //========================================================================//
+    AD1PCFGLbits.PCFG4 = 1; // Set RB2 to digital
+    AD1PCFGLbits.PCFG5 = 1; // Set RB3 to digital
+    TRISBbits.TRISB2  = 0;  // Turn RB2 into output for UART1 TX
+    TRISBbits.TRISB3  = 1;  // Turn RB3 into input for UART1 RX
+    //========================================================================//
+
+    //========================================================================//
+    //Setup peripheral pin select (http://ww1.microchip.com/downloads/en/DeviceDoc/70234B.pdf#page=12)
+    //Input setup                 (http://ww1.microchip.com/downloads/en/DeviceDoc/39940d.pdf#page=130)
+    //Output setup                (http://ww1.microchip.com/downloads/en/DeviceDoc/39940d.pdf#page=131)
+
+    //Unlock the registers by setting bit 6 of OSCCON to 0 (http://ww1.microchip.com/downloads/en/DeviceDoc/39940d.pdf#page=110)
+    __builtin_write_OSCCONL(OSCCON & ~(1\<\<6));
+
+    //Configure Output Functions
+    RPOR1bits.RP2R = 3; //Assign U1TX To Pin RP2
+
+    //Configure Input Functions
+    RPINR18bits.U1RXR = 3; //Assign U1RX To Pin RP3
+    <if(node.slave)>
+    RPINR7bits.IC1R = 3; //Assign IC1 To Pin RP3
+    <endif>
+
+    //Lock the registers by setting bit 6 of OSCCON to 1 (http://ww1.microchip.com/downloads/en/DeviceDoc/39940d.pdf#page=110)
+    __builtin_write_OSCCONL(OSCCON | (1\<\<6));
+    //========================================================================//
+
+    //========================================================================//
+    // Section 21. UART http://ww1.microchip.com/downloads/en/DeviceDoc/en026583.pdf
+
+    // TODO make this adjustable.
+    // BRG = FCY    /(4*BAUD_RATE) - 1
+    // RGB = 2000000/(4*10000     ) - 1 = 49
+    U1BRG = 49; // Set Baud Rate to 10000
+
+    U1MODEbits.BRGH  = 1; // High Baud Rate
+    U1MODEbits.PDSEL = 0; // 8-bit data, no parity
+    U1MODEbits.STSEL = 0; // One stop bit
+
+    IEC0bits.U1RXIE = 1; // RX interrupt enabled
+    IEC0bits.U1TXIE = 1; // TX interrupt enabled
+    IPC2bits.U1RXIP = 4; // Level 4 interrupt priority for RX
+    IPC3bits.U1TXIP = 4; // Level 4 interrupt priority for TX
+
+    U1STAbits.UTXISEL1 = 1; // Interrupt when the last character is shifted out of the Transmit Shift Register; all transmit operations are completed. Part(1/2)
+    U1STAbits.UTXISEL0 = 0; // Part (2/2)
+
+    // TODO URXISEL??
+
+    <if(node.master)>
+        U1MODEbits.UARTEN = 1; // Enable the UART 1 module.
+    <elseif(node.slave)>
+        U1MODEbits.UARTEN = 0; // Disable the UART 1 module until first break.
+    <endif>
+
+    IFS0bits.U1TXIF = 0; // Clear the TX interrupt flag
+    IFS0bits.U1RXIF = 0; // Clear the RX interrupt flag
+
+    //========================================================================//
+<if(node.slave)>
+
     T1CONbits.TON = 1;
     T1CONbits.TCKPS = 0;
     T1CONbits.TCS = 0;
     T1CONbits.TGATE = 0;
     T1CONbits.TSYNC = 0;
-
-    //Unlock the registers by setting bit 6 of OSCCON to 0 (http://ww1.microchip.com/downloads/en/DeviceDoc/39940d.pdf#page=110)
-    __builtin_write_OSCCONL(OSCCON & ~(1\<\<6));
-
-    //Configure Input Functions
-    //RPINR18bits.U1RXR = 3; //Assign U1RX To Pin RP3
-    RPINR7bits.IC1R = 3; //Assign IC1 To Pin RP3
-
-    //Lock the registers by setting bit 6 of OSCCON to 1 (http://ww1.microchip.com/downloads/en/DeviceDoc/39940d.pdf#page=110)
-    __builtin_write_OSCCONL(OSCCON | (1\<\<6));
 
     while(IC1CON1bits.ICBNE != 0)
         (unsigned int)IC1BUF;
@@ -151,127 +199,10 @@ l_bool l_ifc_init_UART1() {
 
     rx_buffer.state = L_IDLE;
 <endif>
+
     return false;
 }
 
-<txUART1Implementation(node)>
-
-<rxUART1Implementation(node)>
->>
-
-boolReadImplementation(signal) ::= <<
-l_bool l_bool_rd_<signal.name>() {
-    return (l_bool)((frames[<signal.frame.name>_INDEX].data.scalar >\> <signal.offset>) & <signal.signalMask.hex>ULL);
-}>>
-
-u8ReadImplementation(signal) ::= <<
-l_u8 l_u8_rd_<signal.name>() {
-    return (l_u8)((frames[<signal.frame.name>_INDEX].data.scalar >\> <signal.offset>) & <signal.signalMask.hex>ULL);
-}>>
-
-u16ReadImplementation(signal) ::= <<
-l_u16 l_u16_rd_<signal.name>() {
-    return (l_u16)((frames[<signal.frame.name>_INDEX].data.scalar >\> <signal.offset>) & <signal.signalMask.hex>ULL);
-}>>
-
-bytesReadImplementation(signal) ::= <<
-void l_bytes_rd_<signal.name>(l_u8 start,l_u8 count,l_u8* const data) {
-    // TODO check for count being to large??
-    for(l_u8 i=0;i\<count;++i)
-        data[i] = frames[<signal.frame.name>_INDEX].data[<signal.offset>/8+start+i];
-}>>
-
-
-boolWriteImplementation(signal) ::= <<
-void l_bool_wr_<signal.name>(l_bool v) {
-    frames[<signal.frame.name>_INDEX].data.scalar &= ~(<signal.signalMask.hex>ULL \<\< <signal.offset>);
-    frames[<signal.frame.name>_INDEX].data.scalar |= (((uint64_t)v & <signal.signalMask.hex>ULL) \<\< <signal.offset>);
-}>>
-
-u8WriteImplementation(signal) ::= <<
-void l_u8_wr_<signal.name>(l_u8 v) {
-    frames[<signal.frame.name>_INDEX].data.scalar &= ~(<signal.signalMask.hex>ULL \<\< <signal.offset>);
-    frames[<signal.frame.name>_INDEX].data.scalar |= (((uint64_t)v & <signal.signalMask.hex>ULL) \<\< <signal.offset>);
-}>>
-
-u16WriteImplementation(signal) ::= <<
-void l_u16_wr_<signal.name>(l_16 v) {
-    frames[<signal.frame.name>_INDEX].data.scalar &= ~(<signal.signalMask.hex>ULL \<\< <signal.offset>);
-    frames[<signal.frame.name>_INDEX].data.scalar |= (((uint64_t)v & <signal.signalMask.hex>ULL) \<\< <signal.offset>);
-}>>
-
-bytesWriteImplementation(signal) ::= <<
-void l_bytes_wr_<signal.name>(l_u8 start,l_u8 count,const l_u8* const data) {
-    frames[<signal.frame.name>_INDEX].data.scalar &= ~(<signal.signalMask.hex>ULL \<\< <signal.offset>);
-    frames[<signal.frame.name>_INDEX].data.scalar |= (((uint64_t)v & <signal.signalMask.hex>ULL) \<\< <signal.offset>);
-}>>
-
-
-signalFlagImplementation(signal) ::= <<
-l_bool l_flg_tst_<signal.name>() {
-    return <signal.name>_flag;
-}
-
-void l_flg_clr_<signal.name>() {
-    <signal.name>_flag = false;
-}
->>
-
-commonUART1Setup() ::= <<
-//========================================================================//
-AD1PCFGLbits.PCFG4 = 1; // Set RB2 to digital
-AD1PCFGLbits.PCFG5 = 1; // Set RB3 to digital
-TRISBbits.TRISB2  = 0;  // Turn RB2 into output for UART1 TX
-TRISBbits.TRISB3  = 1;  // Turn RB3 into input for UART1 RX
-//========================================================================//
-
-//========================================================================//
-//Setup peripheral pin select (http://ww1.microchip.com/downloads/en/DeviceDoc/70234B.pdf#page=12)
-//Input setup                 (http://ww1.microchip.com/downloads/en/DeviceDoc/39940d.pdf#page=130)
-//Output setup                (http://ww1.microchip.com/downloads/en/DeviceDoc/39940d.pdf#page=131)
-
-//Unlock the registers by setting bit 6 of OSCCON to 0 (http://ww1.microchip.com/downloads/en/DeviceDoc/39940d.pdf#page=110)
-__builtin_write_OSCCONL(OSCCON & ~(1\<\<6));
-
-//Configure Output Functions
-RPOR1bits.RP2R = 3; //Assign U1TX To Pin RP2
-
-//Configure Input Functions
-RPINR18bits.U1RXR = 3; //Assign U1RX To Pin RP3
-
-//Lock the registers by setting bit 6 of OSCCON to 1 (http://ww1.microchip.com/downloads/en/DeviceDoc/39940d.pdf#page=110)
-__builtin_write_OSCCONL(OSCCON | (1\<\<6));
-//========================================================================//
-
-//========================================================================//
-// Section 21. UART http://ww1.microchip.com/downloads/en/DeviceDoc/en026583.pdf
-
-// TODO make this adjustable.
-// BRG = FCY    /(4*BAUD_RATE) - 1
-// RGB = 2000000/(4*10000     ) - 1 = 49
-U1BRG = 49; // Set Baud Rate to 10000
-
-U1MODEbits.BRGH  = 1; // High Baud Rate
-U1MODEbits.PDSEL = 0; // 8-bit data, no parity
-U1MODEbits.STSEL = 0; // One stop bit
-
-IEC0bits.U1RXIE = 1; // RX interrupt enabled
-IEC0bits.U1TXIE = 1; // TX interrupt enabled
-IPC2bits.U1RXIP = 4; // Level 4 interrupt priority for RX
-IPC3bits.U1TXIP = 4; // Level 4 interrupt priority for TX
-
-U1STAbits.UTXISEL1 = 1; // Interrupt when the last character is shifted out of the Transmit Shift Register; all transmit operations are completed. Part(1/2)
-U1STAbits.UTXISEL0 = 0; // Part (2/2)
-
-//U1MODEbits.UARTEN = 1; // Enable the UART 1 module
-
-IFS0bits.U1TXIF = 0; // Clear the TX interrupt flag
-IFS0bits.U1RXIF = 0; // Clear the RX interrupt flag
-
-//========================================================================//
->>
-
-txUART1Implementation(node) ::= <<
 static inline void setup_tx(l_u8 PID) {
     tx_buffer.PID = PID;
 
@@ -383,9 +314,7 @@ void l_ifc_tx_UART1() {
         }
     }
 }
->>
 
-rxUART1Implementation(node) ::= <<
 static inline void setup_rx(l_u8 PID) {
     rx_buffer.PID = PID;
 
@@ -496,6 +425,65 @@ void l_ifc_rx_UART1() {
             }
         }
     }
+}
+
+>>
+
+boolReadImplementation(signal) ::= <<
+l_bool l_bool_rd_<signal.name>() {
+    return (l_bool)((frames[<signal.frame.name>_INDEX].data.scalar >\> <signal.offset>) & <signal.signalMask.hex>ULL);
+}>>
+
+u8ReadImplementation(signal) ::= <<
+l_u8 l_u8_rd_<signal.name>() {
+    return (l_u8)((frames[<signal.frame.name>_INDEX].data.scalar >\> <signal.offset>) & <signal.signalMask.hex>ULL);
+}>>
+
+u16ReadImplementation(signal) ::= <<
+l_u16 l_u16_rd_<signal.name>() {
+    return (l_u16)((frames[<signal.frame.name>_INDEX].data.scalar >\> <signal.offset>) & <signal.signalMask.hex>ULL);
+}>>
+
+bytesReadImplementation(signal) ::= <<
+void l_bytes_rd_<signal.name>(l_u8 start,l_u8 count,l_u8* const data) {
+    // TODO check for count being to large??
+    for(l_u8 i=0;i\<count;++i)
+        data[i] = frames[<signal.frame.name>_INDEX].data[<signal.offset>/8+start+i];
+}>>
+
+
+boolWriteImplementation(signal) ::= <<
+void l_bool_wr_<signal.name>(l_bool v) {
+    frames[<signal.frame.name>_INDEX].data.scalar &= ~(<signal.signalMask.hex>ULL \<\< <signal.offset>);
+    frames[<signal.frame.name>_INDEX].data.scalar |= (((uint64_t)v & <signal.signalMask.hex>ULL) \<\< <signal.offset>);
+}>>
+
+u8WriteImplementation(signal) ::= <<
+void l_u8_wr_<signal.name>(l_u8 v) {
+    frames[<signal.frame.name>_INDEX].data.scalar &= ~(<signal.signalMask.hex>ULL \<\< <signal.offset>);
+    frames[<signal.frame.name>_INDEX].data.scalar |= (((uint64_t)v & <signal.signalMask.hex>ULL) \<\< <signal.offset>);
+}>>
+
+u16WriteImplementation(signal) ::= <<
+void l_u16_wr_<signal.name>(l_16 v) {
+    frames[<signal.frame.name>_INDEX].data.scalar &= ~(<signal.signalMask.hex>ULL \<\< <signal.offset>);
+    frames[<signal.frame.name>_INDEX].data.scalar |= (((uint64_t)v & <signal.signalMask.hex>ULL) \<\< <signal.offset>);
+}>>
+
+bytesWriteImplementation(signal) ::= <<
+void l_bytes_wr_<signal.name>(l_u8 start,l_u8 count,const l_u8* const data) {
+    frames[<signal.frame.name>_INDEX].data.scalar &= ~(<signal.signalMask.hex>ULL \<\< <signal.offset>);
+    frames[<signal.frame.name>_INDEX].data.scalar |= (((uint64_t)v & <signal.signalMask.hex>ULL) \<\< <signal.offset>);
+}>>
+
+
+signalFlagImplementation(signal) ::= <<
+l_bool l_flg_tst_<signal.name>() {
+    return <signal.name>_flag;
+}
+
+void l_flg_clr_<signal.name>() {
+    <signal.name>_flag = false;
 }
 >>
 
