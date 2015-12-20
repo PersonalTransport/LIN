@@ -7,12 +7,6 @@ slaveDriverSource(slave) ::= <<
 
 <driverCommon(slave)>
 
-l_bool l_sys_init() {
-    return false;
-}
-
-l_u16 break_ticks = 0;
-
 l_bool l_ifc_init_UART1() {
     <commonUART1Setup()>
 
