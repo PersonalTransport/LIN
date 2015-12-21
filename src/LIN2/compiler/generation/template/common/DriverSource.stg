@@ -259,13 +259,13 @@ static inline void setup_tx(l_u8 PID) {
 }
 
 static inline void cleanup_tx() {
-    if(PID == 0xff) {
+    if(tx_buffer.PID == 0xff) {
         // TODO special
     }
-    else if(PID == 0x3C) {
+    else if(tx_buffer.PID == 0x3C) {
         // TODO master request
     }
-    else if(PID == 0x3D) {
+    else if(tx_buffer.PID == 0x3D) {
         // TODO slave response
     }
 <node.frames:{frame|
@@ -370,13 +370,13 @@ static inline void setup_rx(l_u8 PID) {
 }
 
 static inline void cleanup_rx() {
-    if(PID == 0xff) {
+    if(rx_buffer.PID == 0xff) {
         // TODO special
     }
-    else if(PID == 0x3C) {
+    else if(rx_buffer.PID == 0x3C) {
         // TODO master request
     }
-    else if(PID == 0x3D) {
+    else if(rx_buffer.PID == 0x3D) {
         // TODO slave response
     }
 <node.frames:{frame|
@@ -407,23 +407,18 @@ static inline void cleanup_rx() {
 }
 
 void l_ifc_rx_UART1() {
-    <if(!node.master)>
-    if(rx_buffer.state == L_BREAK_SYNC) {
-        rx_buffer.state = L_PID;
-        rx_buffer.size = 0;
-        rx_buffer.index = 0;
-        break_ticks = 44*U1BRG+44;
-    }
-    <endif>
     while(U1STAbits.URXDA) {
         switch(rx_buffer.state) {
             case L_BREAK_SYNC: {
                 rx_buffer.state = L_PID;
+                <if(node.slave)>
+                break_ticks = 44*U1BRG+44;
+                <endif>
                 break;
             }
             case L_PID: {
                 rx_buffer.state = L_DATA;
-                rx_buffer.index = 0;
+                rx_buffer.index = 0; // TODO is this needed!
 
                 rx_buffer.PID = (l_u8)U1RXREG;
                 <if(node.slave)>
