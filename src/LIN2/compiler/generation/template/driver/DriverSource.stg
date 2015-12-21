@@ -31,6 +31,19 @@ struct l_frame {
     } data;
 };
 
+enum service_identifier {
+    // 0 - 0xAF reserved
+    ASSIGN_NAD = 0xB0,
+    ASSIGN_FRAME_IDENTIFIER = 0xB1, // Obsolete??
+    READ_BY_IDENTIFIER = 0xB2,
+    CONDITIONAL_CHANGE_NAD = 0xB3,
+    DATA_DUMP = 0xB4,
+    // 0xB5 reserved
+    SAVE_CONFIGURATION = 0xB6,
+    ASSIGN_FRAME_IDENTIFIER_RANGE = 0xB7,
+    // 0xB8 - 0xFF reserved
+};
+
 <if(node.master)>
 enum l_schedule_entry_type {
     ASSIGN_FRAME_ID_ENTRY,//??
@@ -100,7 +113,11 @@ static struct l_schedule_instance current = {L_NULL_SCHEDULE,0,0,NULL};
 static struct l_schedule_instance next    = {NULL,0,0,NULL};
 
 <else>
-l_u16 break_ticks = 0; // TODO remove this because it is an hardware implementation detail.
+static l_u8 NAD = <node.initialNAD.hex>;
+static l_u16 supplier_id = <node.supplier.hex>;
+static l_u16 function_id = <node.function.hex>;
+static l_u8 variant_id = <node.variant>;
+static l_u16 break_ticks = 0; // TODO remove this because it is an hardware implementation detail.
 <endif>
 
 <node.signals:{signal|static l_bool <signal.name>_flag = false;};separator="\n">
