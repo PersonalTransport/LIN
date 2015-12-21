@@ -1,13 +1,13 @@
 import "../common/DriverHeader.stg"
 
 //====================================================================================================================//
-masterDriverHeader(cluster) ::= <<
-#ifndef <cluster.master.name>_MASTER_DRIVER_H
-#define <cluster.master.name>_MASTER_DRIVER_H
+masterDriverHeader(master) ::= <<
+#ifndef <master.name>_MASTER_DRIVER_H
+#define <master.name>_MASTER_DRIVER_H
 
-<commonDriver(cluster.master)>
+<commonDriver(master)>
 
-#endif //<cluster.master.name>_MASTER_DRIVER_H
+#endif //<master.name>_MASTER_DRIVER_H
 >>
 //====================================================================================================================//
 

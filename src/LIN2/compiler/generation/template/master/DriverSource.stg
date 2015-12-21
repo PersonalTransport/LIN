@@ -1,11 +1,11 @@
 import "../common/DriverSource.stg"
 
 //====================================================================================================================//
-masterDriverSource(cluster) ::= <<
-#include \<<cluster.master.name>.h>
+masterDriverSource(master) ::= <<
+#include \<<master.name>.h>
 #include \<xc.h>
 
-<driverCommon(cluster.master)>
+<driverCommon(master)>
 >>
 //====================================================================================================================//
 

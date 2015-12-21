@@ -102,7 +102,7 @@ public class Compiler {
 
             Cluster cluster = parseDescriptionFile(masterOptions.getSources().get(0));
 
-            generateDriver(outputDir,cluster);
+            generateDriver(outputDir,cluster.getMaster());
         }
     }
 
@@ -130,26 +130,26 @@ public class Compiler {
         sourceFile.close();
     }
 
-    public static void generateDriver(File outputDir, Cluster cluster) throws FileNotFoundException {
+    public static void generateDriver(File outputDir, Master master) throws FileNotFoundException {
         // TODO check that output is really a directory
         if(!outputDir.exists())
             outputDir.mkdirs();
 
-        PrintWriter headerFile = new PrintWriter(new FileOutputStream(new File(outputDir,"include/"+cluster.getMaster().getName() + ".h")));
+        PrintWriter headerFile = new PrintWriter(new FileOutputStream(new File(outputDir,"include/"+master.getName() + ".h")));
         STGroup masterDriverHeader = new STGroupFile("LIN2/compiler/generation/template/master/DriverHeader.stg");
         addModelAdaptors(masterDriverHeader);
 
         ST headerDriverGroup = masterDriverHeader.getInstanceOf("masterDriverHeader");
-        headerDriverGroup.add("cluster", cluster);
+        headerDriverGroup.add("master", master);
         headerFile.println(headerDriverGroup.render());
         headerFile.close();
 
-        PrintWriter sourceFile = new PrintWriter(new FileOutputStream(new File(outputDir,"src/"+cluster.getMaster().getName()+".c")));
+        PrintWriter sourceFile = new PrintWriter(new FileOutputStream(new File(outputDir,"src/"+master.getName()+".c")));
         STGroup masterDriverSource = new STGroupFile("LIN2/compiler/generation/template/master/DriverSource.stg");
         addModelAdaptors(masterDriverSource);
 
         ST sourceDriverGroup = masterDriverSource.getInstanceOf("masterDriverSource");
-        sourceDriverGroup.add("cluster",cluster);
+        sourceDriverGroup.add("master",master);
         sourceFile.println(sourceDriverGroup.render());
         sourceFile.close();
     }

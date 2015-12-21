@@ -533,6 +533,7 @@ void __attribute__((interrupt,no_auto_psv)) _IC1Interrupt() {
     }
 }
 <endif>
+
 void __attribute__((interrupt,no_auto_psv)) _U1TXInterrupt() {
     if(IFS0bits.U1TXIF) {
         // Clear TX interrupt flag.
