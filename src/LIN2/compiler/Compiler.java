@@ -2,7 +2,6 @@ package LIN2.compiler;
 
 
 import LIN2.Cluster;
-import LIN2.Master;
 import LIN2.Node;
 import LIN2.Slave;
 import LIN2.bitrate.Bitrate;
@@ -20,7 +19,6 @@ import LIN2.signal.Signal;
 import LIN2.signal.SignalValue;
 import com.beust.jcommander.ParameterException;
 import org.antlr.v4.runtime.ANTLRFileStream;
-import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -112,7 +110,7 @@ public class Compiler {
             outputDir.mkdirs();
 
         PrintWriter headerFile = new PrintWriter(new FileOutputStream(new File(outputDir,"include/"+node.getName() + ".h")));
-        STGroup slaveDriverHeader = new STGroupFile("LIN2/compiler/generation/template/common/DriverHeader.stg");
+        STGroup slaveDriverHeader = new STGroupFile("LIN2/compiler/generation/template/driver/DriverHeader.stg");
         addModelAdaptors(slaveDriverHeader);
 
         ST headerDriverGroup = slaveDriverHeader.getInstanceOf("driverHeader");
@@ -121,7 +119,7 @@ public class Compiler {
         headerFile.close();
 
         PrintWriter sourceFile = new PrintWriter(new FileOutputStream(new File(outputDir,"src/"+node.getName()+".c")));
-        STGroup slaveDriverSource = new STGroupFile("LIN2/compiler/generation/template/common/DriverSource.stg");
+        STGroup slaveDriverSource = new STGroupFile("LIN2/compiler/generation/template/driver/DriverSource.stg");
         addModelAdaptors(slaveDriverSource);
 
         ST sourceDriverGroup = slaveDriverSource.getInstanceOf("driverSource");
