@@ -1,4 +1,4 @@
-driverCommon(node) ::= <<
+driverSource(node) ::= <<
 #include \<<node.name>.h>
 #include \<xc.h>
 

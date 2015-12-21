@@ -106,50 +106,26 @@ public class Compiler {
         }
     }
 
-    public static void generateDriver(File outputDir,Slave slave) throws FileNotFoundException {
+    public static void generateDriver(File outputDir,Node node) throws FileNotFoundException {
         // TODO check that output is really a directory
         if(!outputDir.exists())
             outputDir.mkdirs();
 
-        PrintWriter headerFile = new PrintWriter(new FileOutputStream(new File(outputDir,"include/"+slave.getName() + ".h")));
-        STGroup slaveDriverHeader = new STGroupFile("LIN2/compiler/generation/template/slave/DriverHeader.stg");
+        PrintWriter headerFile = new PrintWriter(new FileOutputStream(new File(outputDir,"include/"+node.getName() + ".h")));
+        STGroup slaveDriverHeader = new STGroupFile("LIN2/compiler/generation/template/common/DriverHeader.stg");
         addModelAdaptors(slaveDriverHeader);
 
-        ST headerDriverGroup = slaveDriverHeader.getInstanceOf("slaveDriverHeader");
-        headerDriverGroup.add("slave", slave);
+        ST headerDriverGroup = slaveDriverHeader.getInstanceOf("driverHeader");
+        headerDriverGroup.add("node", node);
         headerFile.println(headerDriverGroup.render());
         headerFile.close();
 
-        PrintWriter sourceFile = new PrintWriter(new FileOutputStream(new File(outputDir,"src/"+slave.getName()+".c")));
-        STGroup slaveDriverSource = new STGroupFile("LIN2/compiler/generation/template/slave/DriverSource.stg");
+        PrintWriter sourceFile = new PrintWriter(new FileOutputStream(new File(outputDir,"src/"+node.getName()+".c")));
+        STGroup slaveDriverSource = new STGroupFile("LIN2/compiler/generation/template/common/DriverSource.stg");
         addModelAdaptors(slaveDriverSource);
 
-        ST sourceDriverGroup = slaveDriverSource.getInstanceOf("slaveDriverSource");
-        sourceDriverGroup.add("slave",slave);
-        sourceFile.println(sourceDriverGroup.render());
-        sourceFile.close();
-    }
-
-    public static void generateDriver(File outputDir, Master master) throws FileNotFoundException {
-        // TODO check that output is really a directory
-        if(!outputDir.exists())
-            outputDir.mkdirs();
-
-        PrintWriter headerFile = new PrintWriter(new FileOutputStream(new File(outputDir,"include/"+master.getName() + ".h")));
-        STGroup masterDriverHeader = new STGroupFile("LIN2/compiler/generation/template/master/DriverHeader.stg");
-        addModelAdaptors(masterDriverHeader);
-
-        ST headerDriverGroup = masterDriverHeader.getInstanceOf("masterDriverHeader");
-        headerDriverGroup.add("master", master);
-        headerFile.println(headerDriverGroup.render());
-        headerFile.close();
-
-        PrintWriter sourceFile = new PrintWriter(new FileOutputStream(new File(outputDir,"src/"+master.getName()+".c")));
-        STGroup masterDriverSource = new STGroupFile("LIN2/compiler/generation/template/master/DriverSource.stg");
-        addModelAdaptors(masterDriverSource);
-
-        ST sourceDriverGroup = masterDriverSource.getInstanceOf("masterDriverSource");
-        sourceDriverGroup.add("master",master);
+        ST sourceDriverGroup = slaveDriverSource.getInstanceOf("driverSource");
+        sourceDriverGroup.add("node",node);
         sourceFile.println(sourceDriverGroup.render());
         sourceFile.close();
     }

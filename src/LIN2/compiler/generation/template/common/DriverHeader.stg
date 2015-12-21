@@ -1,4 +1,4 @@
-commonDriver(node) ::= <<
+driverHeader(node) ::= <<
 #ifndef <node.name>_DRIVER_H
 #define <node.name>_DRIVER_H
 
