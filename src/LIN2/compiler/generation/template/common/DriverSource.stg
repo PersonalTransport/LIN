@@ -462,8 +462,8 @@ void l_ifc_rx_UART1() {
         }
     }
 }
-<if(node.master)>
 
+<if(node.master)>
 void l_sch_set_UART1(struct l_schedule *schedule,l_u8 entry) {
     if(schedule != NULL) {
         next.schedule = schedule;
@@ -509,8 +509,30 @@ l_u8 l_sch_tick_UART1() {
     current.tick++;
     return 0;
 }
+<elseif(node.slave)>
+void __attribute__((interrupt,no_auto_psv)) _IC1Interrupt() {
+    if(IFS0bits.IC1IF) {
+        l_u16 time = TMR1;
+        TMR1 = 0;
+        if(IC1CON1bits.ICM == 0x02) {
+            IC1CON1bits.ICM = 0x03;
+        }
+        else if(IC1CON1bits.ICM == 0x03) {
+            if(break_ticks == 0) {
+                U1BRG = time/52-1;
+                break_ticks = 44*U1BRG+44;
+                U1MODEbits.UARTEN = 1;
+            }
+            if(time >= break_ticks) {
+                rx_buffer.state = L_BREAK_SYNC;
+                U1MODEbits.ABAUD = 1;
+            }
+            IC1CON1bits.ICM = 0x02;
+        }
+        IFS0bits.IC1IF = 0;
+    }
+}
 <endif>
-
 void __attribute__((interrupt,no_auto_psv)) _U1TXInterrupt() {
     if(IFS0bits.U1TXIF) {
         // Clear TX interrupt flag.
