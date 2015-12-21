@@ -7,10 +7,6 @@ masterDriverHeader(cluster) ::= <<
 
 <commonDriver(cluster.master)>
 
-void l_sch_set_UART1(struct l_schedule *schedule,l_u8 entry);
-
-l_u8 l_sch_tick_UART1();
-
 #endif //<cluster.master.name>_MASTER_DRIVER_H
 >>
 //====================================================================================================================//

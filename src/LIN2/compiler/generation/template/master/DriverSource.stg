@@ -7,52 +7,6 @@ masterDriverSource(cluster) ::= <<
 
 <driverCommon(cluster.master)>
 
-void l_sch_set_UART1(struct l_schedule *schedule,l_u8 entry) {
-    if(schedule != NULL) {
-        next.schedule = schedule;
-        next.tick     = 0;
-        next.index    = (entry > 0) ? entry-1 : 0; // TODO check if the entry is in the schedule??
-        next.entry    =  &schedule->entries[next.index];
-    }
-}
-
-l_u8 l_sch_tick_UART1() {
-    if(next.schedule != NULL && current.tick == 0) {
-        current = next;
-        next.schedule = NULL;
-    }
-
-    if(current.schedule == L_NULL_SCHEDULE) {
-        return 0;
-    }
-
-    struct l_schedule_entry *entry = current.entry;
-    switch(entry->type) {
-        case UNCONDITIONAL_ENTRY: {
-            struct l_frame *frame = entry->data.frame;
-            if(current.tick == 0) {
-                setup_tx(frame->PID);
-                setup_rx(frame->PID);
-                l_ifc_tx_UART1();
-            }
-
-            if(current.tick >= entry->ticks-1) {
-                cleanup_tx();
-                cleanup_rx();
-                current.tick = 0;
-                current.index = (current.index \< current.schedule->size-1) ? current.index+1 : 0;
-                current.entry = &current.schedule->entries[current.index];
-                return current.index+1;
-            }
-            break;
-        }
-        // TODO add the rest!
-    }
-
-    current.tick++;
-    return 0;
-}
-
 void __attribute__((interrupt,no_auto_psv)) _U1TXInterrupt() {
     if(IFS0bits.U1TXIF) {
         // Clear TX interrupt flag.
