@@ -510,6 +510,30 @@ l_u8 l_sch_tick_UART1() {
     return 0;
 }
 <endif>
+
+void __attribute__((interrupt,no_auto_psv)) _U1TXInterrupt() {
+    if(IFS0bits.U1TXIF) {
+        // Clear TX interrupt flag.
+        IFS0bits.U1TXIF = 0;
+
+        l_ifc_tx_UART1();
+
+        if(U1STAbits.FERR)
+            U1STAbits.FERR = 0;
+    }
+}
+
+void __attribute__((interrupt,no_auto_psv)) _U1RXInterrupt() {
+    if(IFS0bits.U1RXIF) {
+        // Clear RX interrupt flag.
+        IFS0bits.U1RXIF = 0;
+
+        l_ifc_rx_UART1();
+
+        if(U1STAbits.FERR)
+            U1STAbits.FERR = 0;
+    }
+}
 >>
 
 boolReadImplementation(signal) ::= <<
