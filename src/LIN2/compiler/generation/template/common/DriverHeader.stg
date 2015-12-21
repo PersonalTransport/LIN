@@ -1,4 +1,7 @@
 commonDriver(node) ::= <<
+#ifndef <node.name>_DRIVER_H
+#define <node.name>_DRIVER_H
+
 #include \<stdlib.h>
 #include \<stdint.h>
 #include \<stdbool.h>
@@ -36,6 +39,8 @@ void l_sch_set_UART1(struct l_schedule *schedule,l_u8 entry);
 
 l_u8 l_sch_tick_UART1();
 <endif>
+
+#endif // <node.name>_DRIVER_H
 >>
 
 boolReadPrototype(signal) ::= "l_bool l_bool_rd_<signal.name>();"

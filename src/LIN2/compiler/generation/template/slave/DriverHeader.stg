@@ -2,11 +2,6 @@ import "../common/DriverHeader.stg"
 
 //====================================================================================================================//
 slaveDriverHeader(slave) ::= <<
-#ifndef <slave.name>_SLAVE_DRIVER_H
-#define <slave.name>_SLAVE_DRIVER_H
-
 <commonDriver(slave)>
-
-#endif //<slave.name>_SLAVE_DRIVER_H
 >>
 //====================================================================================================================//

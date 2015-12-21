@@ -1,4 +1,7 @@
 driverCommon(node) ::= <<
+#include \<<node.name>.h>
+#include \<xc.h>
+
 #define MIN_BAUD 10000
 #define MAX_BAUD 20000
 
