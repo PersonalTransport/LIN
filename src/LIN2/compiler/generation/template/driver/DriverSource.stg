@@ -23,14 +23,6 @@ enum l_buffer_state {
     L_IDLE
 };
 
-struct l_frame {
-    l_u8 PID;
-    union {
-        l_u8 array[8];
-        uint64_t scalar;
-    } data;
-};
-
 enum service_identifier {
     // 0 - 0xAF reserved
     ASSIGN_NAD = 0xB0,
@@ -42,6 +34,26 @@ enum service_identifier {
     SAVE_CONFIGURATION = 0xB6,
     ASSIGN_FRAME_IDENTIFIER_RANGE = 0xB7,
     // 0xB8 - 0xFF reserved
+};
+
+union l_frame_data {
+    l_u8 array[8];
+    uint64_t scalar;
+    struct {
+        l_u8 NAD;
+        l_u8 PCI;
+        l_u8 SID;
+        l_u8 D1;
+        l_u8 D2;
+        l_u8 D3;
+        l_u8 D4;
+        l_u8 D5;
+    } PUD;
+};
+
+struct l_frame {
+    l_u8 PID;
+    union l_frame_data data;
 };
 
 <if(node.master)>
@@ -63,6 +75,7 @@ struct l_schedule_entry {
     l_u8 ticks;
     union {
         struct l_frame *frame; // TODO change to PID!
+        l_u8 configured_NAD;
         //TODO add others
     } data;
 };
@@ -83,10 +96,7 @@ struct l_schedule_instance {
 static struct {
     enum l_buffer_state state;
     l_u8 PID;
-    union {
-            l_u8 array[8];
-            uint64_t scalar;
-    } data;
+    union l_frame_data data;
     l_u8 checksum;
     l_u8 size;
     l_u8 index;
@@ -195,11 +205,11 @@ l_bool l_ifc_init_UART1() {
 
     // TODO URXISEL??
 
-    <if(node.master)>
-        U1MODEbits.UARTEN = 1; // Enable the UART 1 module.
-    <elseif(node.slave)>
-        U1MODEbits.UARTEN = 0; // Disable the UART 1 module until first break.
-    <endif>
+<if(node.master)>
+    U1MODEbits.UARTEN = 1; // Enable the UART 1 module.
+<elseif(node.slave)>
+    U1MODEbits.UARTEN = 0; // Disable the UART 1 module until first break.
+<endif>
 
     IFS0bits.U1TXIF = 0; // Clear the TX interrupt flag
     IFS0bits.U1RXIF = 0; // Clear the RX interrupt flag
@@ -234,6 +244,7 @@ l_bool l_ifc_init_UART1() {
 }
 
 static inline void setup_tx(l_u8 PID) {
+    l_bool use_classic_checksum = false;
     tx_buffer.PID = PID;
 
     if(PID == 0xff) {
@@ -256,14 +267,9 @@ static inline void setup_tx(l_u8 PID) {
         tx_buffer.size = <frame.length>;
         tx_buffer.index = 0;
 
-        l_u16 checksum = PID; // TODO check if classic checksum!
-        for(l_u8 i=0;i\<<frame.length>;++i) {
-            tx_buffer.data.array[i] = frames[<frame.name>_INDEX].data.array[i];
-            checksum += frames[<frame.name>_INDEX].data.array[i];
-            if(checksum >= 256)
-                checksum -= 255;
-        \}
-        tx_buffer.checksum = (l_u8)~checksum;
+        use_classic_checksum = <node.useClassicChecksum>;
+
+        tx_buffer.data.scalar = frames[<frame.name>_INDEX].data.scalar;
     \}
 <endif>
 }>
@@ -276,6 +282,14 @@ static inline void setup_tx(l_u8 PID) {
         tx_buffer.size  = 0;
         tx_buffer.index = 0;
     }
+
+    l_u16 checksum = use_classic_checksum ? 0 : PID;
+    for(l_u8 i=0;i\<tx_buffer.size;++i) {
+        checksum += tx_buffer.data.array[i];
+        if(checksum >= 256)
+            checksum -= 255;
+    \}
+    tx_buffer.checksum = (l_u8)~checksum;
 }
 
 static inline void cleanup_tx() {
@@ -390,6 +404,21 @@ static inline void setup_rx(l_u8 PID) {
 }
 
 static inline void cleanup_rx() {
+    l_u16 classic_checksum = 0;
+    l_u16 enhanced_checksum = rx_buffer.PID;
+
+    for(l_u8 i=0;i\<rx_buffer.size;++i) {
+        classic_checksum += rx_buffer.data.array[i];
+        if(classic_checksum >= 256)
+            classic_checksum -= 255;
+
+        enhanced_checksum += rx_buffer.data.array[i];
+        if(enhanced_checksum >= 256)
+            enhanced_checksum -= 255;
+    \}
+    classic_checksum = ~classic_checksum;
+    enhanced_checksum = ~enhanced_checksum;
+
     if(rx_buffer.PID == 0xff) {
         // TODO special
     }
@@ -402,13 +431,7 @@ static inline void cleanup_rx() {
 <node.frames:{frame|
 <if(!node.publishes_frame)>
     else if(rx_buffer.PID == frames[<frame.name>_INDEX].PID) {
-        l_u16 checksum = rx_buffer.PID; // TODO check if classic checksum!
-        for(l_u8 i=0;i\<<frame.length>;++i) {
-            checksum += rx_buffer.data.array[i];
-            if(checksum >= 256)
-                checksum -= 255;
-        \}
-        if((l_u8)~checksum == rx_buffer.checksum) {
+        if((l_u8)<if(frame.useClassicChecksum)>classic_checksum<else>enhanced_checksum<endif> == rx_buffer.checksum) {
 <frame.signals:{signal|
             <signal.name>_flag = true;
 }>
@@ -467,11 +490,12 @@ void l_ifc_rx_UART1() {
                 if(rx_buffer.size > 0) {
                     rx_buffer.checksum = (l_u8)U1RXREG;
 
-                    rx_buffer.size  = 0;
-                    rx_buffer.index = 0;
                     <if(node.slave)>
                     cleanup_rx();
                     <endif>
+
+                    rx_buffer.size  = 0;
+                    rx_buffer.index = 0;
                 }
                 break;
             }
@@ -651,7 +675,7 @@ assignFrameIdRangeEntryInitialization(entry) ::= "{.type = ASSIGN_FRAME_ID_RANGE
 
 //====================================================================================================================//
 // TODO implement this!
-assignNADEntryInitialization(entry) ::= "{.type = ASSIGN_NAD_ENTRY,.ticks = <entry.ticks>}"
+assignNADEntryInitialization(entry) ::= "{.type = ASSIGN_NAD_ENTRY,.ticks = <entry.ticks>,.data.configured_NAD = <entry.slave.configuredNAD.hex>}"
 //====================================================================================================================//
 
 

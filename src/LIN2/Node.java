@@ -66,6 +66,11 @@ public class Node {
         return variant;
     }
 
+    public boolean getUseClassicChecksum() {
+        // TODO make maybe allow this to be true in the future.
+        return false;
+    }
+
     public Bitrate getBitrate() {
         return bitrate;
     }
