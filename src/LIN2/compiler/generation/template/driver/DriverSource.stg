@@ -615,7 +615,7 @@ void l_u8_wr_<signal.name>(l_u8 v) {
 }>>
 
 u16WriteImplementation(signal) ::= <<
-void l_u16_wr_<signal.name>(l_16 v) {
+void l_u16_wr_<signal.name>(l_u16 v) {
     frames[<signal.frame.name>_INDEX].data.scalar &= ~(<signal.signalMask.hex>ULL \<\< <signal.offset>);
     frames[<signal.frame.name>_INDEX].data.scalar |= (((uint64_t)v & <signal.signalMask.hex>ULL) \<\< <signal.offset>);
 }>>

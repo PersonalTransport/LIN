@@ -50,7 +50,7 @@ bytesReadPrototype(signal) ::= "void l_bytes_rd_<signal.name>(l_u8 start,l_u8 co
 
 boolWritePrototype(signal) ::= "void l_bool_wr_<signal.name>(l_bool v);"
 u8WritePrototype(signal) ::= "void l_u8_wr_<signal.name>(l_u8 v);"
-u16WritePrototype(signal) ::= "void l_u16_wr_<signal.name>(l_16 v);"
+u16WritePrototype(signal) ::= "void l_u16_wr_<signal.name>(l_u16 v);"
 bytesWritePrototype(signal) ::= "void l_bytes_wr_<signal.name>(l_u8 start,l_u8 count,const l_u8* const data);"
 
 signalFlagPrototype(signal) ::= <<
