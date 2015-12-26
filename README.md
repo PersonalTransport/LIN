@@ -40,3 +40,7 @@ Usage: jLIN [options] [command] [command options]
 - Generate a slave node from a LIN Node capability file.
  - ```java -jar jLIN.jar slave -o gen LSM.ncf```
  - This will generate a slave driver from the file in the current directory called LSM.ncf and output the driver source code in the subfolder gen.
+
+- Generate a slave node from a LIN description file (this is not a prefered method).
+  - ```java -jar jLIN.jar slave -o gen -s LSM CEM.ldf```
+ - This will generate a slave driver for LSM from the file in the current directory called CEM.ldf and output the driver source code in the subfolder gen. 
