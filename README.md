@@ -31,3 +31,8 @@ Usage: jLIN [options] [command] [command options]
         * -o, --output
              Output directory.
 ```
+
+## Examples ##
+- Generate a master node from a LIN description file.
+  - ```java -jar jLIN.jar master -o gen CEM.ldf```
+  - This will generate a master driver from the file in the current directory called CEM.ldf and output the driver source code in the subfolder gen.
