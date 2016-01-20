@@ -1,17 +1,22 @@
-# jLIN
+# LIN
 
 ## Introduction ##
-jLIN is a compiler that will parse [LIN Node capability files](http://www.cs-group.de/fileadmin/media/Documents/LIN_Specification_Package_2.2A.pdf#page=164) and [LIN description files](http://www.cs-group.de/fileadmin/media/Documents/LIN_Specification_Package_2.2A.pdf#page=175) then generates the corresponding C driver to implement the LIN slave or master node.
+LIN is a compiler that will parse [LIN Node capability files](http://www.cs-group.de/fileadmin/media/Documents/LIN_Specification_Package_2.2A.pdf#page=164) and [LIN description files](http://www.cs-group.de/fileadmin/media/Documents/LIN_Specification_Package_2.2A.pdf#page=175) then generates the corresponding C driver to implement the LIN slave or master node.
 
 ## Supported Targets ##
-- PIC24FJ64GB004 family
-- Support for others should not be too difficult to add
+- PIC24FJ64GB004 family.
+- Support for others should not be too difficult to add.
+
+## Dependencies ##
+- [antlr4](http://www.antlr.org/) is used to generated the parsers for [LIN Node capability files](http://www.cs-group.de/fileadmin/media/Documents/LIN_Specification_Package_2.2A.pdf#page=164) and [LIN description files](http://www.cs-group.de/fileadmin/media/Documents/LIN_Specification_Package_2.2A.pdf#page=175) files.
+- [stringtemplate](http://www.stringtemplate.org/) (usually packaged with antlr4) is used as a temlplate engien to generated the C dirvers.
+- [jcommander](http://jcommander.org/) used to make command line tools more user friendly.
 
 ## Usage ##
 ```
-java -jar jLIN.jar --help
+java -jar LIN.jar --help
 
-Usage: jLIN [options] [command] [command options]
+Usage: LIN [options] [command] [command options]
   Options:
     -h, --help
        Show help this message.
@@ -34,13 +39,13 @@ Usage: jLIN [options] [command] [command options]
 
 ## Examples ##
 - Generate a master node from a LIN description file.
-  - ```java -jar jLIN.jar master -o gen CEM.ldf```
+  - ```java -jar LIN.jar master -o gen CEM.ldf```
   - This will generate a master driver from the file in the current directory called CEM.ldf and output the driver source code in the subfolder gen.
 
 - Generate a slave node from a LIN Node capability file.
- - ```java -jar jLIN.jar slave -o gen LSM.ncf```
+ - ```java -jar LIN.jar slave -o gen LSM.ncf```
  - This will generate a slave driver from the file in the current directory called LSM.ncf and output the driver source code in the subfolder gen.
 
 - Generate a slave node from a LIN description file (this is not a prefered method).
-  - ```java -jar jLIN.jar slave -o gen -s LSM CEM.ldf```
+  - ```java -jar LIN.jar slave -o gen -s LSM CEM.ldf```
  - This will generate a slave driver for LSM from the file in the current directory called CEM.ldf and output the driver source code in the subfolder gen. 
