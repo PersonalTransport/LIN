@@ -16,6 +16,7 @@ systemInitialization() ::= <<
 globalsUART1(node) ::= <<
 <if(node.slave)>
 static l_u16 break_ticks_UART1 = 0;
+
 void __attribute__((interrupt,no_auto_psv)) _IC1Interrupt() {
     if(IFS0bits.IC1IF) {
         l_u16 time = TMR1;
@@ -132,6 +133,8 @@ IPC0bits.IC1IP = 7;
 rxDataAvailableUART1() ::= "U1STAbits.URXDA"
 
 rxDataUART1(cVarToStoreIn) ::= "<cVarToStoreIn> = (l_u8)U1RXREG;"
+
+rxBreakSyncUART1() ::= "break_ticks_UART1 = 44*U1BRG+44;"
 
 txDataUART1(cVarToTx) ::= <<
 U1STAbits.UTXEN  = 1; // Signal the send 2 clock cycles from now.

@@ -305,7 +305,7 @@ void l_ifc_rx_<interface.name>() {
             case L_BREAK_SYNC: {
                 rx_buffer.state = L_PID;
                 <if(node.slave)>
-                break_ticks = 44*U1BRG+44; // BAD move out of this file.
+                <(interface.rxBreakSync)()>
                 <endif>
                 break;
             }
@@ -346,6 +346,7 @@ void l_ifc_rx_<interface.name>() {
             }
             case L_IDLE: {
                 <(interface.rxData)("l_u8 data")> // Just eat the data that this node does not care about!
+                (void)data; // Shut the compiler up about data not being used.
                 break;
             }
         }
