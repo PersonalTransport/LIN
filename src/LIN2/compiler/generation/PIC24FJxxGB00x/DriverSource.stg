@@ -1,0 +1,140 @@
+includes() ::= <<
+#include \<xc.h>
+>>
+
+systemInitialization() ::= <<
+// TODO implement!
+>>
+
+globalsUART1(node) ::= <<
+<if(node.slave)>
+static l_u16 break_ticks_UART1 = 0;
+void __attribute__((interrupt,no_auto_psv)) _IC1Interrupt() {
+    if(IFS0bits.IC1IF) {
+        l_u16 time = TMR1;
+        TMR1 = 0;
+        if(IC1CON1bits.ICM == 0x02) {
+            IC1CON1bits.ICM = 0x03;
+        }
+        else if(IC1CON1bits.ICM == 0x03) {
+            if(break_ticks_UART1 == 0) {
+                U1BRG = time/52-1;
+                break_ticks_UART1 = 44*U1BRG+44;
+                U1MODEbits.UARTEN = 1;
+            }
+            if(time >= break_ticks_UART1) {
+                rx_buffer.state = L_BREAK_SYNC;
+                U1MODEbits.ABAUD = 1;
+            }
+            IC1CON1bits.ICM = 0x02;
+        }
+        IFS0bits.IC1IF = 0;
+    }
+}
+<endif>
+>>
+
+initializationUART1(node) ::= <<
+//========================================================================//
+AD1PCFGLbits.PCFG4 = 1; // Set RB2 to digital
+AD1PCFGLbits.PCFG5 = 1; // Set RB3 to digital
+TRISBbits.TRISB2  = 0;  // Turn RB2 into output for UART1 TX
+TRISBbits.TRISB3  = 1;  // Turn RB3 into input for UART1 RX
+//========================================================================//
+
+//========================================================================//
+//Setup peripheral pin select (http://ww1.microchip.com/downloads/en/DeviceDoc/70234B.pdf#page=12)
+//Input setup                 (http://ww1.microchip.com/downloads/en/DeviceDoc/39940d.pdf#page=130)
+//Output setup                (http://ww1.microchip.com/downloads/en/DeviceDoc/39940d.pdf#page=131)
+
+//Unlock the registers by setting bit 6 of OSCCON to 0 (http://ww1.microchip.com/downloads/en/DeviceDoc/39940d.pdf#page=110)
+__builtin_write_OSCCONL(OSCCON & ~(1\<\<6));
+
+//Configure Output Functions
+RPOR1bits.RP2R = 3; //Assign U1TX To Pin RP2
+
+//Configure Input Functions
+RPINR18bits.U1RXR = 3; //Assign U1RX To Pin RP3
+<if(node.slave)>
+RPINR7bits.IC1R = 3; //Assign IC1 To Pin RP3
+<endif>
+
+//Lock the registers by setting bit 6 of OSCCON to 1 (http://ww1.microchip.com/downloads/en/DeviceDoc/39940d.pdf#page=110)
+__builtin_write_OSCCONL(OSCCON | (1\<\<6));
+//========================================================================//
+
+//========================================================================//
+// Section 21. UART http://ww1.microchip.com/downloads/en/DeviceDoc/en026583.pdf
+
+// TODO make this adjustable.
+// BRG = FCY    /(4*BAUD_RATE) - 1
+// RGB = 2000000/(4*10000     ) - 1 = 49
+U1BRG = 49; // Set Baud Rate to 10000
+
+U1MODEbits.BRGH  = 1; // High Baud Rate
+U1MODEbits.PDSEL = 0; // 8-bit data, no parity
+U1MODEbits.STSEL = 0; // One stop bit
+
+IEC0bits.U1RXIE = 1; // RX interrupt enabled
+IEC0bits.U1TXIE = 1; // TX interrupt enabled
+IPC2bits.U1RXIP = 4; // Level 4 interrupt priority for RX
+IPC3bits.U1TXIP = 4; // Level 4 interrupt priority for TX
+
+U1STAbits.UTXISEL1 = 1; // Interrupt when the last character is shifted out of the Transmit Shift Register; all transmit operations are completed. Part(1/2)
+U1STAbits.UTXISEL0 = 0; // Part (2/2)
+
+// TODO URXISEL??
+
+<if(node.master)>
+U1MODEbits.UARTEN = 1; // Enable the UART 1 module.
+<elseif(node.slave)>
+U1MODEbits.UARTEN = 0; // Disable the UART 1 module until first break.
+<endif>
+
+IFS0bits.U1TXIF = 0; // Clear the TX interrupt flag
+IFS0bits.U1RXIF = 0; // Clear the RX interrupt flag
+
+//========================================================================//
+<if(node.slave)>
+
+T1CONbits.TON = 1;
+T1CONbits.TCKPS = 0;
+T1CONbits.TCS = 0;
+T1CONbits.TGATE = 0;
+T1CONbits.TSYNC = 0;
+
+while(IC1CON1bits.ICBNE != 0)
+    (unsigned int)IC1BUF;
+
+IC1CON1bits.ICSIDL = 0x00;
+IC1CON1bits.ICTSEL = 0x07;
+IC1CON1bits.ICI    = 0x00;
+IC1CON1bits.ICM    = 0x02;
+
+IC1CON2bits.IC32 = 0x00;
+IC1CON2bits.ICTRIG = 0x01;
+IC1CON2bits.SYNCSEL = 0xb;
+
+IC1TMR = 0;
+IEC0bits.IC1IE = 1;
+IPC0bits.IC1IP = 7;
+<endif>
+>>
+
+rxDataAvailableUART1() ::= "U1STAbits.URXDA"
+
+rxDataUART1(cVarToStoreIn) ::= "<cVarToStoreIn> = (l_u8)U1RXREG;"
+
+txDataUART1(cVarToTx) ::= <<
+U1STAbits.UTXEN  = 1; // Signal the send 2 clock cycles from now.
+U1TXREG = (l_u8)<cVarToTx>;
+>>
+
+txBreakAndSyncUART1() ::= <<
+// Send the break and sync.
+while(!U1STAbits.TRMT); // Wait for tx to complete.
+U1STAbits.UTXBRK = 1; // Enable a break sequence.
+U1STAbits.UTXEN  = 1; // Signal the send 2 clock cycles from now.
+U1TXREG = 0x00;  // Value is ignored.
+U1TXREG = 0x55; // Send the sync character.
+>>

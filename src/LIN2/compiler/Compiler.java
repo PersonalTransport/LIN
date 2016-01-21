@@ -5,6 +5,8 @@ import LIN2.Cluster;
 import LIN2.Node;
 import LIN2.Slave;
 import LIN2.bitrate.Bitrate;
+import LIN2.compiler.generation.PIC24FJxxGB00x.PIC24FJxxGB00x;
+import LIN2.compiler.generation.PIC24FJxxGB00x.UART1;
 import LIN2.compiler.generation.models.*;
 import LIN2.compiler.parser.capability.NodeCapabilityFileLexer;
 import LIN2.compiler.parser.capability.NodeCapabilityFileParser;
@@ -109,21 +111,33 @@ public class Compiler {
         if(!outputDir.exists())
             outputDir.mkdirs();
 
-        PrintWriter headerFile = new PrintWriter(new FileOutputStream(new File(outputDir,node.getName() + ".h")));
-        STGroup slaveDriverHeader = new STGroupFile("LIN2/compiler/generation/template/"+ options.getTargetDevice() +"/DriverHeader.stg");
+        PIC24FJxxGB00x target = new PIC24FJxxGB00x();
+        UART1 inf = new UART1();
+
+        STGroup slaveDriverHeader = new STGroupFile("LIN2/compiler/generation/template/Generic/DriverHeader.stg");
+        target.addHeaderGroups(slaveDriverHeader);
         addModelAdaptors(slaveDriverHeader);
+
+        STGroup slaveDriverSource = new STGroupFile("LIN2/compiler/generation/template/Generic/DriverSource.stg");
+        target.addSourceGroups(slaveDriverSource);
+        addModelAdaptors(slaveDriverSource);
 
         ST headerDriverGroup = slaveDriverHeader.getInstanceOf("driverHeader");
         headerDriverGroup.add("node", node);
+        headerDriverGroup.add("target", target);
+        headerDriverGroup.add("interface", inf);
+
+        PrintWriter headerFile = new PrintWriter(new FileOutputStream(new File(outputDir,node.getName() + ".h")));
         headerFile.println(headerDriverGroup.render());
         headerFile.close();
 
-        PrintWriter sourceFile = new PrintWriter(new FileOutputStream(new File(outputDir,node.getName()+".c")));
-        STGroup slaveDriverSource = new STGroupFile("LIN2/compiler/generation/template/"+ options.getTargetDevice() +"/DriverSource.stg");
-        addModelAdaptors(slaveDriverSource);
 
         ST sourceDriverGroup = slaveDriverSource.getInstanceOf("driverSource");
         sourceDriverGroup.add("node",node);
+        sourceDriverGroup.add("target", target);
+        sourceDriverGroup.add("interface", inf);
+
+        PrintWriter sourceFile = new PrintWriter(new FileOutputStream(new File(outputDir,node.getName()+".c")));
         sourceFile.println(sourceDriverGroup.render());
         sourceFile.close();
     }

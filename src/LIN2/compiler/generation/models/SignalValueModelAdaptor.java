@@ -4,7 +4,6 @@ import LIN2.signal.ArraySignalValue;
 import LIN2.signal.ScalarSignalValue;
 import org.stringtemplate.v4.Interpreter;
 import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.misc.ObjectModelAdaptor;
 import org.stringtemplate.v4.misc.STNoSuchPropertyException;
 
 
