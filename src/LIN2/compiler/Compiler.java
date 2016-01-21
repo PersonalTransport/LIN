@@ -87,7 +87,7 @@ public class Compiler {
                 }
                 System.exit(-1);
             }
-            generateDriver(outputDir,slave);
+            generateDriver(compilerOptions,outputDir,slave);
         }
         else if(compilerOptions.getMasterDriverOptions() != null) {
             CompilerOptions.MasterDriverOptions masterOptions = compilerOptions.getMasterDriverOptions();
@@ -100,17 +100,17 @@ public class Compiler {
 
             Cluster cluster = parseDescriptionFile(masterOptions.getSources().get(0));
 
-            generateDriver(outputDir,cluster.getMaster());
+            generateDriver(compilerOptions,outputDir,cluster.getMaster());
         }
     }
 
-    public static void generateDriver(File outputDir,Node node) throws FileNotFoundException {
+    public static void generateDriver(CompilerOptions options,File outputDir,Node node) throws FileNotFoundException {
         // TODO check that output is really a directory
         if(!outputDir.exists())
             outputDir.mkdirs();
 
-        PrintWriter headerFile = new PrintWriter(new FileOutputStream(new File(outputDir,"include/"+node.getName() + ".h")));
-        STGroup slaveDriverHeader = new STGroupFile("LIN2/compiler/generation/template/driver/DriverHeader.stg");
+        PrintWriter headerFile = new PrintWriter(new FileOutputStream(new File(outputDir,node.getName() + ".h")));
+        STGroup slaveDriverHeader = new STGroupFile("LIN2/compiler/generation/template/"+ options.getTargetDevice() +"/DriverHeader.stg");
         addModelAdaptors(slaveDriverHeader);
 
         ST headerDriverGroup = slaveDriverHeader.getInstanceOf("driverHeader");
@@ -118,8 +118,8 @@ public class Compiler {
         headerFile.println(headerDriverGroup.render());
         headerFile.close();
 
-        PrintWriter sourceFile = new PrintWriter(new FileOutputStream(new File(outputDir,"src/"+node.getName()+".c")));
-        STGroup slaveDriverSource = new STGroupFile("LIN2/compiler/generation/template/driver/DriverSource.stg");
+        PrintWriter sourceFile = new PrintWriter(new FileOutputStream(new File(outputDir,node.getName()+".c")));
+        STGroup slaveDriverSource = new STGroupFile("LIN2/compiler/generation/template/"+ options.getTargetDevice() +"/DriverSource.stg");
         addModelAdaptors(slaveDriverSource);
 
         ST sourceDriverGroup = slaveDriverSource.getInstanceOf("driverSource");

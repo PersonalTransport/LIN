@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CompilerOptions {
-    public class TargetOptions {
+    public class NodeTypeOptions {
         @Parameter(description = "sources...", required = true)
         private List<String> sources = new ArrayList<>();
 
@@ -26,7 +26,7 @@ public class CompilerOptions {
     }
 
     @Parameters(commandDescription = "Generate the slave C slave driver.")
-    public class SlaveDriverOptions extends TargetOptions {
+    public class SlaveDriverOptions extends NodeTypeOptions {
         @Parameter(names = {"-s","--slave"},description = "name of slave node to export")
         private String slaveName;
 
@@ -37,18 +37,21 @@ public class CompilerOptions {
     private SlaveDriverOptions slaveDriverOptions = new SlaveDriverOptions();
 
     @Parameters(commandDescription = "Generate the slave C master driver.")
-    public class MasterDriverOptions extends TargetOptions {
+    public class MasterDriverOptions extends NodeTypeOptions {
     }
     private MasterDriverOptions masterDriverOptions = new MasterDriverOptions();
 
     @Parameter(names = {"-h","--help"}, help = true, description = "Show help this message.")
     private boolean help = false;
 
+    @Parameter(names = {"-t","--target"}, description = "The target device.")
+    private String targetDevice = "generic";
+
     private JCommander jCommander;
 
     public CompilerOptions() {
         jCommander = new JCommander(this);
-        jCommander.setProgramName("jLIN");
+        jCommander.setProgramName("LIN");
         jCommander.addCommand("slave",slaveDriverOptions);
         jCommander.addCommand("master",masterDriverOptions);
     }
@@ -59,6 +62,10 @@ public class CompilerOptions {
 
     public boolean getHelp() {
         return help;
+    }
+
+    public String getTargetDevice() {
+        return targetDevice;
     }
 
     public SlaveDriverOptions getSlaveDriverOptions() {
