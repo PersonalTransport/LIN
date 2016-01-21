@@ -5,9 +5,11 @@ import LIN2.Cluster;
 import LIN2.Node;
 import LIN2.Slave;
 import LIN2.bitrate.Bitrate;
-import LIN2.compiler.generation.PIC24FJxxGB00x.PIC24FJxxGB00x;
-import LIN2.compiler.generation.PIC24FJxxGB00x.UART1;
+import LIN2.compiler.generation.Interface;
+import LIN2.compiler.generation.Target;
+import LIN2.compiler.generation.targets.PIC24FJxxGB00x.PIC24FJxxGB00x;
 import LIN2.compiler.generation.models.*;
+import LIN2.compiler.generation.targets.generic.GenericTarget;
 import LIN2.compiler.parser.capability.NodeCapabilityFileLexer;
 import LIN2.compiler.parser.capability.NodeCapabilityFileParser;
 import LIN2.compiler.parser.capability.SlaveVisitor;
@@ -30,6 +32,11 @@ import java.io.*;
 import java.util.Set;
 
 public class Compiler {
+    public static Target[] targets = {
+            new GenericTarget(),
+            new PIC24FJxxGB00x()
+    };
+
     public static void main(String [] args) throws IOException {
         CompilerOptions compilerOptions = new CompilerOptions();
         try {
@@ -111,14 +118,27 @@ public class Compiler {
         if(!outputDir.exists())
             outputDir.mkdirs();
 
-        PIC24FJxxGB00x target = new PIC24FJxxGB00x();
-        UART1 inf = new UART1();
+        Target target = null;
+        for(Target t:targets) {
+            if(t.targetMatches(options.getTargetDevice()))
+                target = t;
+        }
+        if(target == null) {
+            System.err.println("Not target named '"+options.getTargetDevice()+"'.");
+            return;
+        }
 
-        STGroup slaveDriverHeader = new STGroupFile("LIN2/compiler/generation/template/generic/DriverHeader.stg");
+        Interface inf = target.getInterface(options.getTargetInterface());
+        if(inf == null) {
+            System.err.println(options.getTargetDevice()+" doe not have a interface named '"+options.getTargetInterface()+"'.");
+            return;
+        }
+
+        STGroup slaveDriverHeader = new STGroupFile("LIN2/compiler/generation/DriverHeader.stg");
         target.addHeaderGroups(slaveDriverHeader);
         addModelAdaptors(slaveDriverHeader);
 
-        STGroup slaveDriverSource = new STGroupFile("LIN2/compiler/generation/template/generic/DriverSource.stg");
+        STGroup slaveDriverSource = new STGroupFile("LIN2/compiler/generation/DriverSource.stg");
         target.addSourceGroups(slaveDriverSource);
         addModelAdaptors(slaveDriverSource);
 

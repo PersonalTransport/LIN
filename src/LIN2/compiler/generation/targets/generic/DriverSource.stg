@@ -1,0 +1,6 @@
+systemInitialization() ::= ""
+initializationGenericInterface(node) ::= ""
+rxDataAvailableGenericInterface() ::= "false"
+rxDataGenericInterface(cVarToStoreIn) ::= "//<cVarToStoreIn> = read();"
+txDataGenericInterface(cVarToTx) ::= "//write(<cVarToTx>);"
+txBreakAndSyncGenericInterface() ::= "//sendBreakAndSync();"

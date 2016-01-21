@@ -44,8 +44,11 @@ public class CompilerOptions {
     @Parameter(names = {"-h","--help"}, help = true, description = "Show help this message.")
     private boolean help = false;
 
-    @Parameter(names = {"-t","--target"}, description = "The target device.")
-    private String targetDevice = "generic";
+    @Parameter(names = {"-t","--target"}, required = true, description = "The target device.")
+    private String targetDevice;
+
+    @Parameter(names = {"-i","--target-interface"}, required = true , description = "The target device's interface.")
+    private String targetInterface;
 
     private JCommander jCommander;
 
@@ -66,6 +69,10 @@ public class CompilerOptions {
 
     public String getTargetDevice() {
         return targetDevice;
+    }
+
+    public String getTargetInterface() {
+        return targetInterface;
     }
 
     public SlaveDriverOptions getSlaveDriverOptions() {

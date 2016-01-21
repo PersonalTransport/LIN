@@ -46,7 +46,7 @@ public class Main {
                 cluster.addSlave(slaveVisitor.visit(nodeCtx));
         }
 
-        STGroup capabilityFileGroup = new STGroupFile("LIN2/compiler/generation/template/DescriptionFile.stg");
+        STGroup capabilityFileGroup = new STGroupFile("LIN2/compiler/generation/DescriptionFile.stg");
         addModelAdaptors(capabilityFileGroup);
 
         ST descriptionFile = capabilityFileGroup.getInstanceOf("descriptionFile");

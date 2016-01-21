@@ -1,12 +1,17 @@
-package LIN2.compiler.generation.PIC24FJxxGB00x;
+package LIN2.compiler.generation.targets.PIC24FJxxGB00x;
 
 import LIN2.compiler.generation.Interface;
 
-public class UART1 extends Interface {
+public class UART extends Interface {
+    private int version;
+
+    public UART(int version) {
+        this.version = version;
+    }
 
     @Override
     public String getName() {
-        return "UART1";
+        return "UART"+version;
     }
 
     @Override
@@ -14,26 +19,26 @@ public class UART1 extends Interface {
 
     @Override
     public String getInitialization() {
-        return "initializationUART1";
+        return "initializationUART"+version;
     }
 
     @Override
     public String getRxDataAvailable() {
-        return "rxDataAvailableUART1";
+        return "rxDataAvailableUART"+version;
     }
 
     @Override
     public String getRxData() {
-        return "rxDataUART1";
+        return "rxDataUART"+version;
     }
 
     @Override
     public String getTxData() {
-        return "txDataUART1";
+        return "txDataUART"+version;
     }
 
     @Override
     public String getTxBreakAndSync() {
-        return "txBreakAndSyncUART1";
+        return "txBreakAndSyncUART"+version;
     }
 }

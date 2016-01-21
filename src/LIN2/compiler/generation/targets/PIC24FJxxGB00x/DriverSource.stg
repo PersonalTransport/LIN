@@ -1,5 +1,12 @@
 includes() ::= <<
 #include \<xc.h>
+
+#define MIN_BAUD 10000
+#define MAX_BAUD 20000
+
+#if (13*FCY/MIN_BAUD)  > 0xFFFF
+    #error "FCY/MAX_BAUD is too large for a 16-bit timer!"
+#endif
 >>
 
 systemInitialization() ::= <<
