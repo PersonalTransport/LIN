@@ -119,6 +119,7 @@ IC1TMR = 0;
 IEC0bits.IC1IE = 1;
 IPC0bits.IC1IP = 7;
 <endif>
+// TODO use l_sys_irq_restore to enable the interrupts.
 >>
 
 rxDataAvailableUART1() ::= "U1STAbits.URXDA"

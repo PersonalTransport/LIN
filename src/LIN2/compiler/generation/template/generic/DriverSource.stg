@@ -284,8 +284,7 @@ static inline void cleanup_rx_<interface.name>() {
     else if(rx_buffer.PID == frames[<frame.name>_INDEX].PID) {
         if((l_u8)<if(frame.useClassicChecksum)>classic_checksum<else>enhanced_checksum<endif> == rx_buffer.checksum) {
 <frame.signals:{signal|
-            <signal.name>_flag = true;
-}>
+            <signal.name>_flag = true;}>
             frames[<frame.name>_INDEX].data.scalar = rx_buffer.data.scalar;
         \}
         else {
@@ -313,16 +312,13 @@ void l_ifc_rx_<interface.name>() {
             case L_PID: {
                 rx_buffer.state = L_DATA;
                 rx_buffer.index = 0; // TODO is this needed!
-
                 <(interface.rxData)("rx_buffer.PID")>
-
                 <if(node.slave)>
-                setup_tx(rx_buffer.PID);
-                setup_rx(rx_buffer.PID);
+                setup_tx_<interface.name>(rx_buffer.PID);
+                setup_rx_<interface.name>(rx_buffer.PID);
                 // TODO wait??
                 l_ifc_tx_<interface.name>();
                 <endif>
-
                 break;
             }
             case L_DATA: {

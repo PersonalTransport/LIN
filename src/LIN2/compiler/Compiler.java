@@ -114,11 +114,11 @@ public class Compiler {
         PIC24FJxxGB00x target = new PIC24FJxxGB00x();
         UART1 inf = new UART1();
 
-        STGroup slaveDriverHeader = new STGroupFile("LIN2/compiler/generation/template/Generic/DriverHeader.stg");
+        STGroup slaveDriverHeader = new STGroupFile("LIN2/compiler/generation/template/generic/DriverHeader.stg");
         target.addHeaderGroups(slaveDriverHeader);
         addModelAdaptors(slaveDriverHeader);
 
-        STGroup slaveDriverSource = new STGroupFile("LIN2/compiler/generation/template/Generic/DriverSource.stg");
+        STGroup slaveDriverSource = new STGroupFile("LIN2/compiler/generation/template/generic/DriverSource.stg");
         target.addSourceGroups(slaveDriverSource);
         addModelAdaptors(slaveDriverSource);
 
