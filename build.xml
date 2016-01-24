@@ -1,10 +1,10 @@
-<project name="LIN" default="jar">
+<project name="LIN" default="LIN">
 
     <property name="src.dir" value="src"/>
     <property name="grammar.dir" value="grammar"/>
     <property name="gen-src.dir" value="gen"/>
-    <property name="build.dir" value="build"/>
-    <property name="classes.dir" value="${build.dir}/classes"/>
+    <property name="build.dir" value="out"/>
+    <property name="classes.dir" value="${build.dir}/production/${ant.project.name}"/>
     <property name="jar.dir" value="${build.dir}"/>
     <property name="lib.dir" value="lib" />
     <path id="lib.path.id">
@@ -72,7 +72,7 @@
         <javac srcdir="${src.dir};${gen-src.dir}" destdir="${classes.dir}" classpathref="lib.path.id" includeantruntime="false"/>
     </target>
 
-    <target name="jar" depends="compile,git.revision">
+    <target name="LIN" depends="compile,git.revision">
         <mkdir dir="${jar.dir}"/>
         <jar destfile="${jar.dir}/${ant.project.name}-${git.revision}.jar" basedir="${classes.dir}">
             <fileset dir="${src.dir}" includes="**/*.stg"/>
