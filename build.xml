@@ -1,0 +1,89 @@
+<project name="LIN" default="jar">
+
+    <property name="src.dir" value="src"/>
+    <property name="grammar.dir" value="grammar"/>
+    <property name="gen-src.dir" value="gen"/>
+    <property name="build.dir" value="build"/>
+    <property name="classes.dir" value="${build.dir}/classes"/>
+    <property name="jar.dir" value="${build.dir}"/>
+    <property name="lib.dir" value="lib" />
+    <path id="lib.path.id">
+        <fileset dir="${lib.dir}" />
+    </path>
+    <property name="antlr.version" value="4.5.1"/>
+    <property name="jcommander.version" value="1.48"/>
+
+    <available file=".git" type="dir" property="git.present"/>
+    <target name="git.revision" description="Store git revision in ${repository.version}" if="git.present">
+        <exec executable="git" outputproperty="git.revision" failifexecutionfails="false" errorproperty="">
+            <arg value="describe"/>
+            <arg value="--tags"/>
+            <arg value="--always"/>
+            <arg value="HEAD"/>
+        </exec>
+        <condition property="repository.version" value="${git.revision}" else="unknown">
+            <and>
+                <isset property="git.revision"/>
+                <length string="${git.revision}" trim="yes" length="0" when="greater"/>
+            </and>
+        </condition>
+    </target>
+
+    <target name="antlr">
+        <get src="http://www.antlr.org/download/antlr-${antlr.version}-complete.jar" dest="${lib.dir}" skipExisting="true"/>
+    </target>
+
+    <target name="jcommander">
+        <get src="http://central.maven.org/maven2/com/beust/jcommander/${jcommander.version}/jcommander-${jcommander.version}.jar" dest="${lib.dir}" skipExisting="true"/>
+    </target>
+
+    <target name="generated-description-files" depends="antlr">
+        <java jar="${lib.dir}/antlr-${antlr.version}-complete.jar" fork="true">
+            <arg value="-o"/>
+            <arg value="${gen-src.dir}/LIN2/compiler/parser/description"/>
+            <arg value="-package"/>
+            <arg value="LIN2.compiler.parser.description"/>
+            <arg value="-visitor"/>
+            <arg value="-no-listener"/>
+            <arg value="-lib"/>
+            <arg value="${grammar.dir}"/>
+            <arg value="${grammar.dir}/DescriptionFile.g4"/>
+        </java>
+    </target>
+
+    <target name="generated-capability-files" depends="antlr">
+        <java jar="${lib.dir}/antlr-${antlr.version}-complete.jar" fork="true">
+            <arg value="-o"/>
+            <arg value="${gen-src.dir}/LIN2/compiler/parser/capability"/>
+            <arg value="-package"/>
+            <arg value="LIN2.compiler.parser.capability"/>
+            <arg value="-visitor"/>
+            <arg value="-no-listener"/>
+            <arg value="-lib"/>
+            <arg value="${grammar.dir}"/>
+            <arg value="${grammar.dir}/NodeCapabilityFile.g4"/>
+        </java>
+    </target>
+
+    <target name="compile" depends="jcommander,generated-description-files,generated-capability-files">
+        <mkdir dir="${classes.dir}"/>
+        <javac srcdir="${src.dir};${gen-src.dir}" destdir="${classes.dir}" classpathref="lib.path.id" includeantruntime="false"/>
+    </target>
+
+    <target name="jar" depends="compile,git.revision">
+        <mkdir dir="${jar.dir}"/>
+        <jar destfile="${jar.dir}/${ant.project.name}-${git.revision}.jar" basedir="${classes.dir}">
+            <fileset dir="${src.dir}" includes="**/*.stg"/>
+            <zipgroupfileset dir="${lib.dir}" includes="**/*.jar" />
+            <manifest>
+                <attribute name="Main-Class" value="LIN2.compiler.Compiler"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+        <delete dir="${gen-src.dir}"/>
+    </target>
+
+</project>
