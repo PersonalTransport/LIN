@@ -13,8 +13,8 @@ LIN is a compiler that will parse [LIN Node capability](http://www.cs-group.de/f
 
 ## Dependencies ##
 - [antlr4](http://www.antlr.org/) is used to generated the parsers for [LIN Node capability](http://www.cs-group.de/fileadmin/media/Documents/LIN_Specification_Package_2.2A.pdf#page=164) and [LIN description](http://www.cs-group.de/fileadmin/media/Documents/LIN_Specification_Package_2.2A.pdf#page=175) files.
-- [stringtemplate](http://www.stringtemplate.org/) (usually packaged with antlr4) is used as a temlplate engine to generate the C drivers.
-- [jcommander](http://jcommander.org/) used to make command line tools more user friendly.
+- [string template](http://www.stringtemplate.org/) (usually packaged with antlr4) is used as a template engine to generate the C drivers.
+- [jcommander](http://jcommander.org/) used to make command line tools more user-friendly.
 
 
 ## Usage ##
