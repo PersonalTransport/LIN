@@ -30,10 +30,12 @@
     </target>
 
     <target name="antlr">
+         <mkdir dir="${lib.dir}"/>
         <get src="http://www.antlr.org/download/antlr-${antlr.version}-complete.jar" dest="${lib.dir}" skipExisting="true"/>
     </target>
 
     <target name="jcommander">
+        <mkdir dir="${lib.dir}"/>
         <get src="http://central.maven.org/maven2/com/beust/jcommander/${jcommander.version}/jcommander-${jcommander.version}.jar" dest="${lib.dir}" skipExisting="true"/>
     </target>
 
