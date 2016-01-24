@@ -19,13 +19,17 @@ LIN is a compiler that will parse [LIN Node capability files](http://www.cs-grou
 
 ## Usage ##
 ```
-java -jar LIN.jar --help
+The following options are required: -i, --target-interface -t, --target 
 
 Usage: LIN [options] [command] [command options]
   Options:
     -h, --help
        Show help this message.
        Default: false
+  * -t, --target
+       The target device.
+  * -i, --target-interface
+       The target device's interface.
   Commands:
     slave      Generate the slave C slave driver.
       Usage: slave [options] sources...
