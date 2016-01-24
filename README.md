@@ -48,13 +48,13 @@ Usage: LIN [options] [command] [command options]
 
 ## Examples ##
 - Generate a master node from a LIN description file.
-  - ```java -jar LIN.jar master -o gen CEM.ldf```
+  - ```java -jar -t PIC24FJ64GB002 -i UART1 LIN.jar master -o gen CEM.ldf```
   - This will generate a master driver from the file in the current directory called CEM.ldf and output the driver source code in the subfolder gen.
 
 - Generate a slave node from a LIN Node capability file.
- - ```java -jar LIN.jar slave -o gen LSM.ncf```
+ - ```java -jar -t PIC24FJ64GB002 -i UART1 LIN.jar slave -o gen LSM.ncf```
  - This will generate a slave driver from the file in the current directory called LSM.ncf and output the driver source code in the subfolder gen.
 
 - Generate a slave node from a LIN description file (this is not a prefered method).
-  - ```java -jar LIN.jar slave -o gen -s LSM CEM.ldf```
+  - ```java -jar -t PIC24FJ64GB002 -i UART1 LIN.jar slave -o gen -s LSM CEM.ldf```
  - This will generate a slave driver for LSM from the file in the current directory called CEM.ldf and output the driver source code in the subfolder gen. 
