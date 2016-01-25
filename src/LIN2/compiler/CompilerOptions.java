@@ -10,7 +10,7 @@ import java.util.List;
 
 public class CompilerOptions {
     public class NodeTypeOptions {
-        @Parameter(description = "sources...", required = true)
+        @Parameter(description = "(*.nfc *.ldf)+", required = true)
         private List<String> sources = new ArrayList<>();
 
         @Parameter(names = {"-o","--output"}, description = "Output directory.")

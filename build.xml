@@ -80,15 +80,15 @@
                 <attribute name="Main-Class" value="LIN2.compiler.Compiler"/>
             </manifest>
         </jar>
-    </target>
-
-    <target name="release" depends="LIN">
         <echo file="${build.dir}/LIN">#!/usr/bin/sh
 java -jar "`dirname "$0"`/${ant.project.name}-${git.revision}.jar" "$@"
         </echo>
         <echo file="${build.dir}/LIN.bat">@echo off
 java -jar "%~dp0\${ant.project.name}-${git.revision}.jar" %*
         </echo>
+    </target>
+
+    <target name="release" depends="LIN">
         <zip destfile="${build.dir}/${ant.project.name}-${git.revision}-install.zip">
             <zipfileset dir="${build.dir}" includes="${ant.project.name}-${git.revision}.jar" fullpath="${ant.project.name}-${git.revision}/${ant.project.name}-${git.revision}.jar"/>
             <zipfileset dir="${build.dir}" includes="LIN" fullpath="${ant.project.name}-${git.revision}/LIN"/>
