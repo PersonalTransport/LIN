@@ -80,9 +80,11 @@
                 <attribute name="Main-Class" value="LIN2.compiler.Compiler"/>
             </manifest>
         </jar>
-        <echo file="${build.dir}/LIN">#!/usr/bin/sh
+        <echo file="${build.dir}/LIN">#!/bin/bash
 java -jar "`dirname "$0"`/${ant.project.name}-${git.revision}.jar" "$@"
         </echo>
+        <chmod file="${build.dir}/LIN" perm="+x"/>
+
         <echo file="${build.dir}/LIN.bat">@echo off
 java -jar "%~dp0\${ant.project.name}-${git.revision}.jar" %*
         </echo>
