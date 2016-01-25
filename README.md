@@ -1,7 +1,7 @@
 # LIN
 
 ## Introduction ##
-LIN is a compiler (written in java) that will parse [LIN Node capability](http://www.cs-group.de/fileadmin/media/Documents/LIN_Specification_Package_2.2A.pdf#page=164) and [LIN description](http://www.cs-group.de/fileadmin/media/Documents/LIN_Specification_Package_2.2A.pdf#page=175) files and generate C source code that implements the LIN 2.2 spec LIN for slave or master nodes.
+LIN is a compiler (written in java) that will parse [LIN Node capability](http://www.cs-group.de/fileadmin/media/Documents/LIN_Specification_Package_2.2A.pdf#page=164) and [LIN description](http://www.cs-group.de/fileadmin/media/Documents/LIN_Specification_Package_2.2A.pdf#page=175) files and generate C source code that implements the LIN 2.2 spec for slave or master nodes.
 
 ## Download ##
 - [Latest release (v0.1.2)](https://github.com/PersonalTransport/LIN/releases/download/v0.1.2-alpha/LIN-v0.1.2-alpha-install.zip).
