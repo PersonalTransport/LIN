@@ -13,8 +13,8 @@ public class CompilerOptions {
         @Parameter(description = "sources...", required = true)
         private List<String> sources = new ArrayList<>();
 
-        @Parameter(names = {"-o","--output"}, description = "Output directory.", required = true)
-        private String outputDirectory;
+        @Parameter(names = {"-o","--output"}, description = "Output directory.")
+        private String outputDirectory = "gen";
 
         public List<String> getSources() {
             return sources;

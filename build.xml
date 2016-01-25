@@ -5,7 +5,6 @@
     <property name="gen-src.dir" value="gen"/>
     <property name="build.dir" value="out"/>
     <property name="classes.dir" value="${build.dir}/production/${ant.project.name}"/>
-    <property name="jar.dir" value="${build.dir}"/>
     <property name="lib.dir" value="lib" />
     <path id="lib.path.id">
         <fileset dir="${lib.dir}" />
@@ -73,14 +72,28 @@
     </target>
 
     <target name="LIN" depends="compile,git.revision">
-        <mkdir dir="${jar.dir}"/>
-        <jar destfile="${jar.dir}/${ant.project.name}-${git.revision}.jar" basedir="${classes.dir}">
+        <mkdir dir="${build.dir}"/>
+        <jar destfile="${build.dir}/${ant.project.name}-${git.revision}.jar" basedir="${classes.dir}">
             <fileset dir="${src.dir}" includes="**/*.stg"/>
             <zipgroupfileset dir="${lib.dir}" includes="**/*.jar" />
             <manifest>
                 <attribute name="Main-Class" value="LIN2.compiler.Compiler"/>
             </manifest>
         </jar>
+    </target>
+
+    <target name="release" depends="LIN">
+        <echo file="${build.dir}/LIN">#!/usr/bin/sh
+java -jar "`dirname "$0"`/${ant.project.name}-${git.revision}.jar" "$@"
+        </echo>
+        <echo file="${build.dir}/LIN.bat">@echo off
+java -jar "%~dp0\${ant.project.name}-${git.revision}.jar" %*
+        </echo>
+        <zip destfile="${build.dir}/${ant.project.name}-${git.revision}-install.zip">
+            <zipfileset dir="${build.dir}" includes="${ant.project.name}-${git.revision}.jar" fullpath="${ant.project.name}-${git.revision}/${ant.project.name}-${git.revision}.jar"/>
+            <zipfileset dir="${build.dir}" includes="LIN" fullpath="${ant.project.name}-${git.revision}/LIN"/>
+            <zipfileset dir="${build.dir}" includes="LIN.bat" fullpath="${ant.project.name}-${git.revision}/LIN.bat"/>
+        </zip>
     </target>
 
     <target name="clean">
