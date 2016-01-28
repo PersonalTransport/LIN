@@ -58,54 +58,22 @@ public class Compiler {
             CompilerOptions.SlaveDriverOptions slaveOptions = compilerOptions.getSlaveDriverOptions();
             File outputDir = new File(slaveOptions.getOutputDirectory()).getCanonicalFile();
 
-            Cluster cluster = null;
-            for(String sourceFile:slaveOptions.getSources()) {
-                if(sourceFile.endsWith(".ldf") && cluster == null) {
-                    cluster = parseDescriptionFile(sourceFile);
-                }
-                else {
-                    System.out.println("error: more than one LIN Description file.");
-                    System.exit(-1);
-                }
-            }
-
-            if(cluster == null)
-                cluster = new Cluster();
+            Cluster cluster = new Cluster();
 
             for(String sourceFile:slaveOptions.getSources()) {
-                if (sourceFile.endsWith(".ncf"))
+                if (sourceFile.toLowerCase().endsWith(".nfc")) {
                     parseNodeCapability(sourceFile, cluster);
-            }
-
-            Slave slave = null;
-
-            Set<Slave> slaves = cluster.getSlaves();
-            if(slaves.size() == 1) {
-                slave = slaves.iterator().next();
-            }
-            else if(slaveOptions.getSlaveName() !=null) {
-                slave = cluster.getSlave(slaveOptions.getSlaveName());
-            }
-            else {
-                System.out.println("The following option is required: -s, --slave");
-                System.out.println();
-                compilerOptions.usage();
-                System.out.println("       possible slave names:");
-                for(Slave s:slaves) {
-                    System.out.println("         "+s.getName());
+                    break;
                 }
-                System.exit(-1);
             }
+
+            Slave slave = cluster.getSlaves().iterator().next();
+
             generateDriver(compilerOptions,outputDir,slave);
         }
         else if(compilerOptions.getMasterDriverOptions() != null) {
             CompilerOptions.MasterDriverOptions masterOptions = compilerOptions.getMasterDriverOptions();
             File outputDir = new File(masterOptions.getOutputDirectory()).getCanonicalFile();
-
-            if(masterOptions.getSources().size() != 1) { // TODO add other types
-                System.out.println("too many source files should only contain one .ldf");
-                System.exit(-1);
-            }
 
             Cluster cluster = parseDescriptionFile(masterOptions.getSources().get(0));
 
@@ -114,7 +82,6 @@ public class Compiler {
     }
 
     public static void generateDriver(CompilerOptions options,File outputDir,Node node) throws FileNotFoundException {
-        // TODO check that output is really a directory
         if(!outputDir.exists())
             outputDir.mkdirs();
 
@@ -175,8 +142,9 @@ public class Compiler {
             System.exit(-1);
 
         SlaveVisitor slaveVisitor = new SlaveVisitor(cluster);
-        for(NodeCapabilityFileParser.NodeDefinitionContext nodeCtx:context.nodeDefinition())
+        for(NodeCapabilityFileParser.NodeDefinitionContext nodeCtx:context.nodeDefinition()) {
             cluster.addSlave(slaveVisitor.visit(nodeCtx));
+        }
     }
 
     private static Cluster parseDescriptionFile(String sourceFile) throws IOException {

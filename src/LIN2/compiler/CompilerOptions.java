@@ -28,7 +28,7 @@ public class CompilerOptions {
     @Parameters(commandDescription = "Generate the slave C slave driver.")
     public class SlaveDriverOptions extends NodeTypeOptions {
         @Parameter(names = {"-s","--slave"},description = "name of slave node to export")
-        private String slaveName;
+        private String slaveName = "";
 
         public String getSlaveName() {
             return slaveName;
