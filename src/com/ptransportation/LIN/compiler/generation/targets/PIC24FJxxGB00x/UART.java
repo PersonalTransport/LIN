@@ -1,6 +1,6 @@
-package com.ptransportation.compiler.generation.targets.PIC24FJxxGB00x;
+package com.ptransportation.LIN.compiler.generation.targets.PIC24FJxxGB00x;
 
-import com.ptransportation.compiler.generation.Interface;
+import com.ptransportation.LIN.compiler.generation.Interface;
 
 public class UART extends Interface {
     private int version;

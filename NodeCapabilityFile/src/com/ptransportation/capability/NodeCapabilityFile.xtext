@@ -3,12 +3,9 @@ grammar com.ptransportation.capability.NodeCapabilityFile with org.eclipse.xtext
 
 generate nodeCapabilityFile "http://www.ptransportation.com/capability/NodeCapabilityFile"
 
-NodeCapabilityFile:
+Node:
 	'node_capability_file' ';'
 	'LIN_language_version' '=' languageVersion=STRING ';'
-	(nodes+=Node)+;
-
-Node:
 	'node' name=ID '{'
 		'general' '{'
 			'LIN_protocol_version' '=' protocolVersion=STRING ';'
@@ -20,7 +17,7 @@ Node:
 		'}'
 
 		'diagnostic' '{'
-            'NAD' '=' NADSet=NadSet ';'
+            'NAD' '=' nadSet=NadSet ';'
             'diagnostic_class' '=' diagnosticClass=Integer ';'
             ('P2_min' '=' p2Min=Number 'ms' ';')?
             ('ST_min' '=' stMin=Number 'ms' ';')?

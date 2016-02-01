@@ -1,4 +1,4 @@
-package com.ptransportation.compiler.generation;
+package com.ptransportation.LIN.compiler.generation;
 
 public abstract  class Interface {
     public abstract String getName();

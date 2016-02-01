@@ -107,7 +107,7 @@ static struct {
 static struct l_frame frames[] = {
 <node.frames:{frame|
     {   // <frame.name>
-        .PID = L_FRAME_PID(<frame.ID>),
+        .PID = <if(frame.ID)>L_FRAME_PID(<frame.ID>)<else>0xFF<endif>, // TODO is 0xFF Invalid
         .data.scalar = 0ULL // TODO initial data
     \}};separator=",\n">
 };
@@ -125,13 +125,17 @@ static struct l_schedule_instance current = {L_NULL_SCHEDULE,0,0,NULL};
 static struct l_schedule_instance next    = {NULL,0,0,NULL};
 
 <else>
-static l_u8 NAD = <node.initialNAD.hex>;
+static l_u8 NAD = <node.initialNAD.hex>; // TODO this needs to be implemented.
 static l_u16 supplier_id = <node.supplier.hex>;
 static l_u16 function_id = <node.function.hex>;
 static l_u8 variant_id = <node.variant>;
 <endif>
 
-<node.signals:{signal|static l_bool <signal.name>_flag = false;};separator="\n">
+<node.frames:{frame|
+static l_bool <frame.name>_flag = false;
+<frame.signals:{signal|
+
+static l_bool <signal.name>_flag = false;}>}>
 
 static void setup_tx_<interface.name>(l_u8 PID);
 static void setup_rx_<interface.name>(l_u8 PID);
@@ -239,7 +243,7 @@ static inline void setup_rx_<interface.name>(l_u8 PID) {
         // TODO slave response
     }
 <node.frames:{frame|
-<if(!node.publishes_frame)>
+<if(frame.subscribes)>
     else if(PID == frames[<frame.name>_INDEX].PID) {
         rx_buffer.state = L_DATA;
         rx_buffer.size = <frame.length>;
@@ -280,7 +284,7 @@ static inline void cleanup_rx_<interface.name>() {
         // TODO slave response
     }
 <node.frames:{frame|
-<if(!node.publishes_frame)>
+<if(frame.subscribes)>
     else if(rx_buffer.PID == frames[<frame.name>_INDEX].PID) {
         if((l_u8)<if(frame.useClassicChecksum)>classic_checksum<else>enhanced_checksum<endif> == rx_buffer.checksum) {
 <frame.signals:{signal|
@@ -367,7 +371,7 @@ static inline void setup_tx_<interface.name>(l_u8 PID) {
         // TODO slave response
     }
 <node.frames:{frame|
-<if(node.publishes_frame)>
+<if(frame.publishes)>
     else if(PID == frames[<frame.name>_INDEX].PID) {
     <if(node.master)>
         tx_buffer.state = L_BREAK_SYNC;
@@ -413,11 +417,12 @@ static inline void cleanup_tx_<interface.name>() {
         // TODO slave response
     }
 <node.frames:{frame|
-<if(node.publishes_frame && frame.signals)>
+<if(frame.publishes && frame.signals)>
     else if(tx_buffer.PID == frames[<frame.name>_INDEX].PID) {
 <frame.signals:{signal|
 
-        <signal.name>_flag = true;}>
+        <signal.name>_flag = true;
+}>
     \}<endif>
 }>
     tx_buffer.PID = 0xFF;
@@ -481,13 +486,24 @@ l_u16 l_ifc_read_status_<interface.name>() {
     // TODO implement!
 }
 
-<node.signals:{signal|<signal:(signal.signalType_ReadImplementation)()>};separator="\n\n">
+<node.frames:{frame|
 
-<node.publishedSignals:{signal|<signal:(signal.signalType_WriteImplementation)()>};separator="\n\n">
+<testFlagImplementation(frame.name)>
 
-<node.signals:{signal|<signalTestFlagImplementation(signal)>};separator="\n\n">
+<clearFlagImplementation(frame.name)>
 
-<node.signals:{signal|<signalClearFlagImplementation(signal)>};separator="\n\n">
+<frame.signals:{signal|
+<signal:(signal.signalType_ReadImplementation)()>
+<if(frame.publishes)>
+
+<signal:(signal.signalType_WriteImplementation)()>
+<endif>
+
+<testFlagImplementation(signal.name)>
+
+<clearFlagImplementation(signal.name)>
+}>
+}>
 >>
 
 
@@ -542,15 +558,15 @@ void l_bytes_wr_<signal.name>(l_u8 start,l_u8 count,const l_u8* const data) {
 
 
 
-signalTestFlagImplementation(signal) ::= <<
-l_bool l_flg_tst_<signal.name>() {
-    return <signal.name>_flag;
+testFlagImplementation(name) ::= <<
+l_bool l_flg_tst_<name>() {
+    return <name>_flag;
 }
 >>
 
-signalClearFlagImplementation(signal) ::= <<
-void l_flg_clr_<signal.name>() {
-    <signal.name>_flag = false;
+clearFlagImplementation(name) ::= <<
+void l_flg_clr_<name>() {
+    <name>_flag = false;
 }
 >>
 

@@ -173,13 +173,24 @@ struct l_irqmask l_sys_irq_disable();
 **/
 void l_sys_irq_restore(struct l_irqmask previous);
 
-<node.signals:{signal|<signal:(signal.signalType_ReadPrototype)()>};separator="\n\n">
+<node.frames:{frame|
 
-<node.publishedSignals:{signal|<signal:(signal.signalType_WritePrototype)()>};separator="\n\n">
+<testFlagPrototype(frame.name)>
 
-<node.signals:{signal|<signalFlagTestPrototype(signal)>};separator="\n\n">
+<clearFlagPrototype(frame.name)>
 
-<node.signals:{signal|<signalFlagClearPrototype(signal)>};separator="\n\n">
+<frame.signals:{signal|
+<signal:(signal.signalType_ReadPrototype)()>
+<if(frame.publishes)>
+
+<signal:(signal.signalType_WritePrototype)()>
+<endif>
+
+<testFlagPrototype(signal.name)>
+
+<clearFlagPrototype(signal.name)>
+}>
+}>
 
 #endif //<node.name>_<interface.name>_DRIVER_H
 >>
@@ -268,16 +279,16 @@ void l_bytes_wr_<signal.name>(l_u8 start,l_u8 count,const l_u8* const data);
 
 
 
-signalFlagTestPrototype(signal) ::= <<
+testFlagPrototype(name) ::= <<
 /**
-* @returns if the signal <signal.name> has been received/transmitted by the driver.
+* @returns if the <name> has been received/transmitted by the driver.
 **/
-l_bool l_flg_tst_<signal.name>();
+l_bool l_flg_tst_<name>();
 >>
 
-signalFlagClearPrototype(signal) ::= <<
+clearFlagPrototype(name) ::= <<
 /**
-* Informs then driver that the application has consumed/published the signal <signal.name>'s new value.
+* Informs then driver that the application has consumed/published <name>'s new value.
 **/
-void l_flg_clr_<signal.name>();
+void l_flg_clr_<name>();
 >>

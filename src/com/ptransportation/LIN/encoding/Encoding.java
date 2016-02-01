@@ -8,7 +8,7 @@ public class Encoding {
 
     public Encoding(String name) {
         this.name = name;
-        this.encodedValues = new ArrayList<>();
+        this.encodedValues = new ArrayList<EncodedValue>();
     }
 
     public String getName() {

@@ -1,7 +1,7 @@
-package com.ptransportation.compiler.generation.targets.generic;
+package com.ptransportation.LIN.compiler.generation.targets.generic;
 
 
-import com.ptransportation.compiler.generation.Interface;
+import com.ptransportation.LIN.compiler.generation.Interface;
 
 public class GenericInterface extends Interface {
     private int number;

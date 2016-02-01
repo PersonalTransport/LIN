@@ -8,7 +8,6 @@ import com.ptransportation.capability.nodeCapabilityFile.AutomaticBitrate
 import com.ptransportation.capability.nodeCapabilityFile.FixedBitrate
 import com.ptransportation.capability.nodeCapabilityFile.Frame
 import com.ptransportation.capability.nodeCapabilityFile.Node
-import com.ptransportation.capability.nodeCapabilityFile.NodeCapabilityFile
 import com.ptransportation.capability.nodeCapabilityFile.NodeCapabilityFilePackage
 import com.ptransportation.capability.nodeCapabilityFile.ScalorSignalValue
 import com.ptransportation.capability.nodeCapabilityFile.SelectBitrate
@@ -39,15 +38,15 @@ class NodeCapabilityFileValidator extends AbstractNodeCapabilityFileValidator {
 	}
 	
 	@Check
-	def checkThatTheLanguageVersionIsAValidLINVersion(NodeCapabilityFile file) {
-		if(!LIN_VERSIONS.contains(file.languageVersion)) {
-			error('''Invalid LIN language version "«file.languageVersion»".''',file,
-				NodeCapabilityFilePackage.Literals.NODE_CAPABILITY_FILE__LANGUAGE_VERSION
+	def checkThatTheLanguageVersionIsAValidLINVersion(Node node) {
+		if(!LIN_VERSIONS.contains(node.languageVersion)) {
+			error('''Invalid LIN language version "«node.languageVersion»".''',node,
+				NodeCapabilityFilePackage.Literals.NODE__LANGUAGE_VERSION
 			);
 		}
-		if(!file.languageVersion.equals('2.2')) {
-			warning('''Currently only LIN language version "2.2" is supported.''',file,
-				NodeCapabilityFilePackage.Literals.NODE_CAPABILITY_FILE__LANGUAGE_VERSION
+		if(!node.languageVersion.equals('2.2')) {
+			warning('''Currently only LIN language version "2.2" is supported.''',node,
+				NodeCapabilityFilePackage.Literals.NODE__LANGUAGE_VERSION
 			);
 		}
 	}
@@ -282,7 +281,7 @@ class NodeCapabilityFileValidator extends AbstractNodeCapabilityFileValidator {
 			val max = Double.parseDouble(bitrate.maxValue);
 			if(min > max) {
 				error('''Invalid minimum bitrate "«bitrate.minValue»" kbps greator than maximum bitrate "«bitrate.maxValue»" kbps.''',bitrate,
-					NodeCapabilityFilePackage.Literals.AUTOMATIC_BITRATE__MAX_VALUE
+					NodeCapabilityFilePackage.Literals.AUTOMATIC_BITRATE__MIN_VALUE
 				);
 			}
 		}
