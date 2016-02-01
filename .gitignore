@@ -1,73 +1,19 @@
 *.class
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
 *.jar
 *.war
-*.ear
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-
-# Generated folders
-gen
-
-# Cmake files
-CMakeCache.txt
-CMakeFiles
-CMakeScripts
-Makefile
-cmake_install.cmake
-install_manifest.txt
-
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
-*.ko
-*.obj
-*.elf
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-*.so.*
-
-# Fortran module files
-*.mod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-*.lo
-
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
-
-# Debug files
-*.dSYM/
-
-# Intellij
-.idea
 *.iml
-bin/
-out/
-lib/
+!gradle/wrapper/gradle-wrapper.jar
 
-# QtCreator
-CMakeLists.txt.user
+target/
+bin/
+build/
+
+*-gen/
+gen/
+generated/
+
+.gradle/
+.settings/
+.idea/
+
+hs_err_pid*

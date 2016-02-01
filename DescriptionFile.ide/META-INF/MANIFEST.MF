@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: DescriptionFile.ide
+Bundle-Vendor: My Company
+Bundle-Version: 1.0.0.qualifier
+Bundle-SymbolicName: DescriptionFile.ide; singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: DescriptionFile,
+ org.eclipse.xtext.ide,
+ org.eclipse.xtext.xbase.ide
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Export-Package: com.ptransportation.description.ide.contentassist.antlr,
+ com.ptransportation.description.ide.contentassist.antlr.internal
+

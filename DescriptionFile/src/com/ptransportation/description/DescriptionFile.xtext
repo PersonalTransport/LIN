@@ -1,0 +1,255 @@
+grammar com.ptransportation.description.DescriptionFile with org.eclipse.xtext.common.Terminals
+
+generate descriptionFile "http://www.ptransportation.com/description/DescriptionFile"
+
+Cluster:
+	'LIN_description_file' ';'
+	'LIN_protocol_version' '=' protocolVersion=STRING ';'
+	'LIN_language_version' '=' languageVersion=STRING ';'
+	'LIN_speed' '=' value=Number 'kbps' ';'
+	('Channel_name' '=' channelName=ID ';')?
+
+	'Nodes' '{'
+		'Master' ':' master=Master ',' timeBase=Number 'ms' ',' jitter=Number 'ms' ';'
+		'Slaves' ':' slaveReferences+=[Slave] (',' slaveReferences+=[Slave])* ';'
+	'}'
+
+	//(<Node_composition_def>)
+
+	'Signals' '{'
+		(signals+=Signal)+
+	'}'
+
+	('Diagnostic_signals' '{'
+		'MasterReqB0' ':' eights+=Integer ',' zeros+=Integer ';'
+		'MasterReqB1' ':' eights+=Integer ',' zeros+=Integer ';'
+		'MasterReqB2' ':' eights+=Integer ',' zeros+=Integer ';'
+		'MasterReqB3' ':' eights+=Integer ',' zeros+=Integer ';'
+		'MasterReqB4' ':' eights+=Integer ',' zeros+=Integer ';'
+		'MasterReqB5' ':' eights+=Integer ',' zeros+=Integer ';'
+		'MasterReqB6' ':' eights+=Integer ',' zeros+=Integer ';'
+		'MasterReqB7' ':' eights+=Integer ',' zeros+=Integer ';'
+		'SlaveRespB0' ':' eights+=Integer ',' zeros+=Integer ';'
+		'SlaveRespB1' ':' eights+=Integer ',' zeros+=Integer ';'
+		'SlaveRespB2' ':' eights+=Integer ',' zeros+=Integer ';'
+		'SlaveRespB3' ':' eights+=Integer ',' zeros+=Integer ';'
+		'SlaveRespB4' ':' eights+=Integer ',' zeros+=Integer ';'
+		'SlaveRespB5' ':' eights+=Integer ',' zeros+=Integer ';'
+		'SlaveRespB6' ':' eights+=Integer ',' zeros+=Integer ';'
+		'SlaveRespB7' ':' eights+=Integer ',' zeros+=Integer ';'
+	'}')?
+
+	'Frames' '{'
+		(frames+=UnconditionalFrame)+
+	'}'
+
+	('Sporadic_frames' '{'
+		(frames+=SporadicFrame)+
+	'}')?
+
+	('Event_triggered_frames' '{'
+		(frames+=EventTriggeredFrame)+
+	'}')?
+
+	('Diagnostic_frames' '{'
+		frames+=MasterReqFrame
+		frames+=SlaveRespFrame
+	'}')?
+
+	'Node_attributes' '{'
+		(slaves+=Slave)+
+	'}'
+
+	'Schedule_tables' '{'
+		(scheduleTables+=ScheduleTable)+
+	'}'
+
+	('Signal_groups' '{'
+		(signalGroups+=SignalGroup)+
+	'}')?
+
+	('Signal_encoding_types' '{'
+		(encodings+=Encoding)+
+	'}')?
+
+	('Signal_representation' '{'
+		(signalRepresentations+=SignalRepresentation)+
+	'}')?
+;
+
+Node: Master | Slave;
+
+Master: name=ID;
+
+Signal: name=ID ':' size=Integer ','  value=SignalValue ',' publisher=[Node] ',' subscribers+=[Node] (',' subscribers+=[Node])* ';';
+
+SignalValue : ScalorSignalValue | ArraySignalValue;
+ScalorSignalValue: value=Integer;
+ArraySignalValue: '{' values+=Integer (',' values+=Integer)* '}';
+
+Frame: UnconditionalFrame | EventTriggeredFrame | SporadicFrame | MasterReqFrame | SlaveRespFrame;
+
+UnconditionalFrame:
+	name=ID ':' id=Integer ',' publisher=[Node] ',' length=Integer '{'
+		(signalOffsets+=SignalOffset)*
+	'}';
+	
+SignalOffset:
+	signal=[Signal] ',' offset=Integer ';'
+;
+
+SporadicFrame:
+	name=ID ':' unconditionalFrames+=[UnconditionalFrame] (',' unconditionalFrames+=[UnconditionalFrame])* ';';
+
+EventTriggeredFrame:
+	name=ID ':'
+	collisionResolvingScheduleTable=[ScheduleTable] ',' id=Integer
+	(',' associatedFrames+=[UnconditionalFrame])+ ';' ;
+
+SlaveRespFrame:
+	'SlaveResp' ':' sixtyOne=Integer '{'
+		'SlaveRespB0' ',' zero=Integer ';'
+		'SlaveRespB1' ',' eight=Integer ';'
+		'SlaveRespB2' ',' sixteen=Integer ';'
+		'SlaveRespB3' ',' twentyFour=Integer ';'
+		'SlaveRespB4' ',' thirtyOne=Integer ';'
+		'SlaveRespB5' ',' forty=Integer ';'
+		'SlaveRespB6' ',' fortyEight=Integer ';'
+		'SlaveRespB7' ',' fiftySix=Integer ';'
+	'}';
+
+MasterReqFrame:
+	'MasterReq' ':' sixty=Integer '{'
+		'MasterReqB0' ',' zero=Integer ';'
+		'MasterReqB1' ',' eight=Integer ';'
+		'MasterReqB2' ',' sixteen=Integer ';'
+		'MasterReqB3' ',' twentyFour=Integer ';'
+		'MasterReqB4' ',' thirtyOne=Integer ';'
+		'MasterReqB5' ',' forty=Integer ';'
+		'MasterReqB6' ',' fortyEight=Integer ';'
+		'MasterReqB7' ',' fiftySix=Integer ';'
+	'}';
+
+Slave:
+	name=ID '{'
+		'LIN_protocol' '=' protocolVersion=STRING ';'
+		'configured_NAD' '=' configuredNAD=Integer ';'
+		('initial_NAD' '='  initialNAD=Integer ';')?
+		'product_id' '=' supplierID=Integer ',' functionID=Integer (',' variant=Integer)? ';'
+		'response_error' '=' responseError=[Signal] ';'
+		('fault_state_signals' '=' faultStateSignals+=[Signal] (',' faultStateSignals+=[Signal])* ';')?
+		('P2_min' '=' p2Min=Number 'ms' ';')?
+		('ST_min' '=' stMin=Number 'ms' ';')?
+		('N_As_timeout' '=' nAsTimeout=Number 'ms' ';')?
+		('N_Cr_timeout' '=' nCrTimeout=Number 'ms' ';')?
+		'configurable_frames' '{'
+			configuredFrames=(ConfigurableFrames20Definition | ConfigurableFrames21Definition)
+		'}'
+	'}';
+
+ConfigurableFrames20Definition: (frameNames+=[Frame] '=' frameMessages+=Integer ';')+;
+
+ConfigurableFrames21Definition: (frames+=[Frame] ';')+;
+
+ScheduleTable:
+	name=ID '{'
+		(entries+=ScheduleTableEntry)+
+	'}';
+
+ScheduleTableEntry:
+	(FrameEntry |
+	MasterReqEntry |
+	SlaveRespEntry |
+	AssignNADEntry |
+	ConditionalChangeNADEntry |
+	DataDumpEntry |
+	SaveConfigurationEntry |
+	AssignFrameIdRangeEntry |
+	FreeFormatEntry |
+	AssignFrameIdEntry) 'delay' frameTime=Number 'ms' ';'
+;
+
+FrameEntry: frame=[Frame];
+
+MasterReqEntry:
+	{MasterReqEntry} 'MasterReq';
+
+SlaveRespEntry:
+	{SlaveRespEntry} 'SlaveResp';
+
+AssignNADEntry:
+	'AssignNAD' '{' node=[Node] '}';
+
+ConditionalChangeNADEntry:
+	'ConditionalChangeNAD' '{'
+		NAD=Integer ',' id=Integer ',' byte_=Integer',' mask=Integer',' inv=Integer',' newNAD=Integer
+	'}';
+
+DataDumpEntry:
+	'DataDump' '{'
+		node=[Node] ',' d1=Integer',' d2=Integer',' d3=Integer',' d4=Integer',' d5=Integer
+	'}';
+
+SaveConfigurationEntry:
+	'SaveConfiguration' '{' node=[Node] '}';
+
+AssignFrameIdRangeEntry:
+	'AssignFrameIdRange' '{'
+		node=[Node]',' frameIndex=Integer (',' frame0_PID=Integer',' frame1_PID=Integer',' frame2_PID=Integer',' frame3_PID=Integer)?
+	'}';
+
+FreeFormatEntry:
+	'FreeFormat' '{'
+		d1=Integer',' d2=Integer',' d3=Integer',' d4=Integer',' d5=Integer',' d6=Integer',' d7=Integer',' d8=Integer
+	'}';
+
+AssignFrameIdEntry:
+	'AssignFrameId' '{' node=[Node] ',' frame=[Frame] '}';
+
+SignalGroup:
+	name=ID ':' groupSize=Integer '{'
+		(singalsInGroup+=SignalInGroup)+
+	'}';
+
+SignalInGroup:
+	signal=[Signal] ',' groupOffset=Integer ';';
+
+
+Encoding:
+	name=ID '{'
+		(encodedValues+=EncodedValue)+
+	'}';
+
+EncodedValue:
+	LogicalEncodedValue ';' |
+	PhysicalEncodedRange ';' |
+	BCDEncodedValue ';' |
+	ASCIIEncodedValue ';'
+;
+
+LogicalEncodedValue:
+	'logical_value' ',' value=Integer (',' textInfo=STRING)?
+;
+
+PhysicalEncodedRange:
+	'physical_value' ',' minValue=Integer ',' maxValue=Integer ',' scale=Number ',' offset=Number (',' textInfo=STRING)?
+;
+
+BCDEncodedValue:
+	{BCDEncodedValue} 'bcd_value'
+;
+
+ASCIIEncodedValue:
+	{ASCIIEncodedValue} 'ascii_value'
+;
+
+SignalRepresentation:
+	encoding=[Encoding] ':' signals+=[Signal] (',' signals+=[Signal])* ';';
+
+Number:
+	INT ('.' INT)?;
+
+Integer: INT | HEX;
+
+terminal HEX:
+	('0x'|'0X') ('0'..'9'|'a'..'f'|'A'..'F')+;

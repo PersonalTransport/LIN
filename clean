@@ -1,0 +1,15 @@
+#!/bin/bash
+find . -name "*.class" -delete
+find . -name "*.jar" -delete
+find . -name "*.war" -delete
+
+find . -type d -name "target" -exec rm -r "{}" \;
+find . -type d -name "bin" -exec rm -r "{}" \;
+find . -type d -name "build" -exec rm -r "{}" \;
+
+find . -type d -name "*-gen"  -exec rm -r "{}" \;
+find . -type d -name "gen"  -exec rm -r "{}" \;
+find . -type d -name "generated" -exec rm -r "{}" \;
+
+find . -type d -name ".settings" -exec rm -r "{}" \;
+find . -type d -name ".gradle" -exec rm -r "{}" \;

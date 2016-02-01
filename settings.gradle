@@ -1,0 +1,7 @@
+include 'DescriptionFile'
+include 'DescriptionFile.ide'
+include 'DescriptionFile.idea'
+include 'NodeCapabilityFile'
+include 'NodeCapabilityFile.ide'
+include 'NodeCapabilityFile.idea'
+include 'LIN.idea'
