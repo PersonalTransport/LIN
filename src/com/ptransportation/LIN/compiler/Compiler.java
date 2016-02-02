@@ -7,21 +7,14 @@ import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.ptransportation.LIN.compiler.generation.Interface;
 import com.ptransportation.LIN.compiler.generation.Target;
-import com.ptransportation.LIN.compiler.generation.models.FrameModelAdaptor;
-import com.ptransportation.LIN.compiler.generation.models.NodeModelAdaptor;
-import com.ptransportation.LIN.compiler.generation.models.SignalModelAdaptor;
+import com.ptransportation.LIN.compiler.generation.models.*;
 import com.ptransportation.LIN.compiler.generation.targets.PIC24FJxxGB00x.PIC24FJxxGB00x;
 import com.ptransportation.LIN.compiler.generation.targets.generic.GenericTarget;
-import com.ptransportation.LIN.models.IntegerModelAdaptor;
-
 import com.ptransportation.capability.NodeCapabilityFileStandaloneSetup;
-import com.ptransportation.capability.nodeCapabilityFile.Node;
-import com.ptransportation.capability.nodeCapabilityFile.Frame;
-import com.ptransportation.capability.nodeCapabilityFile.Signal;
+import com.ptransportation.capability.nodeCapabilityFile.*;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.xtext.generator.GeneratorContext;
 import org.eclipse.xtext.generator.GeneratorDelegate;
 import org.eclipse.xtext.generator.JavaIoFileSystemAccess;
 import org.eclipse.xtext.util.CancelIndicator;
@@ -104,18 +97,54 @@ public class Compiler {
 
             File outputDir = new File(slaveOptions.getOutputDirectory()).getCanonicalFile();
 
-            Node node = (Node)resource.getContents().get(0);
+            NodeCapabilityFile file = (NodeCapabilityFile)resource.getContents().get(0);
+            Slave node = (Slave)file.getNode();
             node.getSupportedSIDS().add("0xB2");
             node.getSupportedSIDS().add("0xB7");
             generateDriver(compilerOptions,outputDir,node);
         }
         else if(compilerOptions.getMasterDriverOptions() != null) {
-            /*CompilerOptions.MasterDriverOptions masterOptions = compilerOptions.getMasterDriverOptions();
+            CompilerOptions.MasterDriverOptions masterOptions = compilerOptions.getMasterDriverOptions();
+
+            ResourceSet set = resourceSetProvider.get();
+
+            for(String source:masterOptions.getSources())
+                set.createResource(URI.createURI(source));
+
+            Resource resource = null;
+            for(String source:masterOptions.getSources()) {
+                resource = set.getResource(URI.createURI(source),true);
+                NodeCapabilityFile file = (NodeCapabilityFile)resource.getContents().get(0);
+                if(file.getNode() instanceof Master)
+                    break;
+            }
+
+            if(resource == null) {
+                System.err.println("Missing master node.");
+                return;
+            }
+
+            // Validate the resource
+            List<Issue> list = validator.validate(resource, CheckMode.ALL, CancelIndicator.NullImpl);
+            if (!list.isEmpty()) {
+                for (Issue issue : list) {
+                    System.err.println(issue);
+                }
+                return;
+            }
+
+            NodeCapabilityFile masterFile = (NodeCapabilityFile)resource.getContents().get(0);
+            Master master = (Master)masterFile.getNode();
             File outputDir = new File(masterOptions.getOutputDirectory()).getCanonicalFile();
+            generateDriver(compilerOptions,outputDir,master);
 
-            Cluster cluster = parseDescriptionFile(masterOptions.getSources().get(0));
-
-            generateDriver(compilerOptions,outputDir,cluster.getMaster());*/
+            // TODO remove this when Node configuration and identification is implemented!
+            for(Slave slave:master.getSlaves()) {
+                String ncf = slave.eResource().getURI().toString();
+                String ncfRoot = new File(ncf).getParent();
+                outputDir = new File(ncfRoot+"/gen");
+                generateDriver(compilerOptions,outputDir,slave);
+            }
         }
     }
 
@@ -169,9 +198,14 @@ public class Compiler {
 
     private static void addModelAdaptors(STGroup group) {
         group.registerModelAdaptor(Integer.class,new IntegerModelAdaptor());
-        group.registerModelAdaptor(Node.class, new NodeModelAdaptor());
+
+        group.registerModelAdaptor(Master.class, new MasterModelAdaptor());
+        group.registerModelAdaptor(Slave.class, new SlaveModelAdaptor());
         group.registerModelAdaptor(Frame.class, new FrameModelAdaptor());
         group.registerModelAdaptor(Signal.class, new SignalModelAdaptor());
+        group.registerModelAdaptor(ScheduleTable.class, new ScheduleTableModelAdaptor());
+        group.registerModelAdaptor(ScheduleTableEntry.class, new ScheduleEntryModelAdaptor());
+
         /*group.registerModelAdaptor(Node.class,new NodeModelAdaptor());
         group.registerModelAdaptor(Frame.class,new FrameModelAdaptor());
         group.registerModelAdaptor(Entry.class,new PolymorphismModelAdaptor());

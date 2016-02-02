@@ -30,7 +30,6 @@ sourceSets {
 dependencies {
     compile 'com.beust:jcommander:1.48'
 	compile 'org.antlr:stringtemplate:4.0'
-//	compile project(':DescriptionFile')
 	compile project(':NodeCapabilityFile')
 }
 

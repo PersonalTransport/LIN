@@ -1,10 +1,8 @@
 package com.ptransportation.LIN.compiler.generation.models;
 
 
-import com.ptransportation.LIN.models.PolymorphismModelAdaptor;
 import com.ptransportation.capability.nodeCapabilityFile.ArraySignalValue;
 import com.ptransportation.capability.nodeCapabilityFile.Frame;
-import com.ptransportation.capability.nodeCapabilityFile.Node;
 import com.ptransportation.capability.nodeCapabilityFile.Signal;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.misc.STNoSuchPropertyException;

@@ -1,4 +1,4 @@
-package com.ptransportation.LIN.models;
+package com.ptransportation.LIN.compiler.generation.models;
 
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.misc.ObjectModelAdaptor;

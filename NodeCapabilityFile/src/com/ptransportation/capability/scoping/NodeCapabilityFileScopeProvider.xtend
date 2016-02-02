@@ -7,6 +7,7 @@ import com.ptransportation.capability.nodeCapabilityFile.Encoding
 import com.ptransportation.capability.nodeCapabilityFile.Node
 import com.ptransportation.capability.nodeCapabilityFile.NodeCapabilityFilePackage
 import com.ptransportation.capability.nodeCapabilityFile.Signal
+import com.ptransportation.capability.nodeCapabilityFile.Slave
 import java.util.List
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
@@ -23,9 +24,9 @@ class NodeCapabilityFileScopeProvider extends AbstractNodeCapabilityFileScopePro
 
 
     override IScope getScope(EObject context, EReference reference) {
-        if(context instanceof Node &&
-          (reference == NodeCapabilityFilePackage.Literals.NODE__RESPONSE_ERROR ||
-           reference == NodeCapabilityFilePackage.Literals.NODE__FAULT_STATE_SIGNALS)) {
+        if(context instanceof Slave &&
+          (reference == NodeCapabilityFilePackage.Literals.SLAVE__RESPONSE_ERROR ||
+           reference == NodeCapabilityFilePackage.Literals.SLAVE__FAULT_STATE_SIGNALS)) {
             var List<Signal> candidates = EcoreUtil2.getAllContentsOfType(context, Signal)
             var IScope scope = Scopes.scopeFor(candidates)
             return scope

@@ -1,4 +1,4 @@
-package com.ptransportation.LIN.models;
+package com.ptransportation.LIN.compiler.generation.models;
 
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.misc.ObjectModelAdaptor;
@@ -11,6 +11,8 @@ public class PolymorphismModelAdaptor extends ObjectModelAdaptor {
         if(propertyName.startsWith("polymorphic_")) {
             String name = o.getClass().getSimpleName();
             name = Character.toLowerCase(name.charAt(0))+name.substring(1);
+            if(name.endsWith("Impl"))
+                name = name.substring(0,name.length() - 4);
             return  name + propertyName.replace("polymorphic_","");
         }
         return super.getProperty(self, o, property, propertyName);

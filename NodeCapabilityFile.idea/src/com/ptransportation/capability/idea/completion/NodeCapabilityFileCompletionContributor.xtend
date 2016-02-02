@@ -3,8 +3,8 @@
  */
 package com.ptransportation.capability.idea.completion
 
-import com.ptransportation.capability.idea.lang.NodeCapabilityFileLanguage
 import org.eclipse.xtext.idea.lang.AbstractXtextLanguage
+import com.ptransportation.capability.idea.lang.NodeCapabilityFileLanguage
 
 class NodeCapabilityFileCompletionContributor extends AbstractNodeCapabilityFileCompletionContributor {
 	new() {

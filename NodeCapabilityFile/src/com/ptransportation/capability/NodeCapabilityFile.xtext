@@ -3,9 +3,14 @@ grammar com.ptransportation.capability.NodeCapabilityFile with org.eclipse.xtext
 
 generate nodeCapabilityFile "http://www.ptransportation.com/capability/NodeCapabilityFile"
 
-Node:
+NodeCapabilityFile:
 	'node_capability_file' ';'
 	'LIN_language_version' '=' languageVersion=STRING ';'
+	node=Node;
+
+Node: Slave | Master;
+
+Slave:
 	'node' name=ID '{'
 		'general' '{'
 			'LIN_protocol_version' '=' protocolVersion=STRING ';'
@@ -32,12 +37,45 @@ Node:
 		'}'
 
 		'encoding' '{'
-		    (encodings+=Encoding)+
+		    (encodings+=Encoding)*
 		'}'
 
 		'status_management' '{'
 		    'response_error' '=' responseError=[Signal] ';'
 		    ('fault_state_signals' '=' faultStateSignals+=[Signal] (',' faultStateSignals+=[Signal])* ';')?
+		'}'
+
+		('free_text' '{'
+			freeText=STRING
+		'}')?
+	'}';
+
+Master:
+	'master' name=ID '{'
+		'general' '{'
+			'LIN_protocol_version' '=' protocolVersion=STRING ';'
+			'supplier' '=' supplier=Integer ';'
+			'function' '=' function=Integer ';'
+			'variant' '=' variant=Integer ';'
+			'bitrate' '=' bitrate=FixedBitrate ';'
+			'timebase' '=' timebase=Number 'ms' ';'
+			'jitter' '=' jitter=Number 'ms' ';'
+		'}'
+
+		'slaves' '{'
+			(slaves+=[Slave] ';')+
+		'}'
+
+		'frames' '{'
+			(frames+=Frame)*
+		'}'
+
+		'encoding' '{'
+			(encodings+=Encoding)*
+		'}'
+
+		'schedule_tables' '{'
+			(scheduleTables+=ScheduleTable)*
 		'}'
 
 		('free_text' '{'
@@ -112,6 +150,61 @@ BCDEncodedValue:
 ASCIIEncodedValue:
 	{ASCIIEncodedValue} 'ascii_value'
 ;
+
+ScheduleTable:
+	name=ID '{'
+		(entries+=ScheduleTableEntry)+
+	'}';
+
+ScheduleTableEntry:
+	(FrameEntry |
+	MasterReqEntry |
+	SlaveRespEntry |
+	AssignNADEntry |
+	ConditionalChangeNADEntry |
+	DataDumpEntry |
+	SaveConfigurationEntry |
+	AssignFrameIdRangeEntry |
+	FreeFormatEntry |
+	AssignFrameIdEntry) 'delay' frameTime=Number 'ms' ';'
+;
+
+FrameEntry: frame=[Frame];
+
+MasterReqEntry:
+	{MasterReqEntry} 'MasterReq';
+
+SlaveRespEntry:
+	{SlaveRespEntry} 'SlaveResp';
+
+AssignNADEntry:
+	'AssignNAD' '{' node=[Node] '}';
+
+ConditionalChangeNADEntry:
+	'ConditionalChangeNAD' '{'
+		NAD=Integer ',' id=Integer ',' byte_=Integer',' mask=Integer',' inv=Integer',' newNAD=Integer
+	'}';
+
+DataDumpEntry:
+	'DataDump' '{'
+		node=[Node] ',' d1=Integer',' d2=Integer',' d3=Integer',' d4=Integer',' d5=Integer
+	'}';
+
+SaveConfigurationEntry:
+	'SaveConfiguration' '{' node=[Node] '}';
+
+AssignFrameIdRangeEntry:
+	'AssignFrameIdRange' '{'
+		node=[Node]',' frameIndex=Integer (',' frame0_PID=Integer',' frame1_PID=Integer',' frame2_PID=Integer',' frame3_PID=Integer)?
+	'}';
+
+FreeFormatEntry:
+	'FreeFormat' '{'
+		d1=Integer',' d2=Integer',' d3=Integer',' d4=Integer',' d5=Integer',' d6=Integer',' d7=Integer',' d8=Integer
+	'}';
+
+AssignFrameIdEntry:
+	'AssignFrameId' '{' node=[Node] ',' frame=[Frame] '}';
 
 Number:
 	INT ('.' INT)?;

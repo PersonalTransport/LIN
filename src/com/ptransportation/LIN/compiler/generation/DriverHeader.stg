@@ -173,29 +173,41 @@ struct l_irqmask l_sys_irq_disable();
 **/
 void l_sys_irq_restore(struct l_irqmask previous);
 
-<node.frames:{frame|
-
-<testFlagPrototype(frame.name)>
-
-<clearFlagPrototype(frame.name)>
-
-<frame.signals:{signal|
-<signal:(signal.signalType_ReadPrototype)()>
-<if(frame.publishes)>
-
-<signal:(signal.signalType_WritePrototype)()>
-<endif>
-
-<testFlagPrototype(signal.name)>
-
-<clearFlagPrototype(signal.name)>
-}>
-}>
+<testFlagPrototypes(node)>
+<clearFlagPrototypes(node)>
+<readSignalPrototypes(node)>
+<writeSignalPrototypes(node)>
 
 #endif //<node.name>_<interface.name>_DRIVER_H
 >>
 
+testFlagPrototypes(node) ::= <<
+<node.frames:{frame|
+<testFlagPrototype(frame.name)>
+<frame.signals:{signal|
+<testFlagPrototype(signal.name)>}>}>
+>>
+
+clearFlagPrototypes(node) ::= <<
+<node.frames:{frame|
+<clearFlagPrototype(frame.name)>
+<frame.signals:{signal|<clearFlagPrototype(signal.name)>}>}>
+>>
+
+readSignalPrototypes(node) ::= <<
+<node.frames:{frame|
+<frame.signals:{signal|<signal:(signal.signalType_ReadPrototype)()>}>}>
+>>
+
+
+writeSignalPrototypes(node) ::= <<
+<node.frames:{frame|
+<if(frame.publishes)><frame.signals:{signal|<signal:(signal.signalType_WritePrototype)()>}><endif>}>
+>>
+
 scalarReadSignalComment(signal) ::= <<
+
+
 /**
 *
 <if(signal.description)>
@@ -222,6 +234,8 @@ l_u16 l_u16_rd_<signal.name>();
 >>
 
 bytesReadPrototype(signal) ::= <<
+
+
 /**
 *
 <if(signal.description)>
@@ -238,6 +252,8 @@ void l_bytes_rd_<signal.name>(l_u8 start,l_u8 count,l_u8* const data);
 
 
 scalarWriteSignalComment(signal) ::= <<
+
+
 /**
 *
 <if(signal.description)>
@@ -264,6 +280,8 @@ void l_u16_wr_<signal.name>(l_u16 v);
 >>
 
 bytesWritePrototype(signal) ::= <<
+
+
 /**
 *
 <if(signal.description)>
@@ -280,6 +298,8 @@ void l_bytes_wr_<signal.name>(l_u8 start,l_u8 count,const l_u8* const data);
 
 
 testFlagPrototype(name) ::= <<
+
+
 /**
 * @returns if the <name> has been received/transmitted by the driver.
 **/
@@ -287,6 +307,8 @@ l_bool l_flg_tst_<name>();
 >>
 
 clearFlagPrototype(name) ::= <<
+
+
 /**
 * Informs then driver that the application has consumed/published <name>'s new value.
 **/

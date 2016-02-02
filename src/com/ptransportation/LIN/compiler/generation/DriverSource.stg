@@ -119,7 +119,7 @@ struct l_schedule _L_NULL_SCHEDULE = {0,NULL};
 static struct l_schedule_entry _<schedule.name>_entries[] = {
     <schedule.entries:{entry|<entry:(entry.polymorphic_Initialization)()>};separator=",\n">
 \};
-struct l_schedule _<schedule.name> = {<schedule.entryCount>,_<schedule.name>_entries\};
+struct l_schedule _<schedule.name> = {<schedule.size>,_<schedule.name>_entries\};
 };separator="\n">
 static struct l_schedule_instance current = {L_NULL_SCHEDULE,0,0,NULL};
 static struct l_schedule_instance next    = {NULL,0,0,NULL};
@@ -242,15 +242,12 @@ static inline void setup_rx_<interface.name>(l_u8 PID) {
     else if(PID == 0x3D) {
         // TODO slave response
     }
-<node.frames:{frame|
-<if(frame.subscribes)>
+<node.subscribe_frames:{frame|
     else if(PID == frames[<frame.name>_INDEX].PID) {
         rx_buffer.state = L_DATA;
         rx_buffer.size = <frame.length>;
         rx_buffer.index = 0;
-    \}
-<endif>
-}>
+    \}};separator="\n">
     else {
         rx_buffer.state = L_IDLE;
         rx_buffer.size  = 0;
@@ -283,19 +280,17 @@ static inline void cleanup_rx_<interface.name>() {
     else if(rx_buffer.PID == 0x3D) {
         // TODO slave response
     }
-<node.frames:{frame|
-<if(frame.subscribes)>
+<node.subscribe_frames:{frame|
     else if(rx_buffer.PID == frames[<frame.name>_INDEX].PID) {
         if((l_u8)<if(frame.useClassicChecksum)>classic_checksum<else>enhanced_checksum<endif> == rx_buffer.checksum) {
-<frame.signals:{signal|
-            <signal.name>_flag = true;}>
+            // TODO set flags
             frames[<frame.name>_INDEX].data.scalar = rx_buffer.data.scalar;
         \}
         else {
-            return; // TODO what should happen on error.
+            // TODO what should happen on error.
+            // NEW should set response_error?
         \}
-    \}<endif>
-}>
+    \}};separator="\n">
     rx_buffer.PID = 0xFF;
     rx_buffer.size = 0;
     rx_buffer.index = 0;
@@ -358,7 +353,7 @@ void l_ifc_rx_<interface.name>() {
 }
 
 static inline void setup_tx_<interface.name>(l_u8 PID) {
-    l_bool use_classic_checksum = false;
+    l_u16 checksum = 0;
     tx_buffer.PID = PID;
 
     if(PID == 0xff) {
@@ -370,8 +365,7 @@ static inline void setup_tx_<interface.name>(l_u8 PID) {
     else if(PID == 0x3D) {
         // TODO slave response
     }
-<node.frames:{frame|
-<if(frame.publishes)>
+<node.publish_frames:{frame|
     else if(PID == frames[<frame.name>_INDEX].PID) {
     <if(node.master)>
         tx_buffer.state = L_BREAK_SYNC;
@@ -380,13 +374,9 @@ static inline void setup_tx_<interface.name>(l_u8 PID) {
     <endif>
         tx_buffer.size = <frame.length>;
         tx_buffer.index = 0;
-
-        use_classic_checksum = <node.useClassicChecksum>;
-
+        <if(!frame.useClassicChecksum)>checksum = PID;<endif>
         tx_buffer.data.scalar = frames[<frame.name>_INDEX].data.scalar;
-    \}
-<endif>
-}>
+    \}};separator="\n">
     else {
 <if(node.master)>
         tx_buffer.state = L_BREAK_SYNC;
@@ -397,7 +387,6 @@ static inline void setup_tx_<interface.name>(l_u8 PID) {
         tx_buffer.index = 0;
     }
 
-    l_u16 checksum = use_classic_checksum ? 0 : PID;
     for(l_u8 i=0;i\<tx_buffer.size;++i) {
         checksum += tx_buffer.data.array[i];
         if(checksum >= 256)
@@ -416,15 +405,10 @@ static inline void cleanup_tx_<interface.name>() {
     else if(tx_buffer.PID == 0x3D) {
         // TODO slave response
     }
-<node.frames:{frame|
-<if(frame.publishes && frame.signals)>
+<node.publish_frames:{frame|
     else if(tx_buffer.PID == frames[<frame.name>_INDEX].PID) {
-<frame.signals:{signal|
-
-        <signal.name>_flag = true;
-}>
-    \}<endif>
-}>
+        // TODO set flags
+    \}};separator="\n">
     tx_buffer.PID = 0xFF;
     tx_buffer.size = 0;
     tx_buffer.index = 0;
@@ -486,44 +470,60 @@ l_u16 l_ifc_read_status_<interface.name>() {
     // TODO implement!
 }
 
+<testFlagImplementations(node)>
+<clearFlagImplementations(node)>
+<readSignalImplementations(node)>
+<writeSignalImplementations(node)>
+>>
+
+testFlagImplementations(node) ::= <<
 <node.frames:{frame|
-
 <testFlagImplementation(frame.name)>
-
-<clearFlagImplementation(frame.name)>
-
 <frame.signals:{signal|
-<signal:(signal.signalType_ReadImplementation)()>
-<if(frame.publishes)>
+<testFlagImplementation(signal.name)>}>}>
+>>
 
-<signal:(signal.signalType_WriteImplementation)()>
-<endif>
+clearFlagImplementations(node) ::= <<
+<node.frames:{frame|
+<clearFlagImplementation(frame.name)>
+<frame.signals:{signal|<clearFlagImplementation(signal.name)>}>}>
+>>
 
-<testFlagImplementation(signal.name)>
-
-<clearFlagImplementation(signal.name)>
-}>
-}>
+readSignalImplementations(node) ::= <<
+<node.frames:{frame|
+<frame.signals:{signal|<signal:(signal.signalType_ReadImplementation)()>}>}>
 >>
 
 
+writeSignalImplementations(node) ::= <<
+<node.frames:{frame|
+<if(frame.publishes)><frame.signals:{signal|<signal:(signal.signalType_WriteImplementation)()>}><endif>}>
+>>
 
 boolReadImplementation(signal) ::= <<
+
+
 l_bool l_bool_rd_<signal.name>() {
     return (l_bool)((frames[<signal.frame.name>_INDEX].data.scalar >\> <signal.offset>) & <signal.signalMask.hex>ULL);
 }>>
 
 u8ReadImplementation(signal) ::= <<
+
+
 l_u8 l_u8_rd_<signal.name>() {
     return (l_u8)((frames[<signal.frame.name>_INDEX].data.scalar >\> <signal.offset>) & <signal.signalMask.hex>ULL);
 }>>
 
 u16ReadImplementation(signal) ::= <<
+
+
 l_u16 l_u16_rd_<signal.name>() {
     return (l_u16)((frames[<signal.frame.name>_INDEX].data.scalar >\> <signal.offset>) & <signal.signalMask.hex>ULL);
 }>>
 
 bytesReadImplementation(signal) ::= <<
+
+
 void l_bytes_rd_<signal.name>(l_u8 start,l_u8 count,l_u8* const data) {
     // TODO check for count being to large??
     for(l_u8 i=0;i\<count;++i)
@@ -533,24 +533,32 @@ void l_bytes_rd_<signal.name>(l_u8 start,l_u8 count,l_u8* const data) {
 
 
 boolWriteImplementation(signal) ::= <<
+
+
 void l_bool_wr_<signal.name>(l_bool v) {
     frames[<signal.frame.name>_INDEX].data.scalar &= ~(<signal.signalMask.hex>ULL \<\< <signal.offset>);
     frames[<signal.frame.name>_INDEX].data.scalar |= (((uint64_t)v & <signal.signalMask.hex>ULL) \<\< <signal.offset>);
 }>>
 
 u8WriteImplementation(signal) ::= <<
+
+
 void l_u8_wr_<signal.name>(l_u8 v) {
     frames[<signal.frame.name>_INDEX].data.scalar &= ~(<signal.signalMask.hex>ULL \<\< <signal.offset>);
     frames[<signal.frame.name>_INDEX].data.scalar |= (((uint64_t)v & <signal.signalMask.hex>ULL) \<\< <signal.offset>);
 }>>
 
 u16WriteImplementation(signal) ::= <<
+
+
 void l_u16_wr_<signal.name>(l_u16 v) {
     frames[<signal.frame.name>_INDEX].data.scalar &= ~(<signal.signalMask.hex>ULL \<\< <signal.offset>);
     frames[<signal.frame.name>_INDEX].data.scalar |= (((uint64_t)v & <signal.signalMask.hex>ULL) \<\< <signal.offset>);
 }>>
 
 bytesWriteImplementation(signal) ::= <<
+
+
 void l_bytes_wr_<signal.name>(l_u8 start,l_u8 count,const l_u8* const data) {
     frames[<signal.frame.name>_INDEX].data.scalar &= ~(<signal.signalMask.hex>ULL \<\< <signal.offset>);
     frames[<signal.frame.name>_INDEX].data.scalar |= (((uint64_t)v & <signal.signalMask.hex>ULL) \<\< <signal.offset>);
@@ -559,12 +567,16 @@ void l_bytes_wr_<signal.name>(l_u8 start,l_u8 count,const l_u8* const data) {
 
 
 testFlagImplementation(name) ::= <<
+
+
 l_bool l_flg_tst_<name>() {
     return <name>_flag;
 }
 >>
 
 clearFlagImplementation(name) ::= <<
+
+
 void l_flg_clr_<name>() {
     <name>_flag = false;
 }
@@ -627,5 +639,5 @@ slaveRespEntryInitialization(entry) ::= "{.type = SLAVE_RESP_ENTRY,.ticks = <ent
 
 //====================================================================================================================//
 // TODO implement this!
-unconditionalEntryInitialization(entry) ::= "{.type = UNCONDITIONAL_ENTRY,.ticks = <entry.ticks>,.data.frame = &frames[<entry.frame.name>_INDEX]}"
+frameEntryInitialization(entry) ::= "{.type = UNCONDITIONAL_ENTRY,.ticks = <entry.ticks>,.data.frame = &frames[<entry.frame.name>_INDEX]}"
 //====================================================================================================================//

@@ -5,8 +5,8 @@ package com.ptransportation.capability.idea
 
 import com.google.inject.Guice
 import com.ptransportation.capability.NodeCapabilityFileRuntimeModule
-import com.ptransportation.capability.NodeCapabilityFileStandaloneSetupGenerated
 import org.eclipse.xtext.util.Modules2
+import com.ptransportation.capability.NodeCapabilityFileStandaloneSetupGenerated
 
 class NodeCapabilityFileStandaloneSetupIdea extends NodeCapabilityFileStandaloneSetupGenerated {
 	override createInjector() {

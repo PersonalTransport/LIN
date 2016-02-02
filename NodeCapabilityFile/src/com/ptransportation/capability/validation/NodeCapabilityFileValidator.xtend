@@ -7,11 +7,15 @@ import com.ptransportation.capability.nodeCapabilityFile.ArraySignalValue
 import com.ptransportation.capability.nodeCapabilityFile.AutomaticBitrate
 import com.ptransportation.capability.nodeCapabilityFile.FixedBitrate
 import com.ptransportation.capability.nodeCapabilityFile.Frame
+import com.ptransportation.capability.nodeCapabilityFile.NadList
+import com.ptransportation.capability.nodeCapabilityFile.NadRange
 import com.ptransportation.capability.nodeCapabilityFile.Node
+import com.ptransportation.capability.nodeCapabilityFile.NodeCapabilityFile
 import com.ptransportation.capability.nodeCapabilityFile.NodeCapabilityFilePackage
 import com.ptransportation.capability.nodeCapabilityFile.ScalorSignalValue
 import com.ptransportation.capability.nodeCapabilityFile.SelectBitrate
 import com.ptransportation.capability.nodeCapabilityFile.Signal
+import com.ptransportation.capability.nodeCapabilityFile.Slave
 import java.util.HashSet
 import org.eclipse.xtext.validation.Check
 
@@ -38,15 +42,15 @@ class NodeCapabilityFileValidator extends AbstractNodeCapabilityFileValidator {
 	}
 	
 	@Check
-	def checkThatTheLanguageVersionIsAValidLINVersion(Node node) {
-		if(!LIN_VERSIONS.contains(node.languageVersion)) {
-			error('''Invalid LIN language version "«node.languageVersion»".''',node,
-				NodeCapabilityFilePackage.Literals.NODE__LANGUAGE_VERSION
+	def checkThatTheLanguageVersionIsAValidLINVersion(NodeCapabilityFile file) {
+		if(!LIN_VERSIONS.contains(file.languageVersion)) {
+			error('''Invalid LIN language version "«file.languageVersion»".''',file,
+				NodeCapabilityFilePackage.Literals.NODE_CAPABILITY_FILE__LANGUAGE_VERSION
 			);
 		}
-		if(!node.languageVersion.equals('2.2')) {
-			warning('''Currently only LIN language version "2.2" is supported.''',node,
-				NodeCapabilityFilePackage.Literals.NODE__LANGUAGE_VERSION
+		if(!file.languageVersion.equals('2.2')) {
+			warning('''Currently only LIN language version "2.2" is supported.''',file,
+				NodeCapabilityFilePackage.Literals.NODE_CAPABILITY_FILE__LANGUAGE_VERSION
 			);
 		}
 	}
@@ -82,74 +86,74 @@ class NodeCapabilityFileValidator extends AbstractNodeCapabilityFileValidator {
 	}
 	
 	@Check
-	def checkThatDiagnosticClassIsOneTwoOrThree(Node node) {
-		val v = Integer.decode(node.diagnosticClass);
+	def checkThatDiagnosticClassIsOneTwoOrThree(Slave slave) {
+		val v = Integer.decode(slave.diagnosticClass);
 		if(v != 1 && v != 2 && v != 3) {
-			error('''Invalid diagnostic class "«node.diagnosticClass»". The the diagnostic class must be 1, 2, or 3.''',node,
-				NodeCapabilityFilePackage.Literals.NODE__DIAGNOSTIC_CLASS
+			error('''Invalid diagnostic class "«slave.diagnosticClass»". The the diagnostic class must be 1, 2, or 3.''',slave,
+				NodeCapabilityFilePackage.Literals.SLAVE__DIAGNOSTIC_CLASS
 			);
 		}
 	}
 	
 	
 	@Check
-	def warnAboutP2MinNotBeingUsed(Node node) {
+	def warnAboutP2MinNotBeingUsed(Slave node) {
 		if(node.p2Min == null)
 			return;
 		warning('''The current implementation does not take this value in to account.''',node,
-			NodeCapabilityFilePackage.Literals.NODE__P2_MIN
+			NodeCapabilityFilePackage.Literals.SLAVE__P2_MIN
 		)
 	}
 	
 	@Check
-	def warnAboutSTMinNotBeingUsed(Node node) {
+	def warnAboutSTMinNotBeingUsed(Slave node) {
 		if(node.stMin == null)
 			return;
 		warning('''The current implementation does not take this value in to account.''',node,
-			NodeCapabilityFilePackage.Literals.NODE__ST_MIN
+			NodeCapabilityFilePackage.Literals.SLAVE__ST_MIN
 		)
 	}
 	
 	@Check
-	def warnAboutNAsTimeoutMinNotBeingUsed(Node node) {
+	def warnAboutNAsTimeoutMinNotBeingUsed(Slave node) {
 		if(node.NAsTimeout == null)
 			return;
 		warning('''The current implementation does not take this value in to account.''',node,
-			NodeCapabilityFilePackage.Literals.NODE__NAS_TIMEOUT
+			NodeCapabilityFilePackage.Literals.SLAVE__NAS_TIMEOUT
 		)
 	}
 	
 	@Check
-	def warnAboutNCrTimeoutMinNotBeingUsed(Node node) {
+	def warnAboutNCrTimeoutMinNotBeingUsed(Slave node) {
 		if(node.NCrTimeout == null)
 			return;
 		warning('''The current implementation does not take this value in to account.''',node,
-			NodeCapabilityFilePackage.Literals.NODE__NCR_TIMEOUT
+			NodeCapabilityFilePackage.Literals.SLAVE__NCR_TIMEOUT
 		)
 	}
 	
 	@Check
-	def checkThatTheSupportedServiceIdentifiersAreInRange(Node node) {
+	def checkThatTheSupportedServiceIdentifiersAreInRange(Slave node) {
 		if(node.supportedSIDS == null)
 			return;
 		node.supportedSIDS.forEach[
 			val v = Integer.decode(it);
 			if(v < 0 || v > 0xFF) {
 				error('''Invalid service ID "«it»". The service ID must be in the range [0x00,0xFF].''',node,
-				NodeCapabilityFilePackage.Literals.NODE__SUPPORTED_SIDS,
+				NodeCapabilityFilePackage.Literals.SLAVE__SUPPORTED_SIDS,
 				node.supportedSIDS.indexOf(it));
 			}
 		]
 	}
 	
 	@Check
-	def checkThatTheMaxMessageLengthIsInRange(Node node) {
+	def checkThatTheMaxMessageLengthIsInRange(Slave node) {
 		if(node.maxMessageLength == null)
 			return;
 		val v = Integer.decode(node.maxMessageLength);
 		if(v < 0 || v > 0xFFFF) {
 			error('''Invalid max message length "«node.maxMessageLength»". The message lenght must be in the range [0x0000,0xFFFF].''',node,
-				NodeCapabilityFilePackage.Literals.NODE__MAX_MESSAGE_LENGTH
+				NodeCapabilityFilePackage.Literals.SLAVE__MAX_MESSAGE_LENGTH
 			);
 		}
 	}
@@ -311,12 +315,12 @@ class NodeCapabilityFileValidator extends AbstractNodeCapabilityFileValidator {
 	}
 	
 	@Check
-	def checkThatThereAreNoDuplicatesInFaultStateSignals(Node node) {
+	def checkThatThereAreNoDuplicatesInFaultStateSignals(Slave node) {
 		val seen = new HashSet<Signal>();
 		node.faultStateSignals.forEach [
 			if(seen.contains(it)) {
 				error('''Signal '«it.name»' is already in fault state signals.''', node,
-					NodeCapabilityFilePackage.Literals.NODE__FAULT_STATE_SIGNALS,
+					NodeCapabilityFilePackage.Literals.SLAVE__FAULT_STATE_SIGNALS,
 					node.faultStateSignals.lastIndexOf(it))
 			}
 			seen.add(it);
@@ -361,8 +365,51 @@ class NodeCapabilityFileValidator extends AbstractNodeCapabilityFileValidator {
 			seen.add(it.name);
 		];
 	}
-	
-	// TODO add validations for the NAD sets.
+
+	@Check
+	def checkThatAllNadsInListAreValid(NadList list) {
+		list.values.forEach[
+			val v = Integer.decode(it);
+			if(v < 0x01 || v > 0x7D) {
+				error('''Invalid slave NAD address '«it»'. Slave NAD addresses must be in the range [0x01,0x7D]''',list,
+				NodeCapabilityFilePackage.Literals.NAD_LIST__VALUES,
+				list.values.indexOf(it));
+			}
+		]
+	}
+
+	@Check
+	def checkThatMinNADInNadRangeIsValid(NadRange range) {
+		val min = Integer.decode(range.minValue);
+		if(min < 0x01 || min > 0x7D) {
+			error('''Invalid minimum slave NAD address '«range.minValue»'. Slave NAD addresses must be in the range [0x01,0x7D]''',range,
+			NodeCapabilityFilePackage.Literals.NAD_RANGE__MIN_VALUE);
+		}
+	}
+
+	@Check
+	def checkThatMaxNADInNadRangeIsValid(NadRange range) {
+		val max = Integer.decode(range.maxValue);
+		if(max < 0x01 || max > 0x7D) {
+			error('''Invalid maximum slave NAD address '«range.maxValue»'. Slave NAD addresses must be in the range [0x01,0x7D]''',range,
+			NodeCapabilityFilePackage.Literals.NAD_RANGE__MAX_VALUE);
+		}
+	}
+
+	@Check
+	def warnThatOnlyTheFirstNADInANadListWillBeUsedIfMoreThanOneIsListed(NadList list) {
+		if(list.values.size != 1) {
+			warning('''The current implementation does not support instance generation. The first value in the nad list will be used.''',list,
+			NodeCapabilityFilePackage.Literals.NAD_LIST__VALUES);
+		}
+	}
+
+	@Check
+	def warnThatOnlyTheMinNADInANadRangeWillBeUsed(NadRange range) {
+		warning('''The current implementation does not support instance generation. The minimum value in the nad range will be used.''',range,
+		NodeCapabilityFilePackage.Literals.NAD_RANGE__MAX_VALUE);
+	}
+
 	// TODO add validations that check that subscribed frames,signals,and encodings match published frames,signals,and encodings.
 }
 	
