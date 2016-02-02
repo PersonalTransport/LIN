@@ -9,16 +9,14 @@ buildscript {
 }
 
 apply plugin: 'java'
+apply plugin: 'application'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
-
 repositories {
 	jcenter()
 }
 
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
-
+version = 'git describe --tags --always HEAD'.execute().text.trim()
 sourceSets {
     main {
         java {
@@ -27,10 +25,21 @@ sourceSets {
     }
 }
 
+compileJava {
+	targetCompatibility = '1.8'
+	sourceCompatibility = '1.8'
+}
+
 dependencies {
     compile 'com.beust:jcommander:1.48'
 	compile 'org.antlr:stringtemplate:4.0'
 	compile project(':NodeCapabilityFile')
+}
+
+distributions {
+	main {
+		mainClassName  = 'com.ptransportation.LIN.compiler.Compiler'
+	}
 }
 
 subprojects {
@@ -46,8 +55,8 @@ subprojects {
 	apply plugin: 'eclipse'
 	apply plugin: 'idea'
 
-	group = 'DescriptionFile'
-	version = '1.0.0-SNAPSHOT'
+	group = 'NodeCapabilityFile'
+    version = this.version
 
 	sourceCompatibility = '1.8'
 	targetCompatibility = '1.8'
