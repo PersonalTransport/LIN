@@ -158,22 +158,11 @@ class NodeCapabilityFileValidator extends AbstractNodeCapabilityFileValidator {
 		}
 	}
 	
-	
 	@Check
-	def checkThatFramesThatHaveALengthOfOneDoNotHaveSignals(Frame frame) {
-		if(frame.signals == null)
-			return;
-		if(Integer.decode(frame.length) == 0 && frame.signals.size != 0) {
-			error('''Frames that have a length of '0' can not have signals.''',frame,
-				NodeCapabilityFilePackage.Literals.FRAME__LENGTH); // TODO is the the best place for this error to show up?
-		}
-	}
-	
-	@Check
-	def checkThatTheLengthOfTheFrameIsZeroToEight(Frame frame) {
+	def checkThatTheLengthOfTheFrameIsOneToEight(Frame frame) {
 		val v = Integer.decode(frame.length);
-		if(v < 0 || v > 8) {
-			error('''Invalid frame length"«frame.length»". The frame length must in the range [0,8].''',frame,
+		if(v < 1 || v > 8) {
+			error('''Invalid frame length"«frame.length»". The frame length must in the range [1,8].''',frame,
 				NodeCapabilityFilePackage.Literals.FRAME__LENGTH
 			);
 		}
