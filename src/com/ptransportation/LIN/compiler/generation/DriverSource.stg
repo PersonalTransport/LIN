@@ -175,6 +175,12 @@ l_u8 l_sch_tick_<interface.name>() {
     struct l_schedule_entry *entry = current.entry;
     switch(entry->type) {
         case UNCONDITIONAL_ENTRY: {
+            if(rx_buffer.state == L_IDLE && rx_buffer.size != 0)
+                cleanup_rx_<interface.name>();
+
+            if(tx_buffer.state == L_IDLE && tx_buffer.size != 0)
+                cleanup_tx_<interface.name>();
+
             struct l_frame *frame = entry->data.frame;
             if(current.tick == 0) {
                 setup_tx_<interface.name>(frame->PID);
@@ -182,17 +188,16 @@ l_u8 l_sch_tick_<interface.name>() {
                 l_ifc_tx_<interface.name>();
             }
 
-            if(current.tick >= entry->ticks-1) {
-                cleanup_tx_<interface.name>();
-                cleanup_rx_<interface.name>();
-                current.tick = 0;
-                current.index = (current.index \< current.schedule->size-1) ? current.index+1 : 0;
-                current.entry = &current.schedule->entries[current.index];
-                return current.index+1;
-            }
             break;
         }
         // TODO add the rest!
+    }
+
+    if(current.tick >= entry->ticks-1) {
+        current.tick = 0;
+        current.index = (current.index \< current.schedule->size-1) ? current.index+1 : 0;
+        current.entry = &current.schedule->entries[current.index];
+        return current.index+1;
     }
 
     current.tick++;
@@ -283,8 +288,9 @@ static inline void cleanup_rx_<interface.name>() {
 <node.subscribe_frames:{frame|
     else if(rx_buffer.PID == frames[<frame.name>_INDEX].PID) {
         if((l_u8)<if(frame.useClassicChecksum)>classic_checksum<else>enhanced_checksum<endif> == rx_buffer.checksum) {
-            // TODO set flags
             frames[<frame.name>_INDEX].data.scalar = rx_buffer.data.scalar;
+            <frame.name>_flag = true;
+            <frame.signals:{signal|<signal.name>_flag = true;};separator="\n">
         \}
         else {
             // TODO what should happen on error.
@@ -310,12 +316,10 @@ void l_ifc_rx_<interface.name>() {
             }
             case L_PID: {
                 rx_buffer.state = L_DATA;
-                rx_buffer.index = 0; // TODO is this needed!
-                <(interface.rxData)("rx_buffer.PID")>
                 <if(node.slave)>
+                <(interface.rxData)("rx_buffer.PID")>
                 setup_tx_<interface.name>(rx_buffer.PID);
                 setup_rx_<interface.name>(rx_buffer.PID);
-                // TODO wait??
                 l_ifc_tx_<interface.name>();
                 <endif>
                 break;
@@ -338,12 +342,11 @@ void l_ifc_rx_<interface.name>() {
                     <if(node.slave)>
                     cleanup_rx_<interface.name>();
                     <endif>
-                    rx_buffer.size  = 0;
-                    rx_buffer.index = 0;
                 }
                 break;
             }
             case L_IDLE: {
+                // TODO only the slave should eat data that this node does not care about, right?
                 <(interface.rxData)("l_u8 data")> // Just eat the data that this node does not care about!
                 (void)data; // Shut the compiler up about data not being used.
                 break;
@@ -407,7 +410,8 @@ static inline void cleanup_tx_<interface.name>() {
     }
 <node.publish_frames:{frame|
     else if(tx_buffer.PID == frames[<frame.name>_INDEX].PID) {
-        // TODO set flags
+        <frame.name>_flag = true;
+        <frame.signals:{signal|<signal.name>_flag = true;};separator="\n">
     \}};separator="\n">
     tx_buffer.PID = 0xFF;
     tx_buffer.size = 0;

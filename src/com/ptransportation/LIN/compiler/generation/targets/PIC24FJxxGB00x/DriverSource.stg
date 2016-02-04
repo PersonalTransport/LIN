@@ -45,6 +45,7 @@ void __attribute__((interrupt,no_auto_psv)) _IC1Interrupt() {
 >>
 
 initializationUART1(node) ::= <<
+
 //========================================================================//
 AD1PCFGLbits.PCFG4 = 1; // Set RB2 to digital
 AD1PCFGLbits.PCFG5 = 1; // Set RB3 to digital
@@ -88,8 +89,12 @@ U1MODEbits.STSEL = 0; // One stop bit
 U1STAbits.UTXISEL1 = 1; // Interrupt when the last character is shifted out of the Transmit Shift Register; all transmit operations are completed. Part(1/2)
 U1STAbits.UTXISEL0 = 0; // Part (2/2)
 
+U1STAbits.URXISEL1 = 0;
+U1STAbits.URXISEL0 = 0;
+
 // TODO URXISEL??
 
+l_sys_irq_disable();
 <if(node.master)>
 U1MODEbits.UARTEN = 1; // Enable the UART 1 module.
 <elseif(node.slave)>
