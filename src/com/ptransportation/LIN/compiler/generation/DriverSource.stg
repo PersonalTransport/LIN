@@ -12,8 +12,7 @@ driverSource(node,target,interface) ::= <<
 enum l_buffer_state {
     L_BREAK_SYNC,
     L_PID,
-    L_DATA,
-    L_CHECKSUM,
+    L_DATA_CHECKSUM,
     L_IDLE
 };
 
@@ -249,7 +248,7 @@ static inline void setup_rx_<interface.name>(l_u8 PID) {
     }
 <node.subscribe_frames:{frame|
     else if(PID == frames[<frame.name>_INDEX].PID) {
-        rx_buffer.state = L_DATA;
+        rx_buffer.state = L_DATA_CHECKSUM;
         rx_buffer.size = <frame.length>;
         rx_buffer.index = 0;
     \}};separator="\n">
@@ -315,7 +314,7 @@ void l_ifc_rx_<interface.name>() {
                 break;
             }
             case L_PID: {
-                rx_buffer.state = L_DATA;
+                rx_buffer.state = L_DATA_CHECKSUM;
                 <if(node.slave)>
                 <(interface.rxData)("rx_buffer.PID")>
                 setup_tx_<interface.name>(rx_buffer.PID);
@@ -324,24 +323,19 @@ void l_ifc_rx_<interface.name>() {
                 <endif>
                 break;
             }
-            case L_DATA: {
+            case L_DATA_CHECKSUM: {
                 if(rx_buffer.index \< rx_buffer.size) {
                     <(interface.rxData)("rx_buffer.data.array[rx_buffer.index]")>
                     rx_buffer.index++;
-                    break;
                 }
                 else {
-                    rx_buffer.state = L_CHECKSUM;
-                }
-                // careful purposefully falling through to L_CHECKSUM!
-            }
-            case L_CHECKSUM: {
-                rx_buffer.state = L_IDLE;
-                if(rx_buffer.size > 0) {
-                    <(interface.rxData)("rx_buffer.checksum")>
-                    <if(node.slave)>
-                    cleanup_rx_<interface.name>();
-                    <endif>
+                    rx_buffer.state = L_IDLE;
+                    if(rx_buffer.size > 0) {
+                        <(interface.rxData)("rx_buffer.checksum")>
+                        <if(node.slave)>
+                        cleanup_rx_<interface.name>();
+                        <endif>
+                    }
                 }
                 break;
             }
@@ -373,7 +367,7 @@ static inline void setup_tx_<interface.name>(l_u8 PID) {
     <if(node.master)>
         tx_buffer.state = L_BREAK_SYNC;
     <else>
-        tx_buffer.state = L_DATA;
+        tx_buffer.state = L_DATA_CHECKSUM;
     <endif>
         tx_buffer.size = <frame.length>;
         tx_buffer.index = 0;
@@ -430,33 +424,28 @@ void l_ifc_tx_<interface.name>() {
             break;
         }
         case L_PID: {
-            tx_buffer.state = L_DATA;
+            tx_buffer.state = L_DATA_CHECKSUM;
             tx_buffer.index = 0;
             <if(node.master)>
             <(interface.txData)("tx_buffer.PID")>  // Send the PID.
             <endif>
             break;
         }
-        case L_DATA: {
+        case L_DATA_CHECKSUM: {
             if(tx_buffer.index \< tx_buffer.size) {
                 <(interface.txData)("tx_buffer.data.array[tx_buffer.index]")> // Send the data.
                 tx_buffer.index++;
-                break;
             }
             else {
-                tx_buffer.state = L_CHECKSUM;
-            }
-            // careful purposefully falling through to L_CHECKSUM!
-        }
-        case L_CHECKSUM: {
-            tx_buffer.state = L_IDLE;
-            if(tx_buffer.size > 0) {
-                tx_buffer.size  = 0;
-                tx_buffer.index = 0;
-                <(interface.txData)("tx_buffer.checksum")> // Send the checksum.
-                <if(node.slave)>
-                cleanup_tx_<interface.name>();
-                <endif>
+                tx_buffer.state = L_IDLE;
+                if(tx_buffer.size > 0) {
+                    tx_buffer.size  = 0;
+                    tx_buffer.index = 0;
+                    <(interface.txData)("tx_buffer.checksum")> // Send the checksum.
+                    <if(node.slave)>
+                    cleanup_tx_<interface.name>();
+                    <endif>
+                }
             }
             break;
         }
