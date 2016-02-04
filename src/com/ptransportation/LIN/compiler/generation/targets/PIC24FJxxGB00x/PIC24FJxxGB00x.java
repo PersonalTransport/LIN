@@ -36,4 +36,9 @@ public class PIC24FJxxGB00x extends Target {
     public String getIncludes() {
         return "includes";
     }
+
+    @Override
+    public String getGlobals() {
+        return "pic24FJxxGB00xGlobals";
+    }
 }

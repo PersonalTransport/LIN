@@ -9,6 +9,8 @@ includes() ::= <<
 #endif
 >>
 
+pic24FJxxGB00xGlobals(node) ::= ""
+
 systemInitialization() ::= <<
 // TODO implement!
 >>
@@ -83,11 +85,6 @@ U1MODEbits.BRGH  = 1; // High Baud Rate
 U1MODEbits.PDSEL = 0; // 8-bit data, no parity
 U1MODEbits.STSEL = 0; // One stop bit
 
-IEC0bits.U1RXIE = 1; // RX interrupt enabled
-IEC0bits.U1TXIE = 1; // TX interrupt enabled
-IPC2bits.U1RXIP = 4; // Level 4 interrupt priority for RX
-IPC3bits.U1TXIP = 4; // Level 4 interrupt priority for TX
-
 U1STAbits.UTXISEL1 = 1; // Interrupt when the last character is shifted out of the Transmit Shift Register; all transmit operations are completed. Part(1/2)
 U1STAbits.UTXISEL0 = 0; // Part (2/2)
 
@@ -98,13 +95,11 @@ U1MODEbits.UARTEN = 1; // Enable the UART 1 module.
 <elseif(node.slave)>
 U1MODEbits.UARTEN = 0; // Disable the UART 1 module until first break.
 <endif>
-
-IFS0bits.U1TXIF = 0; // Clear the TX interrupt flag
-IFS0bits.U1RXIF = 0; // Clear the RX interrupt flag
-
 //========================================================================//
 <if(node.slave)>
 
+//========================================================================//
+// Timer 1 for break detection.
 T1CONbits.TON = 1;
 T1CONbits.TCKPS = 0;
 T1CONbits.TCS = 0;
@@ -121,13 +116,11 @@ IC1CON1bits.ICM    = 0x02;
 
 IC1CON2bits.IC32 = 0x00;
 IC1CON2bits.ICTRIG = 0x01;
-IC1CON2bits.SYNCSEL = 0xb;
+IC1CON2bits.SYNCSEL = 0xB;
 
 IC1TMR = 0;
-IEC0bits.IC1IE = 1;
-IPC0bits.IC1IP = 7;
+//========================================================================//
 <endif>
-// TODO use l_sys_irq_restore to enable the interrupts.
 >>
 
 rxDataAvailableUART1() ::= "U1STAbits.URXDA"

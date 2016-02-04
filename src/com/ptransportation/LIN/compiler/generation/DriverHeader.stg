@@ -89,8 +89,8 @@ void l_sch_set_<interface.name>(struct l_schedule *schedule, l_u8 entry);
 * @returns true if failed false otherwise.
 **/
 l_bool l_ifc_init_<interface.name>();
-
 <if(node.master)>
+
 /**
 *
 * Will schedule a goto sleep command when the
@@ -103,6 +103,7 @@ l_bool l_ifc_init_<interface.name>();
 **/
 void l_ifc_goto_sleep_<interface.name>();
 <endif>
+<if(node.sendsWakeUpSignal)>
 
 /**
 *
@@ -115,6 +116,7 @@ void l_ifc_goto_sleep_<interface.name>();
 *       2.6.2 of the LIN spec.
 **/
 void l_ifc_wake_up_<interface.name>();
+<endif>
 
 /**
 *

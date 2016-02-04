@@ -54,10 +54,6 @@ struct l_ioctl_op {
     // TODO add things here?
 };
 
-struct l_irqmask {
-    // TODO add things here?
-};
-
 <if(node.master)>
 enum l_schedule_entry_type {
     ASSIGN_FRAME_ID_ENTRY,//??
@@ -132,6 +128,7 @@ static l_u8 variant_id = <node.variant>;
 <endif>
 
 <node.frames:{frame|
+
 static l_bool <frame.name>_flag = false;
 <frame.signals:{signal|
 
@@ -141,7 +138,6 @@ static void setup_tx_<interface.name>(l_u8 PID);
 static void setup_rx_<interface.name>(l_u8 PID);
 static void cleanup_tx_<interface.name>();
 static void cleanup_rx_<interface.name>();
-
 <if(target.globals)><(target.globals)(node)><endif>
 <if(interface.globals)><(interface.globals)(node)><endif>
 
@@ -162,9 +158,11 @@ l_bool l_sys_init() {
 
     return false;
 }
-
 <if(node.master)>
+
 l_u8 l_sch_tick_<interface.name>() {
+    // TODO the spec hints at using l_sys_irq_disable
+    // but I do not see a need for it; maybe around setup/cleanup.
     if(next.schedule != NULL && current.tick == 0) {
         current = next;
         next.schedule = NULL;
@@ -215,16 +213,18 @@ l_bool l_ifc_init_<interface.name>() {
     <(interface.initialization)(node)>
     return false;
 }
-
 <if(node.master)>
+
 void l_ifc_goto_sleep_<interface.name>() {
     // TODO implement!
 }
 <endif>
+<if(node.sendsWakeUpSignal)>
 
 void l_ifc_wake_up_<interface.name>()  {
     // TODO implement!
 }
+<endif>
 
 l_u16 l_ifc_ioctl_<interface.name>(struct l_ioctl_op op, void* pv) {
     // TODO implement!

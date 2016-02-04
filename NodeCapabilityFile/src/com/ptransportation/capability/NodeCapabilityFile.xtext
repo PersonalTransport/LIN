@@ -18,7 +18,7 @@ Slave:
 			'function' '=' function=Integer ';'
 			'variant' '=' variant=Integer ';'
 			'bitrate' '=' bitrate=Bitrate ';'
-			'sends_wake_up_signal' '=' sendsWakeUpSignal=('"yes"' | '"no"') ';'
+			'sends_wake_up_signal' '=' (sendsWakeUpSignal='"yes"' | '"no"') ';'
 		'}'
 
 		'diagnostic' '{'
