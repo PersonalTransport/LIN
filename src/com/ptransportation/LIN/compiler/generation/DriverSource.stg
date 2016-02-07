@@ -37,7 +37,7 @@ union l_frame_data {
         l_u8 D3;
         l_u8 D4;
         l_u8 D5;
-    } PUD;
+    } PUD; // TODO is this the right order?
 };
 
 struct l_frame {
@@ -263,14 +263,21 @@ static inline void setup_rx_<interface.name>(l_u8 PID) {
     rx_buffer.PID = PID;
 
     if(PID == 0xff) {
-        // TODO special
+        // TODO special??
     }
-    else if(PID == 0x3C) {
-        // TODO master request
+<if(node.slave)>
+    else if(PID == 0x3C) { // Master request frame
+        rx_buffer.state = L_DATA_CHECKSUM;
+        rx_buffer.size = 8;
+        rx_buffer.index = 0;
     }
-    else if(PID == 0x3D) {
-        // TODO slave response
+<else>
+    else if(PID == 0x3D) { // Slave response frame
+        rx_buffer.state = L_DATA_CHECKSUM;
+        rx_buffer.size = 8;
+        rx_buffer.index = 0;
     }
+<endif>
 <node.subscribe_frames:{frame|
     else if(PID == frames[<frame.name>_INDEX].PID) {
         rx_buffer.state = L_DATA_CHECKSUM;
@@ -301,14 +308,70 @@ static inline void cleanup_rx_<interface.name>() {
     enhanced_checksum = ~enhanced_checksum;
 
     if(rx_buffer.PID == 0xff) {
-        // TODO special
+        // TODO special??
     }
-    else if(rx_buffer.PID == 0x3C) {
-        // TODO master request
+<if(node.slave)>
+    else if(rx_buffer.PID == 0x3C) { // Master request frame
+        if((l_u8)classic_checksum == rx_buffer.checksum) {
+            switch((enum service_identifier)rx_buffer.data.PUD.SID) {
+                case ASSIGN_FRAME_IDENTIFIER_RANGE: { // Assign frame identifier range (Mandatory)
+                    if(rx_buffer.data.PUD.NAD == NAD) {
+                        <interface.name>_status.reg.PID = rx_buffer.PID;
+                        <interface.name>_status.reg.overrun = <interface.name>_status.reg.has_frame;
+                        <interface.name>_status.reg.has_frame = true;
+
+                        <interface.name>_status.reg.successful_transfer = true;
+                        master_request_frame.data.scalar = rx_buffer.data.scalar; // TODO not really needed!
+
+                        l_u8 start_index = rx_buffer.data.PUD.D1;
+                        l_u8 *PIDs = &rx_buffer.data.PUD.D2;
+                        for(l_u8 i=0;i\<4;++i) {
+                            if(PIDs[i] != 0xFF)
+                                frames[i+start_index].PID = PIDs[i];
+                        }
+
+                        slave_response_frame.data.PUD.NAD = NAD;
+                        slave_response_frame.data.PUD.PCI = 0x01;
+                        slave_response_frame.data.PUD.SID = 0xF7;
+                        slave_response_frame.data.PUD.D1 = 0xFF;
+                        slave_response_frame.data.PUD.D2 = 0xFF;
+                        slave_response_frame.data.PUD.D3 = 0xFF;
+                        slave_response_frame.data.PUD.D4 = 0xFF;
+                        slave_response_frame.data.PUD.D5 = 0xFF;
+                    }
+                    break;
+                }
+            }
+        }
+        else {
+            <interface.name>_status.reg.error_in_response = true;
+            <interface.name>_status.reg.successful_transfer = false;
+            // TODO should set response_error signal
+        }
     }
-    else if(rx_buffer.PID == 0x3D) {
-        // TODO slave response
+<else>
+    else if(rx_buffer.PID == 0x3D) { // Slave response frame
+        <interface.name>_status.reg.PID = rx_buffer.PID;
+        <interface.name>_status.reg.overrun = <interface.name>_status.reg.has_frame;
+        <interface.name>_status.reg.has_frame = true;
+        if((l_u8)classic_checksum == rx_buffer.checksum) {
+            <interface.name>_status.reg.successful_transfer = true;
+            slave_response_frame.data.scalar = rx_buffer.data.scalar; // TODO not really needed!
+
+            if(tx_buffer.data.PUD.SID >= (ASSIGN_NAD + 0x40) && tx_buffer.data.PUD.SID \<= (ASSIGN_FRAME_IDENTIFIER_RANGE + 0x40)) { // Configuration
+                // TODO check PCI.
+                // TODO add checks that the NAD and RSID match the master request frame.
+                <interface.name>_configuration_status = LD_SERVICE_IDLE;
+            }
+        }
+        else {
+            <interface.name>_status.reg.error_in_response = true;
+            <interface.name>_status.reg.successful_transfer = false;
+            // TODO should set response_error signal
+            // TODO <interface.name>_configuration_status = LD_SERVICE_ERROR?
+        }
     }
+<endif>
 <node.subscribe_frames:{frame|
     else if(rx_buffer.PID == frames[<frame.name>_INDEX].PID) {
         <interface.name>_status.reg.PID = rx_buffer.PID;
@@ -386,12 +449,21 @@ static inline void setup_tx_<interface.name>(l_u8 PID) {
     if(PID == 0xff) {
         // TODO special
     }
-    else if(PID == 0x3C) {
-        // TODO master request
+<if(node.master)>
+    else if(PID == 0x3C) { // Master request frame
+        tx_buffer.state = L_BREAK_SYNC;
+        tx_buffer.size = 8;
+        tx_buffer.index = 0;
+        tx_buffer.data.scalar = master_request_frame.data.scalar;
     }
-    else if(PID == 0x3D) {
-        // TODO slave response
+<else>
+    else if(PID == 0x3D) { // Slave response frame
+        tx_buffer.state = L_DATA_CHECKSUM;
+        tx_buffer.size = 8;
+        tx_buffer.index = 0;
+        tx_buffer.data.scalar = slave_response_frame.data.scalar;
     }
+<endif>
 <node.publish_frames:{frame|
     else if(PID == frames[<frame.name>_INDEX].PID) {
     <if(node.master)>
@@ -423,21 +495,27 @@ static inline void setup_tx_<interface.name>(l_u8 PID) {
 }
 
 static inline void cleanup_tx_<interface.name>() {
+    <interface.name>_status.reg.PID = tx_buffer.PID;
+    <interface.name>_status.reg.successful_transfer = true;
+    <interface.name>_status.reg.overrun = <interface.name>_status.reg.has_frame;
+    <interface.name>_status.reg.has_frame = true;
+
     if(tx_buffer.PID == 0xff) {
         // TODO special
     }
+<if(node.master)>
     else if(tx_buffer.PID == 0x3C) {
         // TODO master request
+        if(tx_buffer.data.PUD.SID >= ASSIGN_NAD && tx_buffer.data.PUD.SID \<= ASSIGN_FRAME_IDENTIFIER_RANGE) { // Configuration
+            <interface.name>_configuration_status = LD_REQUEST_FINISHED;
+        }
     }
+<endif>
     else if(tx_buffer.PID == 0x3D) {
         // TODO slave response
     }
 <node.publish_frames:{frame|
     else if(tx_buffer.PID == frames[<frame.name>_INDEX].PID) {
-        <interface.name>_status.reg.PID = tx_buffer.PID;
-        <interface.name>_status.reg.successful_transfer = true;
-        <interface.name>_status.reg.overrun = <interface.name>_status.reg.has_frame;
-        <interface.name>_status.reg.has_frame = true;
         <frame.name>_flag = true;
         <frame.signals:{signal|<signal.name>_flag = true;};separator="\n">
     \}};separator="\n">
@@ -501,7 +579,7 @@ l_u16 l_ifc_read_status_<interface.name>() {
 <if(node.master)>
 
 l_u8 ld_is_ready_<interface.name>() {
-    // TODO implement!
+    return <interface.name>_configuration_status;
 }
 
 void ld_check_response_<interface.name>(l_u8* const RSID,l_u8* const error_code) {
