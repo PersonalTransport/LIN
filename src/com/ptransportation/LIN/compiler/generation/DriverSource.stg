@@ -200,6 +200,8 @@ l_u8 l_sch_tick_<interface.name>() {
 
     struct l_schedule_entry *entry = current.entry;
     switch(entry->type) {
+        case SLAVE_RESP_ENTRY:
+        case MASTER_REQ_ENTRY:
         case UNCONDITIONAL_ENTRY: {
             if(rx_buffer.state == L_IDLE && rx_buffer.size != 0)
                 cleanup_rx_<interface.name>();
@@ -805,8 +807,7 @@ freeFormatEntryInitialization(entry) ::= "{.type = FREE_FORMAT_ENTRY,.ticks = <e
 
 
 //====================================================================================================================//
-// TODO implement this!
-masterReqEntryInitialization(entry) ::= "{.type = MASTER_REQ_ENTRY,.ticks = <entry.ticks>}"
+masterReqEntryInitialization(entry) ::= "{.type = MASTER_REQ_ENTRY,.ticks = <entry.ticks>,.data.frame = &master_request_frame}"
 //====================================================================================================================//
 
 
@@ -817,8 +818,7 @@ saveConfigurationEntryInitialization(entry) ::= "{.type = SAVE_CONFIGURATION_ENT
 
 
 //====================================================================================================================//
-// TODO implement this!
-slaveRespEntryInitialization(entry) ::= "{.type = SLAVE_RESP_ENTRY,.ticks = <entry.ticks>}"
+slaveRespEntryInitialization(entry) ::= "{.type = SLAVE_RESP_ENTRY,.ticks = <entry.ticks>,.data.frame = &slave_response_frame}"
 //====================================================================================================================//
 
 
