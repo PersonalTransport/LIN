@@ -588,22 +588,59 @@ void ld_check_response_<interface.name>(l_u8* const RSID,l_u8* const error_code)
 
 void ld_assign_frame_id_range_<interface.name>(l_u8 NAD,l_u8 start_index,const l_u8* const PIDs) {
     // TODO implement!
+    <interface.name>_configuration_status = LD_SERVICE_BUSY;
+    master_request_frame.data.PUD.NAD = NAD;
+    master_request_frame.data.PUD.PCI = 0x06;
+    master_request_frame.data.PUD.SID = ASSIGN_FRAME_IDENTIFIER_RANGE;
+    master_request_frame.data.PUD.D1 = start_index;
+    master_request_frame.data.PUD.D2 = PIDs[0];
+    master_request_frame.data.PUD.D3 = PIDs[1];
+    master_request_frame.data.PUD.D4 = PIDs[2];
+    master_request_frame.data.PUD.D5 = PIDs[3];
 }
 
 void ld_assign_NAD_<interface.name>(l_u8 initial_NAD,l_u16 supplier_id,l_u16 function_id,l_u8 new_NAD) {
     // TODO implement!
+    <interface.name>_configuration_status = LD_SERVICE_BUSY;
+    master_request_frame.data.PUD.NAD = initial_NAD;
+    master_request_frame.data.PUD.PCI = 0x06;
+    master_request_frame.data.PUD.SID = ASSIGN_NAD;
+    master_request_frame.data.PUD.D1 = (l_u8)supplier_id;
+    master_request_frame.data.PUD.D2 = (l_u8)(supplier_id \>\> 8);
+    master_request_frame.data.PUD.D3 = (l_u8)function_id;
+    master_request_frame.data.PUD.D4 = (l_u8)(function_id \>\> 8);
+    master_request_frame.data.PUD.D5 = new_NAD;
 }
 
 void ld_save_configuration_<interface.name>(l_u8 NAD) {
     // TODO implement!
+    <interface.name>_configuration_status = LD_SERVICE_BUSY;
+    master_request_frame.data.PUD.NAD = NAD;
+    master_request_frame.data.PUD.PCI = 0x01;
+    master_request_frame.data.PUD.SID = SAVE_CONFIGURATION;
+    master_request_frame.data.PUD.D1 = 0xFF;
+    master_request_frame.data.PUD.D2 = 0xFF;
+    master_request_frame.data.PUD.D3 = 0xFF;
+    master_request_frame.data.PUD.D4 = 0xFF;
+    master_request_frame.data.PUD.D5 = 0xFF;
 }
 
 void ld_conditional_change_NAD_<interface.name>(l_u8 NAD,l_u8 id,l_u8 byte,l_u8 mask,l_u8 invert,l_u8 new_NAD) {
     // TODO implement!
+    <interface.name>_configuration_status = LD_SERVICE_BUSY;
+    master_request_frame.data.PUD.NAD = NAD;
+    master_request_frame.data.PUD.PCI = 0x06;
+    master_request_frame.data.PUD.SID = CONDITIONAL_CHANGE_NAD;
+    master_request_frame.data.PUD.D1 = id;
+    master_request_frame.data.PUD.D2 = byte;
+    master_request_frame.data.PUD.D3 = mask;
+    master_request_frame.data.PUD.D4 = invert;
+    master_request_frame.data.PUD.D5 = new_NAD;
 }
 
 void ld_read_by_id_<interface.name>(l_u8 NAD,l_u16 supplier_id,l_u16 function_id,l_u8 id,l_u8* const data) {
     // TODO implement!
+    <interface.name>_configuration_status = LD_SERVICE_BUSY;
 }
 <else>
 
