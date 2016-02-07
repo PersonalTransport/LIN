@@ -8,6 +8,10 @@ driverHeader(node,target,interface) ::= <<
 <if(target.includes)><(target.includes)()><endif>
 <if(interface.includes)><(interface.includes)()><endif>
 
+#define L_FRAME_PID(id) (~((id \<\< 6) ^ (id \<\< 4) ^ (id \<\< 3) ^ (id \<\< 2)) & 0x80) |\
+                         (((id \<\< 6) ^ (id \<\< 5) ^ (id \<\< 4) ^ (id \<\< 2)) & 0x40) |\
+                         (id & 0x3F)
+
 typedef bool l_bool;        //- 0 is false, and non-zero (>0) is true.
 typedef uint8_t l_u8;       //- Unsigned 8 bit integer.
 typedef uint16_t l_u16;     //- Unsigned 16 bit integer.

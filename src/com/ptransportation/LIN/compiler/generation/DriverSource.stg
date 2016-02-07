@@ -3,10 +3,6 @@ driverSource(node,target,interface) ::= <<
 <if(target.includes)><(target.includes)()><endif>
 <if(interface.includes)><(interface.includes)()><endif>
 
-#define L_FRAME_PID(id) (~((id \<\< 6) ^ (id \<\< 4) ^ (id \<\< 3) ^ (id \<\< 2)) & 0x80) |\
-                         (((id \<\< 6) ^ (id \<\< 5) ^ (id \<\< 4) ^ (id \<\< 2)) & 0x40) |\
-                         (id & 0x3F)
-
 <node.frames:{frame|#define <frame.name>_INDEX <i0>};separator="\n">
 
 enum l_buffer_state {
