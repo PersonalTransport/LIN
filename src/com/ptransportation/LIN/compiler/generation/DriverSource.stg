@@ -133,6 +133,8 @@ static struct l_frame frames[] = {
 };
 
 <if(node.master)>
+enum l_configuration_status <interface.name>_configuration_status = LD_SERVICE_IDLE;
+
 struct l_schedule _L_NULL_SCHEDULE = {0,NULL};
 
 <node.scheduleTables:{schedule|
