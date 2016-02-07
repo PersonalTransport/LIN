@@ -112,6 +112,18 @@ static struct {
     l_u8 index;
 } tx_buffer, rx_buffer;
 
+static struct l_frame master_request_frame =
+{   // master request frame
+    .PID = 0x3C,
+    .data.scalar = 0ULL
+};
+
+static struct l_frame slave_response_frame =
+{   //  slave response frame
+    .PID = 0x3D,
+    .data.scalar = 0ULL
+};
+
 static struct l_frame frames[] = {
 <node.frames:{frame|
     {   // <frame.name>
