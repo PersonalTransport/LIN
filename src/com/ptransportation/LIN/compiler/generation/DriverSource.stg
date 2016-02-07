@@ -462,6 +462,45 @@ void l_ifc_aux_<interface.name>() {
 l_u16 l_ifc_read_status_<interface.name>() {
     // TODO implement!
 }
+<if(node.master)>
+
+l_u8 ld_is_ready_<interface.name>() {
+    // TODO implement!
+}
+
+void ld_check_response_<interface.name>(l_u8* const RSID,l_u8* const error_code) {
+    // TODO implement!
+}
+
+void ld_assign_frame_id_range_<interface.name>(l_u8 NAD,l_u8 start_index,const l_u8* const PIDs) {
+    // TODO implement!
+}
+
+void ld_assign_NAD_<interface.name>(l_u8 initial_NAD,l_u16 supplier_id,l_u16 function_id,l_u8 new_NAD) {
+    // TODO implement!
+}
+
+void ld_save_configuration_<interface.name>(l_u8 NAD) {
+    // TODO implement!
+}
+
+void ld_conditional_change_NAD_<interface.name>(l_u8 NAD,l_u8 id,l_u8 byte,l_u8 mask,l_u8 invert,l_u8 new_NAD) {
+    // TODO implement!
+}
+
+void ld_read_by_id_<interface.name>(l_u8 NAD,l_u16 supplier_id,l_u16 function_id,l_u8 id,l_u8* const data) {
+    // TODO implement!
+}
+<else>
+
+l_u8 ld_read_configuration_<interface.name>(l_u8* const data,l_u8* const length) {
+    // TODO implement!
+}
+
+l_u8 ld_set_configuration_<interface.name>(const l_u8* const data,l_u16 length) {
+    // TODO implement!
+}
+<endif>
 
 <testFlagImplementations(node)>
 <clearFlagImplementations(node)>

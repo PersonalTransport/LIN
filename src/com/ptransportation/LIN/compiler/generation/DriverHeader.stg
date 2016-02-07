@@ -174,6 +174,65 @@ struct l_irqmask l_sys_irq_disable();
 * @param the interrupt mask.
 **/
 void l_sys_irq_restore(struct l_irqmask previous);
+<if(node.master)>
+
+/**
+* @returns the status of the last configuration service.
+**/
+l_u8 ld_is_ready_<interface.name>();
+
+/**
+* returns the result of the last configuration service.
+* @param RSID where to store the response service identifier.
+* @param error_code where to store the error_code if any.
+**/
+void ld_check_response_<interface.name>(l_u8* const RSID,l_u8* const error_code);
+
+/**
+* Assign the PIDs of 4 frames with values or don't cares.
+* @param NAD the NAD address of the slave frames which to assign
+* @param start_index the index of the first frame in the slave to assing PID to.
+* @param PIDs an array of 4 PIDS to assign or don't care 0xFF.
+**/
+void ld_assign_frame_id_range_<interface.name>(l_u8 NAD,l_u8 start_index,const l_u8* const PIDs);
+
+/**
+* Assign the slave with supplier_id,function_id,and initial_NAD a new NAD address.
+* @param initial_NAD the initial NAD of the target slave.
+* @param supplier_id the supplier ID of the target slave.
+* @param function_id the function ID of the target slave.
+* @param new_NAD the new NAD to assign the target slave.
+**/
+void ld_assign_NAD_<interface.name>(l_u8 initial_NAD,l_u16 supplier_id,l_u16 function_id,l_u8 new_NAD);
+
+/**
+* Make a save configuration request to a slave, or all slaves
+* if NAD is the broadcast NAD(0x7F).
+* @param NAD the address of the slave.
+**/
+void ld_save_configuration_<interface.name>(l_u8 NAD);
+
+/**
+* TODO documentation!
+**/
+void ld_conditional_change_NAD_<interface.name>(l_u8 NAD,l_u8 id,l_u8 byte,l_u8 mask,l_u8 invert,l_u8 new_NAD);
+
+/**
+* TODO documentation!
+**/
+void ld_read_by_id_<interface.name>(l_u8 NAD,l_u16 supplier_id,l_u16 function_id,l_u8 id,l_u8* const data);
+<else>
+
+/**
+* TODO documentation!
+**/
+l_u8 ld_read_configuration_<interface.name>(l_u8* const data,l_u8* const length);
+
+/**
+* TODO documentation!
+**/
+l_u8 ld_set_configuration_<interface.name>(const l_u8* const data,l_u16 length);
+<endif>
 
 <testFlagPrototypes(node)>
 <clearFlagPrototypes(node)>
