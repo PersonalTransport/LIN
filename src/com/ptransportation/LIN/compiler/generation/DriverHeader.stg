@@ -17,6 +17,13 @@ struct l_irqmask;
 <if(node.master)>
 struct l_schedule;
 
+enum l_configuration_status {
+    LD_SERVICE_BUSY,
+    LD_REQUEST_FINISHED,
+    LD_SERVICE_IDLE,
+    LD_SERVICE_ERROR
+};
+
 extern struct l_schedule _L_NULL_SCHEDULE;
 <node.scheduleTables:{schedule|extern struct l_schedule _<schedule.name>;};separator="\n">
 

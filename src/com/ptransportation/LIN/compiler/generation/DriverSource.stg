@@ -53,6 +53,21 @@ struct l_ioctl_op {
     // TODO add things here?
 };
 
+union {
+    struct {
+        unsigned int error_in_response : 1;
+        unsigned int successful_transfer : 1;
+        unsigned int overrun : 1;
+        unsigned int goto_sleep: 1; // TODO update this value
+        unsigned int bus_activity : 1; // TODO update this value
+        unsigned int event_triggered_frame_collision : 1; // TODO update this value
+        unsigned int save_configuration : 1; // TODO update this value
+        unsigned int has_frame: 1;
+        unsigned int PID : 8;
+    };
+    l_u16 raw_data;
+} l_status_register;
+
 <if(node.master)>
 enum l_schedule_entry_type {
     ASSIGN_FRAME_ID_ENTRY,//??
@@ -214,6 +229,7 @@ void l_sch_set_<interface.name>(struct l_schedule *schedule, l_u8 entry) {
 <endif>
 
 l_bool l_ifc_init_<interface.name>() {
+    l_status_register = 0;
     <(interface.initialization)(node)>
     return false;
 }
@@ -286,14 +302,19 @@ static inline void cleanup_rx_<interface.name>() {
     }
 <node.subscribe_frames:{frame|
     else if(rx_buffer.PID == frames[<frame.name>_INDEX].PID) {
+        l_status_register.PID = rx_buffer.PID;
+        l_status_register.overrun = l_status_register.has_frame;
+        l_status_register.has_frame = true;
         if((l_u8)<if(frame.useClassicChecksum)>classic_checksum<else>enhanced_checksum<endif> == rx_buffer.checksum) {
+            l_status_register.successful_transfer = true;
             frames[<frame.name>_INDEX].data.scalar = rx_buffer.data.scalar;
             <frame.name>_flag = true;
             <frame.signals:{signal|<signal.name>_flag = true;};separator="\n">
         \}
         else {
-            // TODO what should happen on error.
-            // NEW should set response_error?
+            l_status_register.error_in_response = true;
+            l_status_register.successful_transfer = false;
+            // TODO should set response_error signal
         \}
     \}};separator="\n">
     rx_buffer.PID = 0xFF;
@@ -404,6 +425,10 @@ static inline void cleanup_tx_<interface.name>() {
     }
 <node.publish_frames:{frame|
     else if(tx_buffer.PID == frames[<frame.name>_INDEX].PID) {
+        l_status_register.PID = tx_buffer.PID;
+        l_status_register.successful_transfer = true;
+        l_status_register.overrun = l_status_register.has_frame;
+        l_status_register.has_frame = true;
         <frame.name>_flag = true;
         <frame.signals:{signal|<signal.name>_flag = true;};separator="\n">
     \}};separator="\n">
@@ -460,7 +485,9 @@ void l_ifc_aux_<interface.name>() {
 }
 
 l_u16 l_ifc_read_status_<interface.name>() {
-    // TODO implement!
+    l_u16 r = l_status_register.raw_data;
+    l_status_register.raw_data = 0;
+    return r & 0xFF7F;
 }
 <if(node.master)>
 
