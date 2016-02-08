@@ -127,7 +127,7 @@ static struct l_frame slave_response_frame =
 static struct l_frame frames[] = {
 <node.frames:{frame|
     {   // <frame.name>
-        .PID = <if(frame.ID)>L_FRAME_PID(<frame.ID>)<else>0xFF<endif>, // TODO is 0xFF Invalid
+        .PID = <if(frame.ID && node.master)>L_FRAME_PID(<frame.ID>)<else>0x00<endif>,
         .data.scalar = 0ULL // TODO initial data
     \}};separator=",\n">
 };
