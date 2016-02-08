@@ -431,4 +431,20 @@ class NodeCapabilityFileValidator extends AbstractNodeCapabilityFileValidator {
         ];
     }
 
+    @Check
+    def errorCheckThatSignalsAreOnlyDefinedOnce(Master master) {
+        val seen = new HashMap<String,Slave>();
+        master.slaves.forEach[slave|
+            slave.frames.filter[it.publishes != null].forEach[frame|
+                frame.signals.forEach[signal|
+                    if(seen.containsKey(signal.name)) {
+                        error('''Slave '«slave.name»' contains a signal '«signal.name»' that has already been defined by slave '«seen.get(signal.name).name»'.''', master,
+                        NodeCapabilityFilePackage.Literals.MASTER__SLAVES,
+                        master.slaves.lastIndexOf(slave));
+                    }
+                    seen.put(signal.name,slave);
+                ];
+            ];
+        ];
+    }
 }
