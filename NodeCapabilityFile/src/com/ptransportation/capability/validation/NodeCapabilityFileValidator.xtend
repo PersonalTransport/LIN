@@ -400,5 +400,17 @@ class NodeCapabilityFileValidator extends AbstractNodeCapabilityFileValidator {
 	}
 
 	// TODO add validations that check that subscribed frames,signals,and encodings match published frames,signals,and encodings.
+
+	@Check
+	def errorCheckThatSlavesAreOnlyListedOnce(Master master) {
+		val seen = new HashSet<Slave>();
+		master.slaves.forEach[
+			if(seen.contains(it)) {
+				error('''Slave '«it.name»' is already in slave list.''', master,
+				NodeCapabilityFilePackage.Literals.MASTER__SLAVES,
+				master.slaves.lastIndexOf(it));
+			}
+			seen.add(it);
+		];
+	}
 }
-	
