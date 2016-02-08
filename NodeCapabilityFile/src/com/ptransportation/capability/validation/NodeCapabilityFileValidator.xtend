@@ -18,6 +18,8 @@ import com.ptransportation.capability.nodeCapabilityFile.Signal
 import com.ptransportation.capability.nodeCapabilityFile.Slave
 import java.util.HashSet
 import org.eclipse.xtext.validation.Check
+import com.ptransportation.capability.nodeCapabilityFile.Master
+import java.util.HashMap
 
 /**
  * This class contains custom validation rules. 
@@ -413,4 +415,20 @@ class NodeCapabilityFileValidator extends AbstractNodeCapabilityFileValidator {
 			seen.add(it);
 		];
 	}
+
+    @Check
+    def errorCheckThatAFrameIsOnlyDefinedOnce(Master master) {
+        val seen = new HashMap<String,Slave>();
+        master.slaves.forEach[slave|
+            slave.frames.filter[it.publishes != null].forEach[frame|
+                if(seen.containsKey(frame.name)) {
+                    error('''Slave '«slave.name»' contains a frame'«frame.name»' that has already been defined by slave '«seen.get(frame.name).name»'.''', master,
+                    NodeCapabilityFilePackage.Literals.MASTER__SLAVES,
+                    master.slaves.lastIndexOf(slave));
+                }
+                seen.put(frame.name,slave);
+            ];
+        ];
+    }
+
 }
