@@ -7,6 +7,10 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.AbstractGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.generator.IGeneratorContext
+import com.ptransportation.capability.nodeCapabilityFile.NodeCapabilityFile
+import com.ptransportation.capability.nodeCapabilityFile.Node
+import com.ptransportation.capability.generator.targets.PIC24FJxxGB00x.PIC24FJxxGB00x
+import com.ptransportation.capability.generator.targets.PIC24FJxxGB00x.UART
 
 /**
  * Generates code from your model files on save.
@@ -15,11 +19,17 @@ import org.eclipse.xtext.generator.IGeneratorContext
  */
 class NodeCapabilityFileGenerator extends AbstractGenerator {
 
+	var headerGenerator = new DriverHeaderGenerator();
+	var sourceGenerator = new DriverSourceGenerator();
+	
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
-//		fsa.generateFile('greetings.txt', 'People to greet: ' + 
-//			resource.allContents
-//				.filter(typeof(Greeting))
-//				.map[name]
-//				.join(', '))
+		resource.allContents.filter(typeof(NodeCapabilityFile)).forEach[it.node.generateNode(fsa)]
+	}
+	
+	def void generateNode(Node node,IFileSystemAccess2 fsa) {
+		var target = new PIC24FJxxGB00x();
+		var iii = new UART(1);
+		fsa.generateFile(node.name+'.h',headerGenerator.generateNode(target,iii,node));
+		fsa.generateFile(node.name+'.c',sourceGenerator.generateNode(target,iii,node));
 	}
 }
