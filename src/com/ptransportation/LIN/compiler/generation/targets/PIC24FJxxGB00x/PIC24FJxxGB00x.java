@@ -24,12 +24,12 @@ public class PIC24FJxxGB00x extends Target {
 
     @Override
     public void addSourceGroups(STGroup sourceGroup) {
-        sourceGroup.importTemplates(new STGroupFile("src/com/ptransportation/LIN/compiler/generation/targets/PIC24FJxxGB00x/DriverSource.stg"));
+        sourceGroup.importTemplates(new STGroupFile("com/ptransportation/LIN/compiler/generation/targets/PIC24FJxxGB00x/DriverSource.stg"));
     }
 
     @Override
     public void addHeaderGroups(STGroup headerGroup) {
-        headerGroup.importTemplates(new STGroupFile("src/com/ptransportation/LIN/compiler/generation/targets/PIC24FJxxGB00x/DriverHeader.stg"));
+        headerGroup.importTemplates(new STGroupFile("com/ptransportation/LIN/compiler/generation/targets/PIC24FJxxGB00x/DriverHeader.stg"));
     }
 
     @Override

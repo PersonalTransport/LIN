@@ -21,6 +21,6 @@ public class GenericTarget extends Target {
 
     @Override
     public void addSourceGroups(STGroup sourceGroup) {
-        sourceGroup.importTemplates(new STGroupFile("src/com/ptransportation/LIN/compiler/generation/targets/generic/DriverSource.stg"));
+        sourceGroup.importTemplates(new STGroupFile("com/ptransportation/LIN/compiler/generation/targets/generic/DriverSource.stg"));
     }
 }

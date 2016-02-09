@@ -405,7 +405,7 @@ class NodeCapabilityFileValidator extends AbstractNodeCapabilityFileValidator {
 	// TODO add validations that check that subscribed frames,signals,and encodings match published frames,signals,and encodings.
 
 	@Check
-	def errorCheckThatSlavesAreOnlyListedOnce(Master master) {
+	def checkThatSlavesAreOnlyListedOnce(Master master) {
 		val seen = new HashSet<Slave>();
 		master.slaves.forEach[
 			if(seen.contains(it)) {
@@ -418,7 +418,7 @@ class NodeCapabilityFileValidator extends AbstractNodeCapabilityFileValidator {
 	}
 
     @Check
-    def errorCheckThatAFrameIsOnlyDefinedOnce(Master master) {
+    def checkThatAFrameIsOnlyDefinedOnce(Master master) {
         val seen = new HashMap<String,Slave>();
         master.slaves.forEach[slave|
             slave.frames.filter[it.publishes != null].forEach[frame|
@@ -433,7 +433,7 @@ class NodeCapabilityFileValidator extends AbstractNodeCapabilityFileValidator {
     }
 
     @Check
-    def errorCheckThatSignalsAreOnlyDefinedOnce(Master master) {
+    def checkThatSignalsAreOnlyDefinedOnce(Master master) {
         val seen = new HashMap<String,Slave>();
         master.slaves.forEach[slave|
             slave.frames.filter[it.publishes != null].forEach[frame|
@@ -447,5 +447,61 @@ class NodeCapabilityFileValidator extends AbstractNodeCapabilityFileValidator {
                 ];
             ];
         ];
+    }
+
+    @Check
+    def checkMasterBitrateIsGreatorOrEqualToAllSaveMinBitrates(Master master) {
+        master.slaves.forEach[slave|
+            var bitrate = Double.parseDouble(master.bitrate.value);
+            if(slave.bitrate instanceof AutomaticBitrate) {
+                var min = Double.parseDouble((slave.bitrate as AutomaticBitrate).minValue);
+                if(bitrate < min) {
+                    error('''Slave '«slave.name»' can not operate at a bitrate less than '«(slave.bitrate as AutomaticBitrate).minValue» kbps'.''', master,
+                    NodeCapabilityFilePackage.Literals.MASTER__BITRATE);
+                }
+            }
+        ]
+    }
+
+    @Check
+    def checkMasterBitrateIsLessThanOrEqualToAllSaveMaxBitrates(Master master) {
+        master.slaves.forEach[slave|
+            var bitrate = Double.parseDouble(master.bitrate.value);
+            if(slave.bitrate instanceof AutomaticBitrate) {
+                var max = Double.parseDouble((slave.bitrate as AutomaticBitrate).maxValue);
+                if(bitrate > max) {
+                    error('''Slave '«slave.name»' can not operate at a bitrate greater than '«(slave.bitrate as AutomaticBitrate).maxValue» kbps'.''', master,
+                    NodeCapabilityFilePackage.Literals.MASTER__BITRATE);
+                }
+            }
+        ]
+    }
+
+    @Check
+    def checkMasterBitrateMatchesFixedBitrateInAllSlaves(Master master) {
+        master.slaves.forEach[slave|
+            if(slave.bitrate instanceof FixedBitrate) {
+                var bitrate = Double.parseDouble(master.bitrate.value);
+                var value = Double.parseDouble((slave.bitrate as FixedBitrate).value);
+                if(bitrate != value) {
+                    error('''Slave '«slave.name»' must operate at a bitrate of '«(slave.bitrate as FixedBitrate).value» kbps'.''', master,
+                    NodeCapabilityFilePackage.Literals.MASTER__BITRATE);
+                }
+            }
+        ]
+    }
+
+    @Check
+    def checkMasterBitrateIsListedInSelectOfAllSlaves(Master master) {
+        master.slaves.forEach[slave|
+            if(slave.bitrate instanceof SelectBitrate) {
+                var bitrate = Double.parseDouble(master.bitrate.value);
+                var slaveBitrate = slave.bitrate as SelectBitrate;
+                if(!slaveBitrate.values.map[Double.parseDouble(it)].contains(bitrate)) {
+                    error('''Slave '«slave.name»' must operate at a bitrate in the set '«slaveBitrate.values» kbps'.''', master,
+                    NodeCapabilityFilePackage.Literals.MASTER__BITRATE);
+                }
+            }
+        ]
     }
 }

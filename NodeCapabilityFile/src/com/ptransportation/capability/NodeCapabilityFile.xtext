@@ -63,7 +63,7 @@ Master:
 		'}'
 
 		'slaves' '{'
-			(slaves+=[Slave] ';')+
+			(slaves+=[Slave] ';')*
 		'}'
 
 		'frames' '{'

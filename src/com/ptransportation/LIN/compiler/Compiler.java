@@ -168,11 +168,11 @@ public class Compiler {
             return;
         }
 
-        STGroup slaveDriverHeader = new STGroupFile("src/com/ptransportation/LIN/compiler/generation/DriverHeader.stg");
+        STGroup slaveDriverHeader = new STGroupFile("com/ptransportation/LIN/compiler/generation/DriverHeader.stg");
         target.addHeaderGroups(slaveDriverHeader);
         addModelAdaptors(slaveDriverHeader);
 
-        STGroup slaveDriverSource = new STGroupFile("src/com/ptransportation/LIN/compiler/generation/DriverSource.stg");
+        STGroup slaveDriverSource = new STGroupFile("com/ptransportation/LIN/compiler/generation/DriverSource.stg");
         target.addSourceGroups(slaveDriverSource);
         addModelAdaptors(slaveDriverSource);
 
