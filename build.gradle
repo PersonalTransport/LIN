@@ -1,70 +1,34 @@
 buildscript {
-	repositories {
-		jcenter()
-	}
-	dependencies {
-		classpath 'org.xtext:xtext-gradle-plugin:1.0.1'
-		classpath 'org.xtext:xtext-idea-gradle-plugin:1.0.1'
-	}
-}
-
-apply plugin: 'java'
-apply plugin: 'application'
-apply plugin: 'eclipse'
-apply plugin: 'idea'
-repositories {
-	jcenter()
-}
-
-version = 'git describe --tags --always HEAD'.execute().text.trim()
-sourceSets {
-    main {
-        java {
-            srcDir 'src'
-        }
-		resources {
-			srcDir 'src'
-		}
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath group:'ch.raffael.gradlePlugins.antlr4', name:'gradle-antlr4-plugin', version:'1.0'
     }
 }
 
-compileJava {
-	targetCompatibility = '1.8'
-	sourceCompatibility = '1.8'
+apply plugin:'java'
+apply plugin:'ch.raffael.antlr4'
+
+apply plugin: 'idea'
+
+idea {
+    module {
+        sourceDirs += file('src-gen/antlr4')
+    }
 }
+
+repositories {
+    mavenCentral()
+}
+
+antlr4 {
+    generateDir = file('src-gen/antlr4')
+    source = file('src/main/antlr')
+}
+
+compileJava.dependsOn antlr4
 
 dependencies {
-    compile 'com.beust:jcommander:1.48'
-	compile 'org.antlr:stringtemplate:4.0'
-	compile project(':NodeCapabilityFile')
-}
-
-distributions {
-	main {
-		mainClassName  = 'com.ptransportation.LIN.compiler.Compiler'
-	}
-}
-
-subprojects {
-	ext.xtextVersion = '2.9.1'
-	repositories {
-		jcenter()
-	}
-
-	apply plugin: 'java'
-	apply plugin: 'org.xtext.xtend'
-	apply from: "${rootDir}/gradle/source-layout.gradle"
-	apply from: "${rootDir}/gradle/maven-deployment.gradle"
-	apply plugin: 'eclipse'
-	apply plugin: 'idea'
-
-	group = 'NodeCapabilityFile'
-    version = this.version
-
-	sourceCompatibility = '1.8'
-	targetCompatibility = '1.8'
-
-	configurations.all {
-		exclude group: 'asm'
-	}
+    compile 'org.antlr:antlr4:4.5'
 }
