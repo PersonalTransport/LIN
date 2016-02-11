@@ -1,6 +1,7 @@
 package com.ptransportation.LIN.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public abstract class Node {
@@ -14,7 +15,8 @@ public abstract class Node {
     private List<Encoding> encodings;
     private String freeText;
 
-    public Node() {
+    public Node(String name) {
+        this.name = name;
         this.frames = new ArrayList<Frame>();
         this.encodings = new ArrayList<Encoding>();
     }

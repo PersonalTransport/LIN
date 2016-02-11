@@ -1,19 +1,19 @@
 package com.ptransportation.LIN.model;
 
 public class AssignFrameIdEntry extends ScheduleTableEntry {
-    private Node node;
+    private Slave slave;
     private Frame frame;
 
-    public Node getNode() {
-        return this.node;
+    public Slave getSlave() {
+        return slave;
     }
 
-    public void setNode(Node node) {
-        this.node = node;
+    public void setSlave(Slave slave) {
+        this.slave = slave;
     }
 
     public Frame getFrame() {
-        return this.frame;
+        return frame;
     }
 
     public void setFrame(Frame frame) {

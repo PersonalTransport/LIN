@@ -1,12 +1,13 @@
 package com.ptransportation.LIN.model;
 
 public class FrameEntry extends ScheduleTableEntry {
+    private Frame frame;
+
     public Frame getFrame() {
-        throw new UnsupportedOperationException();
+        return frame;
     }
 
-    public void setFrame(Frame value) {
-        throw new UnsupportedOperationException();
+    public void setFrame(Frame frame) {
+        this.frame = frame;
     }
-
 }

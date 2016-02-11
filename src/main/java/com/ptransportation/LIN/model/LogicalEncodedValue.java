@@ -1,20 +1,22 @@
 package com.ptransportation.LIN.model;
 
 public class LogicalEncodedValue extends EncodedValue {
-    public String getValue() {
-        throw new UnsupportedOperationException();
+    private int value;
+    private String textInfo;
+
+    public int getValue() {
+        return this.value;
     }
 
-    public void setValue(String value) {
-        throw new UnsupportedOperationException();
+    public void setValue(int value) {
+        this.value = value;
     }
 
     public String getTextInfo() {
-        throw new UnsupportedOperationException();
+        return this.textInfo;
     }
 
-    public void setTextInfo(String value) {
-        throw new UnsupportedOperationException();
+    public void setTextInfo(String textInfo) {
+        this.textInfo = textInfo;
     }
-
 }

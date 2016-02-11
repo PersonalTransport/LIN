@@ -1,6 +1,7 @@
 package com.ptransportation.LIN.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ArraySignalValue extends SignalValue {
@@ -11,6 +12,6 @@ public class ArraySignalValue extends SignalValue {
     }
 
     public List<Integer> getValues() {
-        return values;
+        return this.values;
     }
 }

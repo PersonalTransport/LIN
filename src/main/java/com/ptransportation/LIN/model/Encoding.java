@@ -1,18 +1,36 @@
 package com.ptransportation.LIN.model;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Encoding {
-    public String getName() {
-        throw new UnsupportedOperationException();
+    private Node node;
+    private String name;
+    private List<EncodedValue> encodedValues;
+
+    public Encoding(String name) {
+        this.name = name;
+        this.encodedValues = new ArrayList<EncodedValue>();
     }
 
-    public void setName(String value) {
-        throw new UnsupportedOperationException();
+    public Node getNode() {
+        return node;
+    }
+
+    public void setNode(Node node) {
+        this.node = node;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public List<EncodedValue> getEncodedValues() {
-        throw new UnsupportedOperationException();
+        return this.encodedValues;
     }
-
 }

@@ -22,6 +22,11 @@ repositories {
     mavenCentral()
 }
 
+allprojects {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
+
 antlr4 {
     generateDir = file('src-gen/antlr4')
     source = file('src/main/antlr')
@@ -31,4 +36,5 @@ compileJava.dependsOn antlr4
 
 dependencies {
     compile 'org.antlr:antlr4:4.5'
+    compile 'com.google.code.gson:gson:2.2.4'
 }

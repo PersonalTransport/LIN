@@ -1,51 +1,58 @@
 package com.ptransportation.LIN.model;
 
 public class DataDumpEntry extends ScheduleTableEntry {
-    public Node getNode() {
-        throw new UnsupportedOperationException();
+    private Slave slave;
+    private int d1;
+    private int d2;
+    private int d3;
+    private int d4;
+    private int d5;
+
+    public Slave getSlave() {
+        return slave;
     }
 
-    public void setNode(Node value) {
-        throw new UnsupportedOperationException();
+    public void setSlave(Slave slave) {
+        this.slave = slave;
     }
 
-    public String getD1() {
-        throw new UnsupportedOperationException();
+    public int getD1() {
+        return d1;
     }
 
-    public void setD1(String value) {
-        throw new UnsupportedOperationException();
+    public void setD1(int d1) {
+        this.d1 = d1;
     }
 
-    public String getD2() {
-        throw new UnsupportedOperationException();
+    public int getD2() {
+        return d2;
     }
 
-    public void setD2(String value) {
-        throw new UnsupportedOperationException();
+    public void setD2(int d2) {
+        this.d2 = d2;
     }
 
-    public String getD3() {
-        throw new UnsupportedOperationException();
+    public int getD3() {
+        return d3;
     }
 
-    public void setD3(String value) {
-        throw new UnsupportedOperationException();
+    public void setD3(int d3) {
+        this.d3 = d3;
     }
 
-    public String getD4() {
-        throw new UnsupportedOperationException();
+    public int getD4() {
+        return d4;
     }
 
-    public void setD4(String value) {
-        throw new UnsupportedOperationException();
+    public void setD4(int d4) {
+        this.d4 = d4;
     }
 
-    public String getD5() {
-        throw new UnsupportedOperationException();
+    public int getD5() {
+        return d5;
     }
 
-    public void setD5(String value) {
-        throw new UnsupportedOperationException();
+    public void setD5(int d5) {
+        this.d5 = d5;
     }
 }

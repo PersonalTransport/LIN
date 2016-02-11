@@ -21,8 +21,7 @@ public class NodeConverter extends NodeCapabilityFileBaseVisitor<Node> {
 
     @Override
     public Node visitSlave(NodeCapabilityFileParser.SlaveContext ctx) {
-        Slave node = new Slave();
-        node.setName(ctx.name.getText());
+        Slave node = new Slave(ctx.name.getText());
         node.setProtocolVersion(Double.parseDouble(ctx.protocolVersion.getText().replaceAll("\"","")));
         node.setSupplier(Integer.decode(ctx.supplier.getText()));
         node.setFunction(Integer.decode(ctx.function.getText()));
@@ -46,15 +45,22 @@ public class NodeConverter extends NodeCapabilityFileBaseVisitor<Node> {
         if(ctx.maxMessageLength != null)
             node.setMaxMessageLength(Integer.decode(ctx.maxMessageLength.getText()));
 
-        for(NodeCapabilityFileParser.FrameContext frame:ctx.frames)
-            node.getFrames().add(frameConverter.visit(frame));
+        for(NodeCapabilityFileParser.FrameContext frameCtx:ctx.frames) {
+            Frame frame = frameConverter.visit(frameCtx);
+            frame.setNode(node);
+            node.getFrames().add(frame);
+        }
 
-        for(NodeCapabilityFileParser.EncodingContext encoding:ctx.encodings)
-            node.getEncodings().add(encodingConverter.visit(encoding));
+        for(NodeCapabilityFileParser.EncodingContext encodingCtx:ctx.encodings) {
+            Encoding encoding = encodingConverter.visit(encodingCtx);
+            encoding.setNode(node);
+            node.getEncodings().add(encoding);
+        }
 
-        // TODO response_error
+        node.setResponseError(new SignalReference(ctx.responseError.getText()));
 
-        // TODO fault_state_signals
+        for(NodeCapabilityFileParser.SignalReferenceContext signal:ctx.faultStateSignals)
+            node.getFaultStateSignals().add(new SignalReference(signal.getText()));
 
         if(ctx.freeText != null)
             node.setFreeText(ctx.getText().replaceAll("\"",""));
@@ -63,8 +69,7 @@ public class NodeConverter extends NodeCapabilityFileBaseVisitor<Node> {
 
     @Override
     public Node visitMaster(NodeCapabilityFileParser.MasterContext ctx) {
-        Master node = new Master();
-        node.setName(ctx.name.getText());
+        Master node = new Master(ctx.name.getText());
         node.setProtocolVersion(Double.parseDouble(ctx.protocolVersion.getText().replaceAll("\"","")));
         node.setSupplier(Integer.decode(ctx.supplier.getText()));
         node.setFunction(Integer.decode(ctx.function.getText()));
@@ -73,16 +78,26 @@ public class NodeConverter extends NodeCapabilityFileBaseVisitor<Node> {
         node.setTimebase(Double.parseDouble(ctx.timebase.getText()));
         node.setJitter(Double.parseDouble(ctx.jitter.getText()));
 
-        // TODO slaves
+        for(NodeCapabilityFileParser.SlaveReferenceContext slave:ctx.slaves)
+            node.getSlaves().add(new SlaveReference(slave.getText()));
 
-        for(NodeCapabilityFileParser.FrameContext frame:ctx.frames)
-            node.getFrames().add(frameConverter.visit(frame));
+        for(NodeCapabilityFileParser.FrameContext frameCtx:ctx.frames) {
+            Frame frame = frameConverter.visit(frameCtx);
+            frame.setNode(node);
+            node.getFrames().add(frame);
+        }
 
-        for(NodeCapabilityFileParser.EncodingContext encoding:ctx.encodings)
-            node.getEncodings().add(encodingConverter.visit(encoding));
+        for(NodeCapabilityFileParser.EncodingContext encodingCtx:ctx.encodings) {
+            Encoding encoding = encodingConverter.visit(encodingCtx);
+            encoding.setNode(node);
+            node.getEncodings().add(encoding);
+        }
 
-        for(NodeCapabilityFileParser.ScheduleTableContext scheduleTable:ctx.scheduleTables)
-            node.getScheduleTables().add(scheduleTableConverter.visit(scheduleTable));
+        for(NodeCapabilityFileParser.ScheduleTableContext scheduleTableCtx:ctx.scheduleTables) {
+            ScheduleTable scheduleTable = scheduleTableConverter.visit(scheduleTableCtx);
+            scheduleTable.setMaster(node);
+            node.getScheduleTables().add(scheduleTable);
+        }
 
         if(ctx.freeText != null)
             node.setFreeText(ctx.getText().replaceAll("\"",""));

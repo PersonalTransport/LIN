@@ -1,11 +1,13 @@
 package com.ptransportation.LIN.model;
 
 public class AssignNADEntry extends ScheduleTableEntry {
-    public Node getNode() {
-        throw new UnsupportedOperationException();
+    private Slave slave;
+
+    public Slave getSlave() {
+        return slave;
     }
 
-    public void setNode(Node value) {
-        throw new UnsupportedOperationException();
+    public void setSlave(Slave slave) {
+        this.slave = slave;
     }
 }

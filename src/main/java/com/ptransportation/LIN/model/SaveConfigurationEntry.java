@@ -1,13 +1,13 @@
 package com.ptransportation.LIN.model;
 
 public class SaveConfigurationEntry extends ScheduleTableEntry {
+    private Slave slave;
 
-    public Node getNode() {
-        throw new UnsupportedOperationException();
+    public Slave getSlave() {
+        return slave;
     }
 
-    public void setNode(Node value) {
-        throw new UnsupportedOperationException();
+    public void setSlave(Slave slave) {
+        this.slave = slave;
     }
-
 }

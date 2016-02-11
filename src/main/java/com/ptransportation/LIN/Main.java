@@ -1,15 +1,18 @@
 package com.ptransportation.LIN;
 
 import com.ptransportation.LIN.model.NodeCapabilityFile;
-import com.ptransportation.LIN.model.Slave;
 import com.ptransportation.LIN.parser.NodeCapabilityFileConverter;
 import com.ptransportation.LIN.parser.NodeCapabilityFileLexer;
 import com.ptransportation.LIN.parser.NodeCapabilityFileParser;
+import com.ptransportation.LIN.util.IPropertyListener;
+import com.ptransportation.LIN.util.PropertyWalker;
 import com.ptransportation.LIN.validation.DefaultValidator;
 import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.misc.ObjectEqualityComparator;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+
 
 public class Main {
     public static void main(String [] args) throws IOException {
@@ -21,7 +24,7 @@ public class Main {
         NodeCapabilityFileParser parser = new NodeCapabilityFileParser(tokens);
 
         //parser.removeErrorListeners();
-        /*parser.addErrorListener(new BaseErrorListener(){
+        /*parser.addErrorListener(new BaseErrorListener() {
             @Override
             public void syntaxError(Recognizer<?, ?> recognizer,
                                     Object offendingSymbol,

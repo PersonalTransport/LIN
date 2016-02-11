@@ -1,6 +1,7 @@
 package com.ptransportation.LIN.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class SelectBitrate extends Bitrate {
@@ -13,5 +14,4 @@ public class SelectBitrate extends Bitrate {
     public List<Double> getValues() {
         return this.values;
     }
-
 }

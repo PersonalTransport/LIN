@@ -1,4 +1,4 @@
 package com.ptransportation.LIN.model;
 
-public class SignalValue {
+public interface Reference {
 }

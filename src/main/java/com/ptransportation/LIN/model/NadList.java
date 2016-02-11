@@ -1,6 +1,7 @@
 package com.ptransportation.LIN.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class NadList extends NadSet {
@@ -14,5 +15,4 @@ public class NadList extends NadSet {
     public List<Integer> getValues() {
         return this.values;
     }
-
 }

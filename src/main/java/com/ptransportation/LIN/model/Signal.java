@@ -1,11 +1,24 @@
 package com.ptransportation.LIN.model;
 
 public class Signal {
+    private Frame frame;
     private String name;
     private int size;
     private SignalValue initialValue;
     private int offset;
     private Encoding encoding;
+
+    public Signal(String name) {
+        this.name = name;
+    }
+
+    public Frame getFrame() {
+        return frame;
+    }
+
+    public void setFrame(Frame frame) {
+        this.frame = frame;
+    }
 
     public String getName() {
         return this.name;

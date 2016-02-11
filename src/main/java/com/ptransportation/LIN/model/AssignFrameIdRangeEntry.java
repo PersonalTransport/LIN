@@ -1,52 +1,71 @@
 package com.ptransportation.LIN.model;
 
 public class AssignFrameIdRangeEntry extends ScheduleTableEntry {
+    private Slave slave;
+    private int startIndex;
+    private boolean lookupIDs;
+    private int PID0;
+    private int PID1;
+    private int PID2;
+    private int PID3;
 
-    public Node getNode() {
-        throw new UnsupportedOperationException();
+    public AssignFrameIdRangeEntry() {
+        this.lookupIDs = true;
     }
 
-    public void setNode(Node value) {
-        throw new UnsupportedOperationException();
+    public Slave getSlave() {
+        return slave;
     }
 
-    public String getFrameIndex() {
-        throw new UnsupportedOperationException();
+    public void setSlave(Slave slave) {
+        this.slave = slave;
     }
 
-    public void setFrameIndex(String value) {
-        throw new UnsupportedOperationException();
+    public int getStartIndex() {
+        return startIndex;
     }
 
-    public String getFrame0_PID() {
-        throw new UnsupportedOperationException();
+    public void setStartIndex(int startIndex) {
+        this.startIndex = startIndex;
     }
 
-    public void setFrame0_PID(String value) {
-        throw new UnsupportedOperationException();
+    public boolean isLookupIDs() {
+        return lookupIDs;
     }
 
-    public String getFrame1_PID() {
-        throw new UnsupportedOperationException();
+    public void setLookupIDs(boolean lookupIDs) {
+        this.lookupIDs = lookupIDs;
     }
 
-    public void setFrame1_PID(String value) {
-        throw new UnsupportedOperationException();
+    public int getPID0() {
+        return PID0;
     }
 
-    public String getFrame2_PID() {
-        throw new UnsupportedOperationException();
+    public void setPID0(int PID0) {
+        this.PID0 = PID0;
     }
 
-    public void setFrame2_PID(String value) {
-        throw new UnsupportedOperationException();
+    public int getPID1() {
+        return PID1;
     }
 
-    public String getFrame3_PID() {
-        throw new UnsupportedOperationException();
+    public void setPID1(int PID1) {
+        this.PID1 = PID1;
     }
 
-    public void setFrame3_PID(String value) {
-        throw new UnsupportedOperationException();
+    public int getPID2() {
+        return PID2;
+    }
+
+    public void setPID2(int PID2) {
+        this.PID2 = PID2;
+    }
+
+    public int getPID3() {
+        return PID3;
+    }
+
+    public void setPID3(int PID3) {
+        this.PID3 = PID3;
     }
 }

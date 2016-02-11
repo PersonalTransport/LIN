@@ -58,7 +58,7 @@ master:
 		'}'
 
 		'slaves' '{'
-			(slaves+=Identifier ';')*
+			(slaves+=slaveReference ';')*
 		'}'
 
 		'frames' '{'
@@ -115,8 +115,8 @@ signal:
 		(encodingReference ';')?
 	'}';
 
-signalValue: scalorSignalValue | arraySignalValue;
-scalorSignalValue: value=integer;
+signalValue: scalarSignalValue | arraySignalValue;
+scalarSignalValue: value=integer;
 arraySignalValue: '{' values+=integer (',' values+=integer)* '}';
 
 encoding:
@@ -126,7 +126,7 @@ encoding:
 
 encodedValue:
 	logicalEncodedValue ';' |
-	physicalEncodedRange ';' |
+	physicalEncodedValue ';' |
 	bcdEncodedValue ';' |
 	asciiEncodedValue ';'
 ;
@@ -135,7 +135,7 @@ logicalEncodedValue:
 	'logical_value' ',' value=integer (',' textInfo=String)?
 ;
 
-physicalEncodedRange:
+physicalEncodedValue:
 	'physical_value' ',' minValue=integer ',' maxValue=integer ',' scale=number ',' offset=number (',' textInfo=String)?
 ;
 
@@ -153,7 +153,7 @@ scheduleTable:
 	'}';
 
 scheduleTableEntry:
-	(frameEntry |
+	frameEntry |
 	masterReqEntry |
 	slaveRespEntry |
 	assignNADEntry |
@@ -162,47 +162,47 @@ scheduleTableEntry:
 	saveConfigurationEntry |
 	assignFrameIdRangeEntry |
 	freeFormatEntry |
-	assignFrameIdEntry) 'delay' frameTime=number 'ms' ';'
+	assignFrameIdEntry
 ;
 
-frameEntry: frameReference;
+frameEntry: frameReference 'delay' frameTime=number 'ms' ';';
 
 masterReqEntry:
-	'MasterReq';
+	'MasterReq' 'delay' frameTime=number 'ms' ';';
 
 slaveRespEntry:
-	'SlaveResp';
+	'SlaveResp' 'delay' frameTime=number 'ms' ';';
 
 assignNADEntry:
-	'AssignNAD' '{' nodeReference '}';
+	'AssignNAD' '{' slaveReference '}' 'delay' frameTime=number 'ms' ';';
 
 conditionalChangeNADEntry:
 	'ConditionalChangeNAD' '{'
 		NAD=integer ',' id=integer ',' byte_=integer',' mask=integer',' inv=integer',' newNAD=integer
-	'}';
+	'}' 'delay' frameTime=number 'ms' ';';
 
 dataDumpEntry:
 	'DataDump' '{'
-		nodeReference ',' d1=integer',' d2=integer',' d3=integer',' d4=integer',' d5=integer
-	'}';
+		slaveReference ',' d1=integer',' d2=integer',' d3=integer',' d4=integer',' d5=integer
+	'}' 'delay' frameTime=number 'ms' ';';
 
 saveConfigurationEntry:
-	'SaveConfiguration' '{' nodeReference '}';
+	'SaveConfiguration' '{' slaveReference '}' 'delay' frameTime=number 'ms' ';';
 
 assignFrameIdRangeEntry:
 	'AssignFrameIdRange' '{'
-		nodeReference ',' frameIndex=integer (',' frame0_PID=integer',' frame1_PID=integer',' frame2_PID=integer',' frame3_PID=integer)?
-	'}';
+		slaveReference ',' startIndex=integer (',' PID0=integer',' PID1=integer',' PID2=integer',' PID3=integer)?
+	'}' 'delay' frameTime=number 'ms' ';';
 
 freeFormatEntry:
 	'FreeFormat' '{'
 		d1=integer',' d2=integer',' d3=integer',' d4=integer',' d5=integer',' d6=integer',' d7=integer',' d8=integer
-	'}';
+	'}' 'delay' frameTime=number 'ms' ';';
 
 assignFrameIdEntry:
-	'AssignFrameId' '{' nodeReference ',' frameReference '}';
+	'AssignFrameId' '{' slaveReference ',' frameReference '}' 'delay' frameTime=number 'ms' ';';
 
-nodeReference:
+slaveReference:
     id=Identifier;
 
 frameReference:

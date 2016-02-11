@@ -1,6 +1,7 @@
 package com.ptransportation.LIN.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Master extends Node {
@@ -9,7 +10,8 @@ public class Master extends Node {
     private List<Slave> slaves;
     private List<ScheduleTable> scheduleTables;
 
-    public Master() {
+    public Master(String name) {
+        super(name);
         this.slaves = new ArrayList<Slave>();
         this.scheduleTables = new ArrayList<ScheduleTable>();
     }
@@ -37,4 +39,5 @@ public class Master extends Node {
     public List<ScheduleTable> getScheduleTables() {
         return this.scheduleTables;
     }
+
 }

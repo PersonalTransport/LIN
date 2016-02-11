@@ -147,7 +147,7 @@ public class DefaultValidator extends AbstractValidator {
 
     @Check
     public void checkThatScalorSignalSizeIsInValidRange(Signal signal) {
-        if (signal.getInitialValue() instanceof ScalorSignalValue) {
+        if (signal.getInitialValue() instanceof ScalarSignalValue) {
             if (signal.getSize() < 0 || signal.getSize() > 16)
                 error("Invalid signal size '" + signal.getSize() + "'. The signal size must in the range [0,16].",
                         signal, "size");
@@ -415,4 +415,6 @@ public class DefaultValidator extends AbstractValidator {
         }
         ]
     }*/
+
+    // TODO check that real frames are publish and reference frames are subscribe.
 }

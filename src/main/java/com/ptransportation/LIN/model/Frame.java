@@ -1,9 +1,11 @@
 package com.ptransportation.LIN.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Frame {
+    private Node node;
     private boolean publishes;
     private String name;
     private int length;
@@ -12,8 +14,17 @@ public class Frame {
     private Frame eventTriggeredFrame;
     private List<Signal> signals;
 
-    public Frame() {
+    public Frame(String name) {
+        this.name = name;
         this.signals = new ArrayList<Signal>();
+    }
+
+    public Node getNode() {
+        return node;
+    }
+
+    public void setNode(Node node) {
+        this.node = node;
     }
 
     public boolean getPublishes() {
@@ -76,5 +87,4 @@ public class Frame {
     public List<Signal> getSignals() {
         return this.signals;
     }
-
 }

@@ -1,18 +1,36 @@
 package com.ptransportation.LIN.model;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ScheduleTable {
-    public String getName() {
-        throw new UnsupportedOperationException();
+    private Master master;
+    private String name;
+    private List<ScheduleTableEntry> entries;
+
+    public ScheduleTable(String name) {
+        this.name = name;
+        this.entries = new ArrayList<ScheduleTableEntry>();
     }
 
-    public void setName(String value) {
-        throw new UnsupportedOperationException();
+    public Master getMaster() {
+        return master;
+    }
+
+    public void setMaster(Master master) {
+        this.master = master;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public List<ScheduleTableEntry> getEntries() {
-        throw new UnsupportedOperationException();
+        return entries;
     }
-
 }

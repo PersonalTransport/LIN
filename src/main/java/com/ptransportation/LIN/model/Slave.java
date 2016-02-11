@@ -1,6 +1,7 @@
 package com.ptransportation.LIN.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Slave extends Node {
@@ -16,7 +17,8 @@ public class Slave extends Node {
     private Signal responseError;
     private List<Signal> faultStateSignals;
 
-    public Slave() {
+    public Slave(String name) {
+        super(name);
         this.supportedSIDS = new ArrayList<Integer>();
         this.faultStateSignals = new ArrayList<Signal>();
     }
@@ -78,7 +80,7 @@ public class Slave extends Node {
     }
 
     public List<Integer> getSupportedSIDS() {
-        return this.supportedSIDS;
+        return Collections.unmodifiableList(this.supportedSIDS);
     }
 
     public int getMaxMessageLength() {
