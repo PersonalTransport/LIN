@@ -25,26 +25,34 @@ public class PropertyWalker {
 
     public void walk(Object object, String name) {
         ArrayList<Object> validatedObjects = new ArrayList<Object>();
-        walk(null, object.getClass(), name, object, validatedObjects);
+        walk(null, name, object, validatedObjects);
     }
 
     public void walk(Object object) {
         walk(object, null);
     }
 
-    private void walk(Object self, Class<?> klass, String name, Object object, List<Object> alreadyWalked) {
+    private void walk(Object self, String propertyName, Object propertyValue, List<Object> alreadyWalked) {
+        if (propertyValue == null)
+            return;
         for (IPropertyListener listener : listeners)
-            listener.property(self, klass, name, object);
-        alreadyWalked.add(object);
+            listener.property(self, propertyName, propertyValue);
+        alreadyWalked.add(propertyValue);
         try {
-            if (object != null) {
-                BeanInfo info = Introspector.getBeanInfo(object.getClass());
-                for (PropertyDescriptor property : info.getPropertyDescriptors()) {
-                    Method read = property.getReadMethod();
-                    if (!property.getName().equals("class") && read != null) {
-                        Object sub = read.invoke(object);
-                        if (!alreadyWalked.contains(sub))
-                            walk(object, property.getPropertyType(), property.getName(), sub, alreadyWalked);
+            BeanInfo info = Introspector.getBeanInfo(propertyValue.getClass());
+            for (PropertyDescriptor property : info.getPropertyDescriptors()) {
+                Method read = property.getReadMethod();
+                if (!property.getName().equals("class") && read != null) {
+                    Object sub = read.invoke(propertyValue);
+                    if (sub instanceof Iterable<?>) {
+                        int i = 0;
+                        for (Object o : (Iterable<?>) sub) {
+                            if (o != null && !alreadyWalked.contains(o))
+                                walk(propertyValue, property.getName() + "[" + i + "]", o, alreadyWalked);
+                            i++;
+                        }
+                    } else if (!alreadyWalked.contains(sub)) {
+                        walk(propertyValue, property.getName(), sub, alreadyWalked);
                     }
                 }
             }

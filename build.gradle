@@ -16,6 +16,10 @@ idea {
     module {
         sourceDirs += file('src-gen/antlr4')
     }
+    project {
+        jdkName = '1.8'
+        languageLevel = '1.8'
+    }
 }
 
 repositories {

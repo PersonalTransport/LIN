@@ -1,5 +1,6 @@
 package com.ptransportation.LIN;
 
+import com.ptransportation.LIN.link.DefaultLinker;
 import com.ptransportation.LIN.model.NodeCapabilityFile;
 import com.ptransportation.LIN.parser.NodeCapabilityFileConverter;
 import com.ptransportation.LIN.parser.NodeCapabilityFileLexer;
@@ -43,5 +44,8 @@ public class Main {
 
         DefaultValidator validator = new DefaultValidator();
         validator.validate(nodeCapabilityFile);
+
+        DefaultLinker linker = new DefaultLinker();
+        linker.link(nodeCapabilityFile);
     }
 }
