@@ -14,9 +14,9 @@ public class PIC24FJxxGB00x extends Target {
     @Override
     public Interface getInterface(String targetInterface) {
         String clean = targetInterface.trim().toUpperCase();
-        if(clean.matches("^(UART\\d)")) {
-            int version = Integer.parseInt(clean.replace("UART",""));
-            if(version == 1) // TODO add support for more UART modules.
+        if (clean.matches("^(UART\\d)")) {
+            int version = Integer.parseInt(clean.replace("UART", ""));
+            if (version == 1) // TODO add support for more UART modules.
                 return new UART(version);
         }
         return null;

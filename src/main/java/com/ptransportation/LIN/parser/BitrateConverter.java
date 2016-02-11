@@ -10,7 +10,7 @@ public class BitrateConverter extends NodeCapabilityFileBaseVisitor<Bitrate> {
     public Bitrate visitFixedBitrate(NodeCapabilityFileParser.FixedBitrateContext ctx) {
         FixedBitrate bitrate = new FixedBitrate();
         bitrate.setValue(Double.parseDouble(ctx.value.getText()));
-        return  bitrate;
+        return bitrate;
     }
 
     @Override
@@ -24,7 +24,7 @@ public class BitrateConverter extends NodeCapabilityFileBaseVisitor<Bitrate> {
     @Override
     public Bitrate visitSelectBitrate(NodeCapabilityFileParser.SelectBitrateContext ctx) {
         SelectBitrate bitrate = new SelectBitrate();
-        for(NodeCapabilityFileParser.NumberContext number:ctx.values)
+        for (NodeCapabilityFileParser.NumberContext number : ctx.values)
             bitrate.getValues().add(Double.parseDouble(number.getText()));
         return bitrate;
     }

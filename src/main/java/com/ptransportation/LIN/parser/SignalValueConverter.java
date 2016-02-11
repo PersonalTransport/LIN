@@ -8,7 +8,7 @@ public class SignalValueConverter extends NodeCapabilityFileBaseVisitor<SignalVa
     @Override
     public SignalValue visitArraySignalValue(NodeCapabilityFileParser.ArraySignalValueContext ctx) {
         ArraySignalValue signalValue = new ArraySignalValue();
-        for(NodeCapabilityFileParser.IntegerContext value:ctx.values)
+        for (NodeCapabilityFileParser.IntegerContext value : ctx.values)
             signalValue.getValues().add(Integer.decode(value.getText()));
         return signalValue;
     }

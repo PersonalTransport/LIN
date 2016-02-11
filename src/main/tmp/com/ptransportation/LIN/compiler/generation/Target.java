@@ -8,11 +8,17 @@ public abstract class Target {
 
     public abstract Interface getInterface(String targetInterface);
 
-    public void addSourceGroups(STGroup sourceGroup) {}
+    public void addSourceGroups(STGroup sourceGroup) {
+    }
 
-    public void addHeaderGroups(STGroup headerGroup) {}
+    public void addHeaderGroups(STGroup headerGroup) {
+    }
 
-    public String getIncludes() { return null; }
+    public String getIncludes() {
+        return null;
+    }
 
-    public String getGlobals() { return null; }
+    public String getGlobals() {
+        return null;
+    }
 }

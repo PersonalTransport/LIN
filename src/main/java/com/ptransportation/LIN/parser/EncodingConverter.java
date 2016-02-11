@@ -12,7 +12,7 @@ public class EncodingConverter extends NodeCapabilityFileBaseVisitor<Encoding> {
     @Override
     public Encoding visitEncoding(NodeCapabilityFileParser.EncodingContext ctx) {
         Encoding encoding = new Encoding(ctx.name.getText());
-        for(NodeCapabilityFileParser.EncodedValueContext encodedValue:ctx.encodedValues)
+        for (NodeCapabilityFileParser.EncodedValueContext encodedValue : ctx.encodedValues)
             encoding.getEncodedValues().add(encodedValueConverter.visit(encodedValue));
         return encoding;
     }

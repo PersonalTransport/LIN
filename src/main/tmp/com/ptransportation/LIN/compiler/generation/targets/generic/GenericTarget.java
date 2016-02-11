@@ -13,8 +13,8 @@ public class GenericTarget extends Target {
     @Override
     public Interface getInterface(String targetInterface) {
         String clean = targetInterface.trim().toLowerCase();
-        if(clean.matches("^(generic\\d)")) {
-            return new GenericInterface(Integer.parseInt(clean.replace("generic","")));
+        if (clean.matches("^(generic\\d)")) {
+            return new GenericInterface(Integer.parseInt(clean.replace("generic", "")));
         }
         return null;
     }

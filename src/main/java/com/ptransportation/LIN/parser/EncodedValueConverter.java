@@ -17,8 +17,8 @@ public class EncodedValueConverter extends NodeCapabilityFileBaseVisitor<Encoded
     public EncodedValue visitLogicalEncodedValue(NodeCapabilityFileParser.LogicalEncodedValueContext ctx) {
         LogicalEncodedValue encodedValue = new LogicalEncodedValue();
         encodedValue.setValue(Integer.decode(ctx.value.getText()));
-        if(ctx.textInfo != null)
-            encodedValue.setTextInfo(ctx.textInfo.getText().replaceAll("\"",""));
+        if (ctx.textInfo != null)
+            encodedValue.setTextInfo(ctx.textInfo.getText().replaceAll("\"", ""));
         return encodedValue;
     }
 
@@ -29,8 +29,8 @@ public class EncodedValueConverter extends NodeCapabilityFileBaseVisitor<Encoded
         encodedValue.setMaxValue(Integer.decode(ctx.maxValue.getText()));
         encodedValue.setScale(Double.parseDouble(ctx.scale.getText()));
         encodedValue.setOffset(Double.parseDouble(ctx.offset.getText()));
-        if(ctx.textInfo != null)
-            encodedValue.setTextInfo(ctx.textInfo.getText().replaceAll("\"",""));
-        return  encodedValue;
+        if (ctx.textInfo != null)
+            encodedValue.setTextInfo(ctx.textInfo.getText().replaceAll("\"", ""));
+        return encodedValue;
     }
 }

@@ -8,7 +8,7 @@ public class NadSetConverter extends NodeCapabilityFileBaseVisitor<NadSet> {
     @Override
     public NadSet visitNadList(NodeCapabilityFileParser.NadListContext ctx) {
         NadList nadList = new NadList();
-        for(NodeCapabilityFileParser.IntegerContext nad:ctx.values)
+        for (NodeCapabilityFileParser.IntegerContext nad : ctx.values)
             nadList.getValues().add(Integer.decode(nad.getText()));
         return nadList;
     }

@@ -12,7 +12,7 @@ public class ScheduleTableConverter extends NodeCapabilityFileBaseVisitor<Schedu
     @Override
     public ScheduleTable visitScheduleTable(NodeCapabilityFileParser.ScheduleTableContext ctx) {
         ScheduleTable scheduleTable = new ScheduleTable(ctx.name.getText());
-        for(NodeCapabilityFileParser.ScheduleTableEntryContext entry:ctx.entries)
+        for (NodeCapabilityFileParser.ScheduleTableEntryContext entry : ctx.entries)
             scheduleTable.getEntries().add(scheduleTableEntryConverter.visit(entry));
         return scheduleTable;
     }

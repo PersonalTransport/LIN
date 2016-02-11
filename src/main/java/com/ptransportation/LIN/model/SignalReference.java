@@ -10,7 +10,7 @@ public class SignalReference extends Signal implements Reference {
 
     @Override
     public void setName(String name) {
-        if(linked != null && !linked.getName().equals(name))
+        if (linked != null && !linked.getName().equals(name))
             linked = null;
         super.setName(name);
     }

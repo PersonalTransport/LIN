@@ -23,18 +23,18 @@ public class PropertyWalker {
         this.listeners.remove(listener);
     }
 
-    public void walk(Object object,String name) {
+    public void walk(Object object, String name) {
         ArrayList<Object> validatedObjects = new ArrayList<Object>();
-        walk(null,object.getClass(),name,object,validatedObjects);
+        walk(null, object.getClass(), name, object, validatedObjects);
     }
 
     public void walk(Object object) {
-        walk(object,null);
+        walk(object, null);
     }
 
-    private void walk(Object self,Class<?> klass, String name, Object object, List<Object> alreadyWalked) {
+    private void walk(Object self, Class<?> klass, String name, Object object, List<Object> alreadyWalked) {
         for (IPropertyListener listener : listeners)
-            listener.property(self,klass, name, object);
+            listener.property(self, klass, name, object);
         alreadyWalked.add(object);
         try {
             if (object != null) {

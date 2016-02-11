@@ -3,12 +3,12 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath group:'ch.raffael.gradlePlugins.antlr4', name:'gradle-antlr4-plugin', version:'1.0'
+        classpath group: 'ch.raffael.gradlePlugins.antlr4', name: 'gradle-antlr4-plugin', version: '1.0'
     }
 }
 
-apply plugin:'java'
-apply plugin:'ch.raffael.antlr4'
+apply plugin: 'java'
+apply plugin: 'ch.raffael.antlr4'
 
 apply plugin: 'idea'
 

@@ -4,18 +4,16 @@ import com.ptransportation.LIN.model.NodeCapabilityFile;
 import com.ptransportation.LIN.parser.NodeCapabilityFileConverter;
 import com.ptransportation.LIN.parser.NodeCapabilityFileLexer;
 import com.ptransportation.LIN.parser.NodeCapabilityFileParser;
-import com.ptransportation.LIN.util.IPropertyListener;
-import com.ptransportation.LIN.util.PropertyWalker;
 import com.ptransportation.LIN.validation.DefaultValidator;
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.misc.ObjectEqualityComparator;
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CommonTokenStream;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 
 
 public class Main {
-    public static void main(String [] args) throws IOException {
+    public static void main(String[] args) throws IOException {
         ANTLRInputStream file = new ANTLRInputStream(new FileInputStream(args[0]));
         file.name = args[0];
 

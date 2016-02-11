@@ -14,7 +14,7 @@ public class NodeCapabilityFileConverter extends NodeCapabilityFileBaseVisitor<N
     @Override
     public NodeCapabilityFile visitNodeCapabilityFile(NodeCapabilityFileParser.NodeCapabilityFileContext ctx) {
         NodeCapabilityFile file = new NodeCapabilityFile();
-        file.setLanguageVersion(Double.parseDouble(ctx.languageVersion.getText().replaceAll("\"","")));
+        file.setLanguageVersion(Double.parseDouble(ctx.languageVersion.getText().replaceAll("\"", "")));
         file.setNode(nodeConverter.visit(ctx.node()));
         return file;
     }

@@ -4,6 +4,7 @@ import com.ptransportation.LIN.model.*;
 
 public class FrameConverter extends NodeCapabilityFileBaseVisitor<Frame> {
     private SignalValueConverter signalValueConverter;
+
     public FrameConverter() {
         this.signalValueConverter = new SignalValueConverter();
     }
@@ -11,7 +12,7 @@ public class FrameConverter extends NodeCapabilityFileBaseVisitor<Frame> {
     @Override
     public Frame visitFrame(NodeCapabilityFileParser.FrameContext ctx) {
         Frame frame;
-        if(ctx.publishes != null)
+        if (ctx.publishes != null)
             frame = new Frame(ctx.name.getText());
         else
             frame = new FrameReference(ctx.name.getText());
@@ -20,18 +21,18 @@ public class FrameConverter extends NodeCapabilityFileBaseVisitor<Frame> {
 
         frame.setLength(Integer.decode(ctx.length.getText()));
 
-        if(ctx.minPeriod != null)
+        if (ctx.minPeriod != null)
             frame.setMinPeriod(Integer.decode(ctx.minPeriod.getText()));
 
-        if(ctx.maxPeriod != null)
+        if (ctx.maxPeriod != null)
             frame.setMaxPeriod(Integer.decode(ctx.maxPeriod.getText()));
 
-        if(ctx.eventTriggeredFrame != null)
+        if (ctx.eventTriggeredFrame != null)
             frame.setEventTriggeredFrame(new FrameReference(ctx.eventTriggeredFrame.getText()));
 
-        for(NodeCapabilityFileParser.SignalContext signalCtx:ctx.signals) {
+        for (NodeCapabilityFileParser.SignalContext signalCtx : ctx.signals) {
             Signal signal;
-            if(frame.getPublishes())
+            if (frame.getPublishes())
                 signal = new Signal(signalCtx.name.getText());
             else
                 signal = new SignalReference(signalCtx.name.getText());
@@ -42,7 +43,7 @@ public class FrameConverter extends NodeCapabilityFileBaseVisitor<Frame> {
             signal.setInitialValue(signalValueConverter.visit(signalCtx.initialValue));
 
             signal.setOffset(Integer.decode(signalCtx.offset.getText()));
-            if(signalCtx.encodingReference() != null)
+            if (signalCtx.encodingReference() != null)
                 signal.setEncoding(new EncodingReference(signalCtx.encodingReference().getText()));
 
             frame.getSignals().add(signal);

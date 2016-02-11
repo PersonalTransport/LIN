@@ -74,7 +74,7 @@ public class ScheduleTableEntryConverter extends NodeCapabilityFileBaseVisitor<S
         AssignFrameIdRangeEntry entry = new AssignFrameIdRangeEntry();
         entry.setSlave(new SlaveReference(ctx.slaveReference().getText()));
         entry.setStartIndex(Integer.decode(ctx.startIndex.getText()));
-        if(ctx.PID0 != null) {
+        if (ctx.PID0 != null) {
             entry.setLookupIDs(false);
             entry.setPID0(Integer.decode(ctx.PID0.getText()));
             entry.setPID1(Integer.decode(ctx.PID1.getText()));

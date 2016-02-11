@@ -6,57 +6,57 @@ import java.util.Arrays;
 import java.util.List;
 
 public class DefaultValidator extends AbstractValidator {
-    public static List<Double> LIN_VERSIONS = Arrays.asList(1.0,1.1,1.2,1.3,2.0,2.1,2.2);
+    public static List<Double> LIN_VERSIONS = Arrays.asList(1.0, 1.1, 1.2, 1.3, 2.0, 2.1, 2.2);
 
-    public void error(String message,Object object,String field) {
+    public void error(String message, Object object, String field) {
         System.err.println(message);
     }
 
-    public void error(String message,Object object,String field,int index) {
+    public void error(String message, Object object, String field, int index) {
         System.err.println(message);
     }
 
     @Check
     public void checkThatLanguageVersionIsValidLINVersion(NodeCapabilityFile file) {
-        if(!LIN_VERSIONS.contains(file.getLanguageVersion()))
-            error("Invalid LIN language version '"+file.getLanguageVersion()+"'.", file,"languageVersion");
+        if (!LIN_VERSIONS.contains(file.getLanguageVersion()))
+            error("Invalid LIN language version '" + file.getLanguageVersion() + "'.", file, "languageVersion");
     }
 
     @Check
     public void checkThatNodeIsNotNull(NodeCapabilityFile file) {
-        if(file.getNode() == null)
-            error("Node capability file must define a node.",file,"node");
+        if (file.getNode() == null)
+            error("Node capability file must define a node.", file, "node");
     }
 
     @Check
     public void checkThatProtocolVersionIsValidLINVersion(Node node) {
-        if(!LIN_VERSIONS.contains(node.getProtocolVersion()))
-            error("Invalid LIN protocol version '"+node.getProtocolVersion()+"'.",node,"protocolVersion");
+        if (!LIN_VERSIONS.contains(node.getProtocolVersion()))
+            error("Invalid LIN protocol version '" + node.getProtocolVersion() + "'.", node, "protocolVersion");
     }
 
     @Check
     public void checkThatTheSupplierIDWillFitInA16bitInteger(Node node) {
-        if(node.getSupplier() < 0 || node.getSupplier() > 0xFFFF)
-            error("Invalid supplier ID '"+node.getSupplier()+"'. The supplier ID must be in the range [0x0000,0xFFFF].", node,"supplier");
+        if (node.getSupplier() < 0 || node.getSupplier() > 0xFFFF)
+            error("Invalid supplier ID '" + node.getSupplier() + "'. The supplier ID must be in the range [0x0000,0xFFFF].", node, "supplier");
     }
 
     @Check
     public void checkThatTheFunctionIDWillFitInA16bitInteger(Node node) {
-        if(node.getFunction() < 0 || node.getFunction() > 0xFFFF)
-            error("Invalid function ID '"+node.getFunction()+". The function ID must be in the range [0x0000,0xFFFF].", node, "function");
+        if (node.getFunction() < 0 || node.getFunction() > 0xFFFF)
+            error("Invalid function ID '" + node.getFunction() + ". The function ID must be in the range [0x0000,0xFFFF].", node, "function");
     }
 
     @Check
     public void checkThatTheVariantIDWillFitInA8bitInteger(Node node) {
-        if(node.getVariant() < 0 || node.getVariant() > 0xFF)
-            error("Invalid variant ID '"+node.getVariant()+". The variant ID must be in the range [0x00,0xFF].",node,"variant");
+        if (node.getVariant() < 0 || node.getVariant() > 0xFF)
+            error("Invalid variant ID '" + node.getVariant() + ". The variant ID must be in the range [0x00,0xFF].", node, "variant");
     }
 
     @Check
     public void checkThatDiagnosticClassIsOneTwoOrThree(Slave slave) {
         int v = slave.getDiagnosticClass();
-        if(v != 1 && v != 2 && v != 3)
-            error("Invalid diagnostic class '"+slave.getDiagnosticClass()+"'. The the diagnostic class must be 1, 2, or 3.",slave,"diagnosticClass");
+        if (v != 1 && v != 2 && v != 3)
+            error("Invalid diagnostic class '" + slave.getDiagnosticClass() + "'. The the diagnostic class must be 1, 2, or 3.", slave, "diagnosticClass");
     }
 
 
@@ -114,8 +114,8 @@ public class DefaultValidator extends AbstractValidator {
 
     @Check
     public void checkThatTheLengthOfTheFrameIsOneToEight(Frame frame) {
-        if(frame.getLength() < 1 || frame.getLength() > 8)
-            error("Invalid frame length '"+frame.getLength()+"'. The frame length must in the range [1,8].",frame,"length");
+        if (frame.getLength() < 1 || frame.getLength() > 8)
+            error("Invalid frame length '" + frame.getLength() + "'. The frame length must in the range [1,8].", frame, "length");
     }
 
     /*@Check
@@ -194,8 +194,8 @@ public class DefaultValidator extends AbstractValidator {
 
     @Check
     public void checkThatAutomaticBitrateMinIsLessOrEqualToMax(AutomaticBitrate bitrate) {
-        if(bitrate.getMinValue() > bitrate.getMaxValue()) {
-            error("Invalid minimum bitrate '"+bitrate.getMinValue()+"' kbps greator than maximum bitrate '"+bitrate.getMaxValue()+"' kbps.",
+        if (bitrate.getMinValue() > bitrate.getMaxValue()) {
+            error("Invalid minimum bitrate '" + bitrate.getMinValue() + "' kbps greator than maximum bitrate '" + bitrate.getMaxValue() + "' kbps.",
                     bitrate, "minValue");
         }
     }
@@ -211,8 +211,8 @@ public class DefaultValidator extends AbstractValidator {
 
     @Check
     public void checkThatFixedBitrateIsInRange1To20(FixedBitrate bitrate) {
-        if(bitrate.getValue() < 1 || bitrate.getValue() > 20)
-            error("Invalid bitrate '"+bitrate.getValue()+"' kbps. Bitrates must be in the range [1,20]kbps.",
+        if (bitrate.getValue() < 1 || bitrate.getValue() > 20)
+            error("Invalid bitrate '" + bitrate.getValue() + "' kbps. Bitrates must be in the range [1,20]kbps.",
                     bitrate, "value");
 
     }
@@ -221,23 +221,23 @@ public class DefaultValidator extends AbstractValidator {
     public void checkThatAllNadsInListAreValid(NadList list) {
         for (Integer v : list.getValues()) {
             if (v < 0x01 || v > 0x7D)
-                error("Invalid slave NAD address '"+v+"'. Slave NAD addresses must be in the range [0x01,0x7D]", list,
+                error("Invalid slave NAD address '" + v + "'. Slave NAD addresses must be in the range [0x01,0x7D]", list,
                         "values", list.getValues().indexOf(v));
         }
     }
 
     @Check
     public void checkThatMinNADInNadRangeIsValid(NadRange range) {
-        if(range.getMinValue() < 0x01 || range.getMinValue() > 0x7D)
-            error("Invalid minimum slave NAD address '"+range.getMinValue()+
+        if (range.getMinValue() < 0x01 || range.getMinValue() > 0x7D)
+            error("Invalid minimum slave NAD address '" + range.getMinValue() +
                     "'. Slave NAD addresses must be in the range [0x01,0x7D]", range, "minValue");
     }
 
     @Check
     public void checkThatMaxNADInNadRangeIsValid(NadRange range) {
-        if(range.getMaxValue() < 0x01 || range.getMaxValue() > 0x7D)
-            error("Invalid maximum slave NAD address '"+range.getMaxValue()+"'. Slave NAD addresses must be in the range [0x01,0x7D]",
-                    range,"maxValue");
+        if (range.getMaxValue() < 0x01 || range.getMaxValue() > 0x7D)
+            error("Invalid maximum slave NAD address '" + range.getMaxValue() + "'. Slave NAD addresses must be in the range [0x01,0x7D]",
+                    range, "maxValue");
     }
 
 

@@ -22,7 +22,7 @@ public class NodeConverter extends NodeCapabilityFileBaseVisitor<Node> {
     @Override
     public Node visitSlave(NodeCapabilityFileParser.SlaveContext ctx) {
         Slave node = new Slave(ctx.name.getText());
-        node.setProtocolVersion(Double.parseDouble(ctx.protocolVersion.getText().replaceAll("\"","")));
+        node.setProtocolVersion(Double.parseDouble(ctx.protocolVersion.getText().replaceAll("\"", "")));
         node.setSupplier(Integer.decode(ctx.supplier.getText()));
         node.setFunction(Integer.decode(ctx.function.getText()));
         node.setVariant(Integer.decode(ctx.variant.getText()));
@@ -30,28 +30,28 @@ public class NodeConverter extends NodeCapabilityFileBaseVisitor<Node> {
         node.setSendsWakeUpSignal(ctx.sendsWakeUpSignal != null);
         node.setNadSet(nadSetConverter.visit(ctx.nadSet()));
         node.setDiagnosticClass(Integer.decode(ctx.diagnosticClass.getText()));
-        if(ctx.p2Min != null)
+        if (ctx.p2Min != null)
             node.setP2Min(Double.parseDouble(ctx.p2Min.getText()));
-        if(ctx.stMin != null)
+        if (ctx.stMin != null)
             node.setStMin(Double.parseDouble(ctx.stMin.getText()));
-        if(ctx.nAsTimeout != null)
+        if (ctx.nAsTimeout != null)
             node.setNAsTimeout(Double.parseDouble(ctx.nAsTimeout.getText()));
-        if(ctx.nCrTimeout != null)
+        if (ctx.nCrTimeout != null)
             node.setNCrTimeout(Double.parseDouble(ctx.nCrTimeout.getText()));
-        if(ctx.supportedSIDS != null) {
-            for(NodeCapabilityFileParser.IntegerContext sid:ctx.supportedSIDS)
+        if (ctx.supportedSIDS != null) {
+            for (NodeCapabilityFileParser.IntegerContext sid : ctx.supportedSIDS)
                 node.getSupportedSIDS().add(Integer.decode(sid.getText()));
         }
-        if(ctx.maxMessageLength != null)
+        if (ctx.maxMessageLength != null)
             node.setMaxMessageLength(Integer.decode(ctx.maxMessageLength.getText()));
 
-        for(NodeCapabilityFileParser.FrameContext frameCtx:ctx.frames) {
+        for (NodeCapabilityFileParser.FrameContext frameCtx : ctx.frames) {
             Frame frame = frameConverter.visit(frameCtx);
             frame.setNode(node);
             node.getFrames().add(frame);
         }
 
-        for(NodeCapabilityFileParser.EncodingContext encodingCtx:ctx.encodings) {
+        for (NodeCapabilityFileParser.EncodingContext encodingCtx : ctx.encodings) {
             Encoding encoding = encodingConverter.visit(encodingCtx);
             encoding.setNode(node);
             node.getEncodings().add(encoding);
@@ -59,18 +59,18 @@ public class NodeConverter extends NodeCapabilityFileBaseVisitor<Node> {
 
         node.setResponseError(new SignalReference(ctx.responseError.getText()));
 
-        for(NodeCapabilityFileParser.SignalReferenceContext signal:ctx.faultStateSignals)
+        for (NodeCapabilityFileParser.SignalReferenceContext signal : ctx.faultStateSignals)
             node.getFaultStateSignals().add(new SignalReference(signal.getText()));
 
-        if(ctx.freeText != null)
-            node.setFreeText(ctx.getText().replaceAll("\"",""));
+        if (ctx.freeText != null)
+            node.setFreeText(ctx.getText().replaceAll("\"", ""));
         return node;
     }
 
     @Override
     public Node visitMaster(NodeCapabilityFileParser.MasterContext ctx) {
         Master node = new Master(ctx.name.getText());
-        node.setProtocolVersion(Double.parseDouble(ctx.protocolVersion.getText().replaceAll("\"","")));
+        node.setProtocolVersion(Double.parseDouble(ctx.protocolVersion.getText().replaceAll("\"", "")));
         node.setSupplier(Integer.decode(ctx.supplier.getText()));
         node.setFunction(Integer.decode(ctx.function.getText()));
         node.setVariant(Integer.decode(ctx.variant.getText()));
@@ -78,29 +78,29 @@ public class NodeConverter extends NodeCapabilityFileBaseVisitor<Node> {
         node.setTimebase(Double.parseDouble(ctx.timebase.getText()));
         node.setJitter(Double.parseDouble(ctx.jitter.getText()));
 
-        for(NodeCapabilityFileParser.SlaveReferenceContext slave:ctx.slaves)
+        for (NodeCapabilityFileParser.SlaveReferenceContext slave : ctx.slaves)
             node.getSlaves().add(new SlaveReference(slave.getText()));
 
-        for(NodeCapabilityFileParser.FrameContext frameCtx:ctx.frames) {
+        for (NodeCapabilityFileParser.FrameContext frameCtx : ctx.frames) {
             Frame frame = frameConverter.visit(frameCtx);
             frame.setNode(node);
             node.getFrames().add(frame);
         }
 
-        for(NodeCapabilityFileParser.EncodingContext encodingCtx:ctx.encodings) {
+        for (NodeCapabilityFileParser.EncodingContext encodingCtx : ctx.encodings) {
             Encoding encoding = encodingConverter.visit(encodingCtx);
             encoding.setNode(node);
             node.getEncodings().add(encoding);
         }
 
-        for(NodeCapabilityFileParser.ScheduleTableContext scheduleTableCtx:ctx.scheduleTables) {
+        for (NodeCapabilityFileParser.ScheduleTableContext scheduleTableCtx : ctx.scheduleTables) {
             ScheduleTable scheduleTable = scheduleTableConverter.visit(scheduleTableCtx);
             scheduleTable.setMaster(node);
             node.getScheduleTables().add(scheduleTable);
         }
 
-        if(ctx.freeText != null)
-            node.setFreeText(ctx.getText().replaceAll("\"",""));
+        if (ctx.freeText != null)
+            node.setFreeText(ctx.getText().replaceAll("\"", ""));
         return node;
     }
 }

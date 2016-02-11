@@ -12,7 +12,7 @@ public class GenericInterface extends Interface {
 
     @Override
     public String getName() {
-        return "Generic"+ this.number;
+        return "Generic" + this.number;
     }
 
     @Override

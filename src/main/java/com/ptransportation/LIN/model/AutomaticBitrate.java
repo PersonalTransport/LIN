@@ -3,6 +3,7 @@ package com.ptransportation.LIN.model;
 public class AutomaticBitrate extends Bitrate {
     private double minValue;
     private double maxValue;
+
     public double getMinValue() {
         return this.minValue;
     }
