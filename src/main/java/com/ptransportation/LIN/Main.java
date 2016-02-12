@@ -19,10 +19,17 @@ public class Main {
     public static void main(String[] args) throws IOException {
         ErrorModel errorModel = new ErrorModel();
 
+        List<NodeCapabilityFile> nodeCapabilityFiles = generateModel(args, errorModel);
+
+        DefaultValidator validator = new DefaultValidator(errorModel);
+        validator.validate(nodeCapabilityFiles);
+    }
+
+    private static List<NodeCapabilityFile> generateModel(String[] sourceFiles, ErrorModel errorModel) throws IOException {
         List<NodeCapabilityFile> nodeCapabilityFiles = new ArrayList<NodeCapabilityFile>();
         List<NodeCapabilityFileParser.NodeCapabilityFileContext> nodeCapabilityFileContexts = new ArrayList<NodeCapabilityFileParser.NodeCapabilityFileContext>();
 
-        for (String file : args) {
+        for (String file : sourceFiles) {
             ANTLRInputStream stream = new ANTLRInputStream(new FileInputStream(file));
             stream.name = file;
 
@@ -40,10 +47,9 @@ public class Main {
         }
 
         NodeCapabilityFileLinker linker = new NodeCapabilityFileLinker(errorModel);
-        linker.link(nodeCapabilityFileContexts,nodeCapabilityFiles);
-
-        DefaultValidator validator = new DefaultValidator(errorModel);
-        validator.validate(nodeCapabilityFiles);
+        linker.link(nodeCapabilityFileContexts, nodeCapabilityFiles);
+        return nodeCapabilityFiles;
     }
+
 
 }

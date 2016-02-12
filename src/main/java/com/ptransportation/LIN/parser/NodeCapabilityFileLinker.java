@@ -23,7 +23,7 @@ public class NodeCapabilityFileLinker extends NodeCapabilityFileBaseVisitor<Void
 
     public void link(List<NodeCapabilityFileParser.NodeCapabilityFileContext> nodeCapabilityFileContexts, List<NodeCapabilityFile> nodeCapabilityFiles) {
         this.nodeCapabilityFiles = nodeCapabilityFiles;
-        for(NodeCapabilityFileParser.NodeCapabilityFileContext fileContext:nodeCapabilityFileContexts)
+        for (NodeCapabilityFileParser.NodeCapabilityFileContext fileContext : nodeCapabilityFileContexts)
             this.visit(fileContext);
         this.nodeCapabilityFiles = null;
         this.node = null;
@@ -246,10 +246,10 @@ public class NodeCapabilityFileLinker extends NodeCapabilityFileBaseVisitor<Void
     }
 
     protected void error(String message, Object object, String field) {
-        errorModel.error(message,object,field);
+        errorModel.error(message, object, field);
     }
 
     protected void error(String message, Object object, String field, int index) {
-        errorModel.error(message,object,field,index);
+        errorModel.error(message, object, field, index);
     }
 }

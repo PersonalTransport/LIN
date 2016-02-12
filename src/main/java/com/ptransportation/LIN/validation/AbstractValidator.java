@@ -23,11 +23,11 @@ public abstract class AbstractValidator {
     }
 
     public void error(String message, Object object, String field) {
-        errorModel.error(message,object,field);
+        errorModel.error(message, object, field);
     }
 
     public void error(String message, Object object, String field, int index) {
-        errorModel.error(message,object,field,index);
+        errorModel.error(message, object, field, index);
     }
 
     public void validate(Object object) {
