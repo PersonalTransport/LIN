@@ -1,5 +1,6 @@
 package com.ptransportation.LIN.parser;
 
+import com.ptransportation.LIN.model.EncodedValue;
 import com.ptransportation.LIN.model.Encoding;
 
 public class EncodingConverter extends NodeCapabilityFileBaseVisitor<Encoding> {
@@ -12,8 +13,8 @@ public class EncodingConverter extends NodeCapabilityFileBaseVisitor<Encoding> {
     @Override
     public Encoding visitEncoding(NodeCapabilityFileParser.EncodingContext ctx) {
         Encoding encoding = new Encoding(ctx.name.getText());
-        for (NodeCapabilityFileParser.EncodedValueContext encodedValue : ctx.encodedValues)
-            encoding.getEncodedValues().add(encodedValueConverter.visit(encodedValue));
+        for (NodeCapabilityFileParser.EncodedValueContext encodedValueContext : ctx.encodedValues)
+            encoding.getEncodedValues().add(encodedValueConverter.visit(encodedValueContext));
         return encoding;
     }
 }

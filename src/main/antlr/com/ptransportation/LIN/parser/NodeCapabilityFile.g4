@@ -36,8 +36,8 @@ slave:
 		'}'
 
 		'status_management' '{'
-		    'response_error' '=' responseError=signalReference ';'
-		    ('fault_state_signals' '=' faultStateSignals+=signalReference (',' faultStateSignals+=signalReference)* ';')?
+		    'response_error' '=' responseError=Identifier ';'
+		    ('fault_state_signals' '=' faultStateSignals+=Identifier (',' faultStateSignals+=Identifier)* ';')?
 		'}'
 
 		('free_text' '{'
@@ -58,7 +58,7 @@ master:
 		'}'
 
 		'slaves' '{'
-			(slaves+=slaveReference ';')*
+			(slaves+=Identifier ';')*
 		'}'
 
 		'frames' '{'
@@ -101,7 +101,7 @@ frame:
 		'length' '=' length=integer ';'
 		('min_period' '=' minPeriod=integer 'ms' ';')?
 		('max_period' '=' maxPeriod=integer 'ms' ';')?
-		('event_triggered_frame' '=' eventTriggeredFrame=frameReference ';')?
+		('event_triggered_frame' '=' eventTriggeredFrame=Identifier ';')?
 		('signals' '{'
 			(signals+=signal)+
 		'}')?
@@ -112,7 +112,7 @@ signal:
 		'size' '=' size=integer ';'
 		'init_value' '=' initialValue=signalValue ';'
 		'offset' '=' offset=integer ';'
-		(encodingReference ';')?
+		(encodingName=Identifier ';')?
 	'}';
 
 signalValue: scalarSignalValue | arraySignalValue;
@@ -125,26 +125,26 @@ encoding:
 	'}';
 
 encodedValue:
-	logicalEncodedValue ';' |
-	physicalEncodedValue ';' |
-	bcdEncodedValue ';' |
-	asciiEncodedValue ';'
+	logicalEncodedValue |
+	physicalEncodedValue |
+	bcdEncodedValue |
+	asciiEncodedValue
 ;
 
 logicalEncodedValue:
-	'logical_value' ',' value=integer (',' textInfo=String)?
+	'logical_value' ',' value=integer (',' textInfo=String)? ';'
 ;
 
 physicalEncodedValue:
-	'physical_value' ',' minValue=integer ',' maxValue=integer ',' scale=number ',' offset=number (',' textInfo=String)?
+	'physical_value' ',' minValue=integer ',' maxValue=integer ',' scale=number ',' offset=number (',' textInfo=String)? ';'
 ;
 
 bcdEncodedValue:
-	'bcd_value'
+	'bcd_value'  ';'
 ;
 
 asciiEncodedValue:
-	'ascii_value'
+	'ascii_value'  ';'
 ;
 
 scheduleTable:
@@ -165,7 +165,7 @@ scheduleTableEntry:
 	assignFrameIdEntry
 ;
 
-frameEntry: frameReference 'delay' frameTime=number 'ms' ';';
+frameEntry: frameName=Identifier 'delay' frameTime=number 'ms' ';';
 
 masterReqEntry:
 	'MasterReq' 'delay' frameTime=number 'ms' ';';
@@ -174,7 +174,7 @@ slaveRespEntry:
 	'SlaveResp' 'delay' frameTime=number 'ms' ';';
 
 assignNADEntry:
-	'AssignNAD' '{' slaveReference '}' 'delay' frameTime=number 'ms' ';';
+	'AssignNAD' '{' slaveName=Identifier '}' 'delay' frameTime=number 'ms' ';';
 
 conditionalChangeNADEntry:
 	'ConditionalChangeNAD' '{'
@@ -183,15 +183,15 @@ conditionalChangeNADEntry:
 
 dataDumpEntry:
 	'DataDump' '{'
-		slaveReference ',' d1=integer',' d2=integer',' d3=integer',' d4=integer',' d5=integer
+		slaveName=Identifier ',' d1=integer',' d2=integer',' d3=integer',' d4=integer',' d5=integer
 	'}' 'delay' frameTime=number 'ms' ';';
 
 saveConfigurationEntry:
-	'SaveConfiguration' '{' slaveReference '}' 'delay' frameTime=number 'ms' ';';
+	'SaveConfiguration' '{' slaveName=Identifier '}' 'delay' frameTime=number 'ms' ';';
 
 assignFrameIdRangeEntry:
 	'AssignFrameIdRange' '{'
-		slaveReference ',' startIndex=integer (',' PID0=integer',' PID1=integer',' PID2=integer',' PID3=integer)?
+		slaveName=Identifier ',' startIndex=integer (',' PID0=integer',' PID1=integer',' PID2=integer',' PID3=integer)?
 	'}' 'delay' frameTime=number 'ms' ';';
 
 freeFormatEntry:
@@ -200,19 +200,7 @@ freeFormatEntry:
 	'}' 'delay' frameTime=number 'ms' ';';
 
 assignFrameIdEntry:
-	'AssignFrameId' '{' slaveReference ',' frameReference '}' 'delay' frameTime=number 'ms' ';';
-
-slaveReference:
-    id=Identifier;
-
-frameReference:
-    id=Identifier;
-
-signalReference:
-    id=Identifier;
-
-encodingReference:
-    id=Identifier;
+	'AssignFrameId' '{' slaveName=Identifier ',' frameName=Identifier '}' 'delay' frameTime=number 'ms' ';';
 
 number: integer | Real;
 

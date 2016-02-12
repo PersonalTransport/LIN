@@ -24,8 +24,18 @@ public class PropertyWalker {
     }
 
     public void walk(Object object, String name) {
-        ArrayList<Object> validatedObjects = new ArrayList<Object>();
-        walk(null, name, object, validatedObjects);
+        ArrayList<Object> alreadyWalked = new ArrayList<Object>();
+        if (object instanceof Iterable<?>) {
+            int i = 0;
+            for (Object o : (Iterable<?>) object) {
+                if (o != null && !alreadyWalked.contains(o))
+                    walk(null, name + "[" + i + "]", o, alreadyWalked);
+                i++;
+            }
+        }
+        else {
+            walk(null, name, object, alreadyWalked);
+        }
     }
 
     public void walk(Object object) {

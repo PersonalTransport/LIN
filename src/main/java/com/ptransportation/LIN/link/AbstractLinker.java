@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 public abstract class AbstractLinker {
     private PropertyWalker linkWalker;
 
+
     public AbstractLinker() {
         this.linkWalker = new PropertyWalker();
         this.linkWalker.addPropertyListener(new IPropertyListener() {

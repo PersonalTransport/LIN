@@ -6,7 +6,7 @@ public class ScheduleTableEntryConverter extends NodeCapabilityFileBaseVisitor<S
     @Override
     public ScheduleTableEntry visitFrameEntry(NodeCapabilityFileParser.FrameEntryContext ctx) {
         FrameEntry entry = new FrameEntry();
-        entry.setFrame(new FrameReference(ctx.frameReference().getText()));
+        entry.setFrame(new Frame(ctx.frameName.getText())); // TODO mark as reference
         entry.setFrameTime(Double.parseDouble(ctx.frameTime.getText()));
         return entry;
     }
@@ -29,7 +29,7 @@ public class ScheduleTableEntryConverter extends NodeCapabilityFileBaseVisitor<S
     @Override
     public ScheduleTableEntry visitAssignNADEntry(NodeCapabilityFileParser.AssignNADEntryContext ctx) {
         AssignNADEntry entry = new AssignNADEntry();
-        entry.setSlave(new SlaveReference(ctx.slaveReference().getText()));
+        entry.setSlave(new Slave(ctx.slaveName.getText())); // TODO mark as reference
         entry.setFrameTime(Double.parseDouble(ctx.frameTime.getText()));
         return entry;
     }
@@ -51,7 +51,7 @@ public class ScheduleTableEntryConverter extends NodeCapabilityFileBaseVisitor<S
     @Override
     public ScheduleTableEntry visitDataDumpEntry(NodeCapabilityFileParser.DataDumpEntryContext ctx) {
         DataDumpEntry entry = new DataDumpEntry();
-        entry.setSlave(new SlaveReference(ctx.slaveReference().getText()));
+        entry.setSlave(new Slave(ctx.slaveName.getText())); // TODO mark as reference
         entry.setD1(Integer.decode(ctx.d1.getText()));
         entry.setD2(Integer.decode(ctx.d2.getText()));
         entry.setD3(Integer.decode(ctx.d3.getText()));
@@ -64,7 +64,7 @@ public class ScheduleTableEntryConverter extends NodeCapabilityFileBaseVisitor<S
     @Override
     public ScheduleTableEntry visitSaveConfigurationEntry(NodeCapabilityFileParser.SaveConfigurationEntryContext ctx) {
         SaveConfigurationEntry entry = new SaveConfigurationEntry();
-        entry.setSlave(new SlaveReference(ctx.slaveReference().getText()));
+        entry.setSlave(new Slave(ctx.slaveName.getText())); // TODO mark as reference
         entry.setFrameTime(Double.parseDouble(ctx.frameTime.getText()));
         return entry;
     }
@@ -72,7 +72,7 @@ public class ScheduleTableEntryConverter extends NodeCapabilityFileBaseVisitor<S
     @Override
     public ScheduleTableEntry visitAssignFrameIdRangeEntry(NodeCapabilityFileParser.AssignFrameIdRangeEntryContext ctx) {
         AssignFrameIdRangeEntry entry = new AssignFrameIdRangeEntry();
-        entry.setSlave(new SlaveReference(ctx.slaveReference().getText()));
+        entry.setSlave(new Slave(ctx.slaveName.getText())); // TODO mark as reference
         entry.setStartIndex(Integer.decode(ctx.startIndex.getText()));
         if (ctx.PID0 != null) {
             entry.setLookupIDs(false);
@@ -103,8 +103,8 @@ public class ScheduleTableEntryConverter extends NodeCapabilityFileBaseVisitor<S
     @Override
     public ScheduleTableEntry visitAssignFrameIdEntry(NodeCapabilityFileParser.AssignFrameIdEntryContext ctx) {
         AssignFrameIdEntry entry = new AssignFrameIdEntry();
-        entry.setSlave(new SlaveReference(ctx.slaveReference().getText()));
-        entry.setFrame(new FrameReference(ctx.frameReference().getText()));
+        entry.setSlave(new Slave(ctx.slaveName.getText())); // TODO mark as reference
+        entry.setFrame(new Frame(ctx.frameName.getText())); // TODO mark as reference
         entry.setFrameTime(Double.parseDouble(ctx.frameTime.getText()));
         return entry;
     }

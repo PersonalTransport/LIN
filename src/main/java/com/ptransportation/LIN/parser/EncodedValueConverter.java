@@ -3,6 +3,7 @@ package com.ptransportation.LIN.parser;
 import com.ptransportation.LIN.model.*;
 
 public class EncodedValueConverter extends NodeCapabilityFileBaseVisitor<EncodedValue> {
+
     @Override
     public EncodedValue visitAsciiEncodedValue(NodeCapabilityFileParser.AsciiEncodedValueContext ctx) {
         return new ASCIIEncodedValue();

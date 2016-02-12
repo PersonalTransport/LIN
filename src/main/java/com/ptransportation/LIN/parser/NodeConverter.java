@@ -1,7 +1,7 @@
 package com.ptransportation.LIN.parser;
 
 import com.ptransportation.LIN.model.*;
-
+import org.antlr.v4.runtime.Token;
 
 public class NodeConverter extends NodeCapabilityFileBaseVisitor<Node> {
 
@@ -57,11 +57,6 @@ public class NodeConverter extends NodeCapabilityFileBaseVisitor<Node> {
             node.getEncodings().add(encoding);
         }
 
-        node.setResponseError(new SignalReference(ctx.responseError.getText()));
-
-        for (NodeCapabilityFileParser.SignalReferenceContext signal : ctx.faultStateSignals)
-            node.getFaultStateSignals().add(new SignalReference(signal.getText()));
-
         if (ctx.freeText != null)
             node.setFreeText(ctx.getText().replaceAll("\"", ""));
         return node;
@@ -77,9 +72,6 @@ public class NodeConverter extends NodeCapabilityFileBaseVisitor<Node> {
         node.setBitrate(bitrateConverter.visit(ctx.bitrate));
         node.setTimebase(Double.parseDouble(ctx.timebase.getText()));
         node.setJitter(Double.parseDouble(ctx.jitter.getText()));
-
-        for (NodeCapabilityFileParser.SlaveReferenceContext slave : ctx.slaves)
-            node.getSlaves().add(new SlaveReference(slave.getText()));
 
         for (NodeCapabilityFileParser.FrameContext frameCtx : ctx.frames) {
             Frame frame = frameConverter.visit(frameCtx);

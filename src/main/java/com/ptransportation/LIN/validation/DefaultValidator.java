@@ -8,13 +8,7 @@ import java.util.List;
 public class DefaultValidator extends AbstractValidator {
     public static List<Double> LIN_VERSIONS = Arrays.asList(1.0, 1.1, 1.2, 1.3, 2.0, 2.1, 2.2);
 
-    public void error(String message, Object object, String field) {
-        System.err.println(message);
-    }
 
-    public void error(String message, Object object, String field, int index) {
-        System.err.println(message);
-    }
 
     @Check
     public void checkThatLanguageVersionIsValidLINVersion(NodeCapabilityFile file) {
