@@ -1,8 +1,5 @@
 package com.ptransportation.LIN;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.ptransportation.LIN.model.Master;
 import com.ptransportation.LIN.model.NodeCapabilityFile;
 import com.ptransportation.LIN.parser.NodeCapabilityFileConverter;
 import com.ptransportation.LIN.parser.NodeCapabilityFileLexer;
@@ -11,12 +8,10 @@ import com.ptransportation.LIN.parser.NodeCapabilityFileParser;
 import com.ptransportation.LIN.validation.DefaultValidator;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.misc.Pair;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 
@@ -25,7 +20,7 @@ public class Main {
         List<NodeCapabilityFile> nodeCapabilityFiles = new ArrayList<NodeCapabilityFile>();
         List<NodeCapabilityFileParser.NodeCapabilityFileContext> nodeCapabilityFileContexts = new ArrayList<NodeCapabilityFileParser.NodeCapabilityFileContext>();
 
-        for(String file:args) {
+        for (String file : args) {
             ANTLRInputStream stream = new ANTLRInputStream(new FileInputStream(file));
             stream.name = file;
 
@@ -44,11 +39,11 @@ public class Main {
         }
 
         NodeCapabilityFileLinker linker = new NodeCapabilityFileLinker(nodeCapabilityFiles);
-        for(NodeCapabilityFileParser.NodeCapabilityFileContext context:nodeCapabilityFileContexts)
+        for (NodeCapabilityFileParser.NodeCapabilityFileContext context : nodeCapabilityFileContexts)
             linker.visit(context);
 
         DefaultValidator validator = new DefaultValidator();
-        for(NodeCapabilityFile nodeCapabilityFile:nodeCapabilityFiles) {
+        for (NodeCapabilityFile nodeCapabilityFile : nodeCapabilityFiles) {
             validator.validate(nodeCapabilityFile);
             System.out.println(nodeCapabilityFile.toString());
         }

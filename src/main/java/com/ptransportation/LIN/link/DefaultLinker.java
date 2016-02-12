@@ -2,7 +2,6 @@ package com.ptransportation.LIN.link;
 
 import com.ptransportation.LIN.model.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class DefaultLinker extends AbstractLinker {
@@ -13,7 +12,7 @@ public class DefaultLinker extends AbstractLinker {
     }
 
     public void link() {
-        for(Node node:nodes) {
+        for (Node node : nodes) {
             super.link(node);
         }
     }
@@ -21,12 +20,12 @@ public class DefaultLinker extends AbstractLinker {
     @Link
     public void linkMasterSlaves(Master master) {
         List<Slave> slaves = master.getSlaves();
-        for(int i=0;i<slaves.size();++i) {
+        for (int i = 0; i < slaves.size(); ++i) {
             Slave refSlave = slaves.get(i);
             Slave slave = null;
-            for(Node node:nodes) {
+            for (Node node : nodes) {
                 if (node instanceof Slave && node.getName().equals(refSlave.getName())) {
-                    slave = (Slave)node;
+                    slave = (Slave) node;
                 }
             }
         }
@@ -56,10 +55,10 @@ public class DefaultLinker extends AbstractLinker {
     }*/
 
     private Signal getPublishedSignal(Node node, String name) {
-        for(Frame frame:node.getFrames()) {
-            if(frame.getPublishes()) {
-                for(Signal signal:frame.getSignals())
-                    if(signal.getName().equals(name))
+        for (Frame frame : node.getFrames()) {
+            if (frame.getPublishes()) {
+                for (Signal signal : frame.getSignals())
+                    if (signal.getName().equals(name))
                         return signal;
             }
         }

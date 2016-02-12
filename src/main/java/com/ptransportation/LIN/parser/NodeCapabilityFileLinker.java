@@ -2,7 +2,6 @@ package com.ptransportation.LIN.parser;
 
 
 import com.ptransportation.LIN.model.*;
-import org.antlr.v4.runtime.Token;
 
 import java.util.List;
 
@@ -16,6 +15,10 @@ public class NodeCapabilityFileLinker extends NodeCapabilityFileBaseVisitor<Void
     private ScheduleTable scheduleTable;
     private int entryIndex;
 
+    public NodeCapabilityFileLinker(List<NodeCapabilityFile> nodeCapabilityFiles) {
+        this.nodeCapabilityFiles = nodeCapabilityFiles;
+    }
+
     public void error(String message, Object object, String field) {
         System.err.println(message);
     }
@@ -24,28 +27,24 @@ public class NodeCapabilityFileLinker extends NodeCapabilityFileBaseVisitor<Void
         System.err.println(message);
     }
 
-    public NodeCapabilityFileLinker(List<NodeCapabilityFile> nodeCapabilityFiles) {
-        this.nodeCapabilityFiles = nodeCapabilityFiles;
-    }
-
     @Override
     public Void visitMaster(NodeCapabilityFileParser.MasterContext ctx) {
         node = master = getMaster(ctx.name.getText());
-        for(int i=0;i<ctx.slaves.size();++i) {
+        for (int i = 0; i < ctx.slaves.size(); ++i) {
             String slaveName = ctx.slaves.get(i).getText();
             Slave slave = getSlave(slaveName);
-            if(slave != null)
+            if (slave != null)
                 master.getSlaves().add(slave);
             else
-                error("Slave '"+slaveName+"' was not defined.",master,"slaves",i);
+                error("Slave '" + slaveName + "' was not defined.", master, "slaves", i);
         }
         return super.visitMaster(ctx);
     }
 
     @Override
     public Void visitScheduleTable(NodeCapabilityFileParser.ScheduleTableContext ctx) {
-        scheduleTable = getScheduleTable(master,ctx.name.getText());
-        for(int i=0;i<ctx.entries.size();++i) {
+        scheduleTable = getScheduleTable(master, ctx.name.getText());
+        for (int i = 0; i < ctx.entries.size(); ++i) {
             entryIndex = i;
             visitScheduleTableEntry(ctx.entries.get(i));
         }
@@ -54,13 +53,13 @@ public class NodeCapabilityFileLinker extends NodeCapabilityFileBaseVisitor<Void
 
     @Override
     public Void visitFrameEntry(NodeCapabilityFileParser.FrameEntryContext ctx) {
-        FrameEntry entry = (FrameEntry)scheduleTable.getEntries().get(entryIndex);
+        FrameEntry entry = (FrameEntry) scheduleTable.getEntries().get(entryIndex);
 
         Frame frame = getFrame(ctx.frameName.getText());
-        if(frame != null)
+        if (frame != null)
             entry.setFrame(frame);
         else
-            error("Frame '"+ctx.frameName.getText()+"' was not defined.",entry,"frame");
+            error("Frame '" + ctx.frameName.getText() + "' was not defined.", entry, "frame");
 
         return super.visitFrameEntry(ctx);
     }
@@ -68,58 +67,58 @@ public class NodeCapabilityFileLinker extends NodeCapabilityFileBaseVisitor<Void
 
     @Override
     public Void visitAssignNADEntry(NodeCapabilityFileParser.AssignNADEntryContext ctx) {
-        AssignNADEntry entry = (AssignNADEntry)scheduleTable.getEntries().get(entryIndex);
+        AssignNADEntry entry = (AssignNADEntry) scheduleTable.getEntries().get(entryIndex);
 
         Slave slave = getSlave(ctx.slaveName.getText());
-        if(slave != null)
+        if (slave != null)
             entry.setSlave(slave);
         else
-            error("Slave '"+ctx.slaveName.getText()+"' was not defined.",entry,"slave");
+            error("Slave '" + ctx.slaveName.getText() + "' was not defined.", entry, "slave");
 
         return super.visitAssignNADEntry(ctx);
     }
 
     @Override
     public Void visitSaveConfigurationEntry(NodeCapabilityFileParser.SaveConfigurationEntryContext ctx) {
-        SaveConfigurationEntry entry = (SaveConfigurationEntry)scheduleTable.getEntries().get(entryIndex);
+        SaveConfigurationEntry entry = (SaveConfigurationEntry) scheduleTable.getEntries().get(entryIndex);
 
         Slave slave = getSlave(ctx.slaveName.getText());
-        if(slave != null)
+        if (slave != null)
             entry.setSlave(slave);
         else
-            error("Slave '"+ctx.slaveName.getText()+"' was not defined.",entry,"slave");
+            error("Slave '" + ctx.slaveName.getText() + "' was not defined.", entry, "slave");
 
         return super.visitSaveConfigurationEntry(ctx);
     }
 
     @Override
     public Void visitAssignFrameIdRangeEntry(NodeCapabilityFileParser.AssignFrameIdRangeEntryContext ctx) {
-        AssignFrameIdRangeEntry entry = (AssignFrameIdRangeEntry)scheduleTable.getEntries().get(entryIndex);
+        AssignFrameIdRangeEntry entry = (AssignFrameIdRangeEntry) scheduleTable.getEntries().get(entryIndex);
 
         Slave slave = getSlave(ctx.slaveName.getText());
-        if(slave != null)
+        if (slave != null)
             entry.setSlave(slave);
         else
-            error("Slave '"+ctx.slaveName.getText()+"' was not defined.",entry,"slave");
+            error("Slave '" + ctx.slaveName.getText() + "' was not defined.", entry, "slave");
 
         return super.visitAssignFrameIdRangeEntry(ctx);
     }
 
     @Override
     public Void visitAssignFrameIdEntry(NodeCapabilityFileParser.AssignFrameIdEntryContext ctx) {
-        AssignFrameIdEntry entry = (AssignFrameIdEntry)scheduleTable.getEntries().get(entryIndex);
+        AssignFrameIdEntry entry = (AssignFrameIdEntry) scheduleTable.getEntries().get(entryIndex);
 
         Slave slave = getSlave(ctx.slaveName.getText());
-        if(slave != null)
+        if (slave != null)
             entry.setSlave(slave);
         else
-            error("Slave '"+ctx.slaveName.getText()+"' was not defined.",entry,"slave");
+            error("Slave '" + ctx.slaveName.getText() + "' was not defined.", entry, "slave");
 
         Frame frame = getFrame(ctx.frameName.getText());
-        if(frame != null)
+        if (frame != null)
             entry.setFrame(frame);
         else
-            error("Frame '"+ctx.frameName.getText()+"' was not defined.",entry,"frame");
+            error("Frame '" + ctx.frameName.getText() + "' was not defined.", entry, "frame");
 
         return super.visitAssignFrameIdEntry(ctx);
     }
@@ -128,19 +127,19 @@ public class NodeCapabilityFileLinker extends NodeCapabilityFileBaseVisitor<Void
     public Void visitSlave(NodeCapabilityFileParser.SlaveContext ctx) {
         node = slave = getSlave(ctx.name.getText());
 
-        Signal responseError = getSignal(slave,ctx.responseError.getText());
-        if(responseError != null)
+        Signal responseError = getSignal(slave, ctx.responseError.getText());
+        if (responseError != null)
             slave.setResponseError(responseError);
         else
-            error("Signal '"+ctx.responseError.getText()+"' was not defined.",slave,"responseError");
+            error("Signal '" + ctx.responseError.getText() + "' was not defined.", slave, "responseError");
 
-        for(int i=0;i<ctx.faultStateSignals.size();i++) {
+        for (int i = 0; i < ctx.faultStateSignals.size(); i++) {
             String faultStateSignalName = ctx.faultStateSignals.get(i).getText();
-            Signal faultStateSignal = getSignal(slave,faultStateSignalName);
-            if(faultStateSignal != null)
+            Signal faultStateSignal = getSignal(slave, faultStateSignalName);
+            if (faultStateSignal != null)
                 slave.getFaultStateSignals().add(faultStateSignal);
             else
-                error("Signal '"+faultStateSignalName+"' was not defined.",slave,"faultStateSignals",i);
+                error("Signal '" + faultStateSignalName + "' was not defined.", slave, "faultStateSignals", i);
         }
 
         return super.visitSlave(ctx);
@@ -148,7 +147,7 @@ public class NodeCapabilityFileLinker extends NodeCapabilityFileBaseVisitor<Void
 
     @Override
     public Void visitFrame(NodeCapabilityFileParser.FrameContext ctx) {
-        frame = getFrame(node,ctx.name.getText());
+        frame = getFrame(node, ctx.name.getText());
         return super.visitFrame(ctx);
     }
 
@@ -156,22 +155,22 @@ public class NodeCapabilityFileLinker extends NodeCapabilityFileBaseVisitor<Void
     public Void visitSignal(NodeCapabilityFileParser.SignalContext ctx) {
         Signal signal = getSignal(frame, ctx.name.getText());
 
-        if(ctx.encodingName != null) {
+        if (ctx.encodingName != null) {
             String encodingName = ctx.encodingName.getText();
-            Encoding encoding = getEncoding(node,encodingName);
-            if(encoding != null)
+            Encoding encoding = getEncoding(node, encodingName);
+            if (encoding != null)
                 signal.setEncoding(encoding);
             else
-                error("Encoding '"+encodingName+"' was not defined.", signal,"encoding");
+                error("Encoding '" + encodingName + "' was not defined.", signal, "encoding");
         }
         return super.visitSignal(ctx);
     }
 
     private Master getMaster(String name) {
-        for(NodeCapabilityFile file:nodeCapabilityFiles) {
-            if(file.getNode() instanceof Master) {
+        for (NodeCapabilityFile file : nodeCapabilityFiles) {
+            if (file.getNode() instanceof Master) {
                 Master master = (Master) file.getNode();
-                if(master.getName().equals(name))
+                if (master.getName().equals(name))
                     return master;
             }
         }
@@ -179,32 +178,32 @@ public class NodeCapabilityFileLinker extends NodeCapabilityFileBaseVisitor<Void
     }
 
     private Slave getSlave(String name) {
-        for(NodeCapabilityFile file:nodeCapabilityFiles) {
-            if(file.getNode() instanceof Slave) {
-                Slave slave = (Slave)file.getNode();
-                if(slave.getName().equals(name))
+        for (NodeCapabilityFile file : nodeCapabilityFiles) {
+            if (file.getNode() instanceof Slave) {
+                Slave slave = (Slave) file.getNode();
+                if (slave.getName().equals(name))
                     return slave;
             }
         }
         return null;
     }
 
-    private Frame getFrame(Node node,String name) {
-        for(Frame frame:node.getFrames()) {
-            if(frame.getName().equals(name))
+    private Frame getFrame(Node node, String name) {
+        for (Frame frame : node.getFrames()) {
+            if (frame.getName().equals(name))
                 return frame;
         }
         return null;
     }
 
-    private Signal getSignal(Frame frame,String name) {
+    private Signal getSignal(Frame frame, String name) {
         for (Signal signal : frame.getSignals())
             if (signal.getName().equals(name))
                 return signal;
         return null;
     }
 
-    private Signal getSignal(Node node,String name) {
+    private Signal getSignal(Node node, String name) {
         for (Frame frame : node.getFrames()) {
             for (Signal signal : frame.getSignals())
                 if (signal.getName().equals(name))
@@ -213,7 +212,7 @@ public class NodeCapabilityFileLinker extends NodeCapabilityFileBaseVisitor<Void
         return null;
     }
 
-    private Encoding getEncoding(Node node,String name) {
+    private Encoding getEncoding(Node node, String name) {
         for (Encoding encoding : node.getEncodings()) {
             if (encoding.getName().equals(name))
                 return encoding;
@@ -222,18 +221,18 @@ public class NodeCapabilityFileLinker extends NodeCapabilityFileBaseVisitor<Void
     }
 
     private ScheduleTable getScheduleTable(Master master, String name) {
-        for(ScheduleTable scheduleTable:master.getScheduleTables()) {
-            if(scheduleTable.getName().equals(name))
+        for (ScheduleTable scheduleTable : master.getScheduleTables()) {
+            if (scheduleTable.getName().equals(name))
                 return scheduleTable;
         }
         return null;
     }
 
     private Frame getFrame(String name) {
-        for(NodeCapabilityFile file:nodeCapabilityFiles) {
-            for(Frame frame:file.getNode().getFrames()) {
-                if(frame.getPublishes() && frame.getName().equals(name))
-                    return  frame;
+        for (NodeCapabilityFile file : nodeCapabilityFiles) {
+            for (Frame frame : file.getNode().getFrames()) {
+                if (frame.getPublishes() && frame.getName().equals(name))
+                    return frame;
             }
         }
         return null;

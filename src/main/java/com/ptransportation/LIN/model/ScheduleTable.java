@@ -36,8 +36,8 @@ public class ScheduleTable {
     @Override
     public String toString() {
         String s = getName() + " {\n";
-        for(ScheduleTableEntry entry:getEntries())
-            s += "\t" + entry.toString().replaceAll("\n","\n\t") + "\n";
+        for (ScheduleTableEntry entry : getEntries())
+            s += "\t" + entry.toString().replaceAll("\n", "\n\t") + "\n";
         return s + "}";
     }
 }

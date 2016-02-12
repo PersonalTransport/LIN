@@ -49,7 +49,7 @@ public class PhysicalEncodedValue extends EncodedValue {
 
     @Override
     public String toString() {
-        return "physical_value, "+minValue+", "+maxValue+", "+scale+", "+offset+((getTextInfo() != null) ? ", \""+getTextInfo()+"\"" : "");
+        return "physical_value, " + minValue + ", " + maxValue + ", " + scale + ", " + offset + ((getTextInfo() != null) ? ", \"" + getTextInfo() + "\"" : "");
     }
 
 }

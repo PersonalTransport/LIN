@@ -9,14 +9,6 @@ import java.lang.reflect.Method;
 public abstract class AbstractValidator {
     private PropertyWalker walker;
 
-    public void error(String message, Object object, String field) {
-        System.err.println(message);
-    }
-
-    public void error(String message, Object object, String field, int index) {
-        System.err.println(message);
-    }
-
     public AbstractValidator() {
         this.walker = new PropertyWalker();
         this.walker.addPropertyListener(new IPropertyListener() {
@@ -25,6 +17,14 @@ public abstract class AbstractValidator {
                 runChecks(propertyValue);
             }
         });
+    }
+
+    public void error(String message, Object object, String field) {
+        System.err.println(message);
+    }
+
+    public void error(String message, Object object, String field, int index) {
+        System.err.println(message);
     }
 
     public void validate(Object object) {

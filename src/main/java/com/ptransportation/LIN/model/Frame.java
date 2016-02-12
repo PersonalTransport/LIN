@@ -90,14 +90,14 @@ public class Frame {
     @Override
     public String toString() {
         String s = (getPublishes() ? "publish" : "subscribe") + getName() + " {\n";
-        s += "\tlength = "+getLength()+";\n";
-        s += "\tmin_period = "+getMinPeriod()+";\n";
-        s += "\tmax_period = "+getMaxPeriod()+";\n";
-        if(getEventTriggeredFrame() != null)
-            s += "\tevent_triggered_frame = "+getEventTriggeredFrame().getName()+";\n";
+        s += "\tlength = " + getLength() + ";\n";
+        s += "\tmin_period = " + getMinPeriod() + ";\n";
+        s += "\tmax_period = " + getMaxPeriod() + ";\n";
+        if (getEventTriggeredFrame() != null)
+            s += "\tevent_triggered_frame = " + getEventTriggeredFrame().getName() + ";\n";
         s += "\tsignals {\n";
-        for(Signal signal:getSignals())
-            s += "\t\t" + signal.toString().replaceAll("\n","\n\t\t") + "\n";
+        for (Signal signal : getSignals())
+            s += "\t\t" + signal.toString().replaceAll("\n", "\n\t\t") + "\n";
         s += "}\n";
         return s;
     }

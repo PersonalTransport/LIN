@@ -17,8 +17,8 @@ public class ArraySignalValue extends SignalValue {
     @Override
     public String toString() {
         String s = "{ ";
-        for(int i=0;i<values.size()-1;++i)
-            s += "0x"+Integer.toHexString(values.get(i)) + ", ";
-        return s + values.get(values.size()-1) + "}";
+        for (int i = 0; i < values.size() - 1; ++i)
+            s += "0x" + Integer.toHexString(values.get(i)) + ", ";
+        return s + values.get(values.size() - 1) + "}";
     }
 }

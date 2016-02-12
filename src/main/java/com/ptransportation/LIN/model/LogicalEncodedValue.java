@@ -22,6 +22,6 @@ public class LogicalEncodedValue extends EncodedValue {
 
     @Override
     public String toString() {
-        return "logical_value, "+value+((getTextInfo() != null) ? ", \""+getTextInfo()+"\"" : "");
+        return "logical_value, " + value + ((getTextInfo() != null) ? ", \"" + getTextInfo() + "\"" : "");
     }
 }

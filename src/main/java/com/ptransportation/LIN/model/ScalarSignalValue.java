@@ -13,6 +13,6 @@ public class ScalarSignalValue extends SignalValue {
 
     @Override
     public String toString() {
-        return "0x"+Integer.toHexString(value);
+        return "0x" + Integer.toHexString(value);
     }
 }

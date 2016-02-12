@@ -1,6 +1,5 @@
 package com.ptransportation.LIN.parser;
 
-import com.ptransportation.LIN.model.Encoding;
 import com.ptransportation.LIN.model.Frame;
 import com.ptransportation.LIN.model.Signal;
 

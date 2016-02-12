@@ -22,6 +22,6 @@ public class AssignFrameIdEntry extends ScheduleTableEntry {
 
     @Override
     public String toString() {
-        return "AssignFrameId { " + slave.getName()+", "+frame.getName()+" } delay "+getFrameTime()+" ms;";
+        return "AssignFrameId { " + slave.getName() + ", " + frame.getName() + " } delay " + getFrameTime() + " ms;";
     }
 }

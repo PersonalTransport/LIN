@@ -13,6 +13,6 @@ public class FrameEntry extends ScheduleTableEntry {
 
     @Override
     public String toString() {
-        return frame.getName()+" delay " + getFrameTime() + " ms;";
+        return frame.getName() + " delay " + getFrameTime() + " ms;";
     }
 }

@@ -71,8 +71,8 @@ public class AssignFrameIdRangeEntry extends ScheduleTableEntry {
 
     @Override
     public String toString() {
-        return "AssignFrameIdRange { " + slave.getName()+", "+startIndex
-                +(isLookupIDs()?", "+PID0+", "+PID1+", "+PID2+", "+PID3:"")
-                +" } delay "+getFrameTime()+" ms;";
+        return "AssignFrameIdRange { " + slave.getName() + ", " + startIndex
+                + (isLookupIDs() ? ", " + PID0 + ", " + PID1 + ", " + PID2 + ", " + PID3 : "")
+                + " } delay " + getFrameTime() + " ms;";
     }
 }

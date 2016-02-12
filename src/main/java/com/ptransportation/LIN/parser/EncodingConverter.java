@@ -1,6 +1,5 @@
 package com.ptransportation.LIN.parser;
 
-import com.ptransportation.LIN.model.EncodedValue;
 import com.ptransportation.LIN.model.Encoding;
 
 public class EncodingConverter extends NodeCapabilityFileBaseVisitor<Encoding> {

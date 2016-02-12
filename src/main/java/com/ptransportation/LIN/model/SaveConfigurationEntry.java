@@ -13,6 +13,6 @@ public class SaveConfigurationEntry extends ScheduleTableEntry {
 
     @Override
     public String toString() {
-        return "SaveConfiguration { " + slave.getName()+ " } delay "+getFrameTime()+" ms;";
+        return "SaveConfiguration { " + slave.getName() + " } delay " + getFrameTime() + " ms;";
     }
 }

@@ -22,6 +22,6 @@ public class NadRange extends NadSet {
 
     @Override
     public String toString() {
-        return "0x"+Integer.toHexString(getMinValue()) +" to 0x"+Integer.toHexString(getMaxValue());
+        return "0x" + Integer.toHexString(getMinValue()) + " to 0x" + Integer.toHexString(getMaxValue());
     }
 }

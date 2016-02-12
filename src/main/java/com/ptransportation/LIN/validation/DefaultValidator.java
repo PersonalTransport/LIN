@@ -9,7 +9,6 @@ public class DefaultValidator extends AbstractValidator {
     public static List<Double> LIN_VERSIONS = Arrays.asList(1.0, 1.1, 1.2, 1.3, 2.0, 2.1, 2.2);
 
 
-
     @Check
     public void checkThatLanguageVersionIsValidLINVersion(NodeCapabilityFile file) {
         if (!LIN_VERSIONS.contains(file.getLanguageVersion()))

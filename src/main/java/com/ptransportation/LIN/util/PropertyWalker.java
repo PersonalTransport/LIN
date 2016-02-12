@@ -32,8 +32,7 @@ public class PropertyWalker {
                     walk(null, name + "[" + i + "]", o, alreadyWalked);
                 i++;
             }
-        }
-        else {
+        } else {
             walk(null, name, object, alreadyWalked);
         }
     }

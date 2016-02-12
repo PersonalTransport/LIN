@@ -1,7 +1,6 @@
 package com.ptransportation.LIN.parser;
 
 import com.ptransportation.LIN.model.*;
-import org.antlr.v4.runtime.Token;
 
 public class NodeConverter extends NodeCapabilityFileBaseVisitor<Node> {
 
