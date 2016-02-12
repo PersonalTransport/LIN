@@ -59,4 +59,15 @@ public class Signal {
     public void setEncoding(Encoding encoding) {
         this.encoding = encoding;
     }
+
+    @Override
+    public String toString() {
+        String s = getName() + " {\n";
+        s += "\tsize = "+getSize()+";\n";
+        s += "\tinit_value = "+getInitialValue()+";\n";
+        s += "\toffset = "+getOffset()+";\n";
+        if(encoding != null)
+            s += "\t"+getEncoding().getName()+";\n";
+        return s + "}";
+    }
 }

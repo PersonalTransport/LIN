@@ -10,4 +10,9 @@ public class ScalarSignalValue extends SignalValue {
     public void setValue(int value) {
         this.value = value;
     }
+
+    @Override
+    public String toString() {
+        return "0x"+Integer.toHexString(value);
+    }
 }

@@ -10,4 +10,9 @@ public class FrameEntry extends ScheduleTableEntry {
     public void setFrame(Frame frame) {
         this.frame = frame;
     }
+
+    @Override
+    public String toString() {
+        return frame.getName()+" delay " + getFrameTime() + " ms;";
+    }
 }

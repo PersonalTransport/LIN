@@ -10,4 +10,9 @@ public class AssignNADEntry extends ScheduleTableEntry {
     public void setSlave(Slave slave) {
         this.slave = slave;
     }
+
+    @Override
+    public String toString() {
+        return "AssignNAD { " + slave.getName()+ " } delay "+getFrameTime()+" ms;";
+    }
 }

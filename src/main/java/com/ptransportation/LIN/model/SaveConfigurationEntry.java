@@ -10,4 +10,9 @@ public class SaveConfigurationEntry extends ScheduleTableEntry {
     public void setSlave(Slave slave) {
         this.slave = slave;
     }
+
+    @Override
+    public String toString() {
+        return "SaveConfiguration { " + slave.getName()+ " } delay "+getFrameTime()+" ms;";
+    }
 }

@@ -20,4 +20,8 @@ public class AutomaticBitrate extends Bitrate {
         this.maxValue = maxValue;
     }
 
+    @Override
+    public String toString() {
+        return "automatic min " + minValue + " kbps max " + maxValue + " kbps";
+    }
 }

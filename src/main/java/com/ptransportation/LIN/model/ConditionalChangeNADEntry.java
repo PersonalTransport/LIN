@@ -55,4 +55,10 @@ public class ConditionalChangeNADEntry extends ScheduleTableEntry {
     public void setNewNAD(int newNAD) {
         this.newNAD = newNAD;
     }
+
+    @Override
+    public String toString() {
+        return "ConditionalChangeNAD { " + NAD + ", " + id + ", " + byte_ + ", " + mask + ", " + inv + ", " + newNAD + " } delay "
+                + getFrameTime()+" ms;";
+    }
 }

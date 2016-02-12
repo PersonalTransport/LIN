@@ -19,4 +19,9 @@ public class LogicalEncodedValue extends EncodedValue {
     public void setTextInfo(String textInfo) {
         this.textInfo = textInfo;
     }
+
+    @Override
+    public String toString() {
+        return "logical_value, "+value+((getTextInfo() != null) ? ", \""+getTextInfo()+"\"" : "");
+    }
 }

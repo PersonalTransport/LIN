@@ -1,6 +1,8 @@
 package com.ptransportation.LIN.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class Encoding {
@@ -31,5 +33,13 @@ public class Encoding {
 
     public List<EncodedValue> getEncodedValues() {
         return this.encodedValues;
+    }
+
+    @Override
+    public String toString() {
+        String s = getName() + " {\n";
+        for(EncodedValue value:this.encodedValues)
+            s += "\t" + value.toString() + ";\n";
+        return s + "}";
     }
 }

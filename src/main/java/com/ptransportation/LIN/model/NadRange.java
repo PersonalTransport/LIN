@@ -20,4 +20,8 @@ public class NadRange extends NadSet {
         this.maxValue = maxValue;
     }
 
+    @Override
+    public String toString() {
+        return "0x"+Integer.toHexString(getMinValue()) +" to 0x"+Integer.toHexString(getMaxValue());
+    }
 }

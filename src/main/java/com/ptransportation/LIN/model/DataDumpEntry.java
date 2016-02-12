@@ -55,4 +55,10 @@ public class DataDumpEntry extends ScheduleTableEntry {
     public void setD5(int d5) {
         this.d5 = d5;
     }
+
+    @Override
+    public String toString() {
+        return "DataDump { " + slave.getName() + ", " + d1 + ", " + d2 + ", " + d3 + ", " + d4 + ", " + d5 + " } delay "
+                + getFrameTime() + " ms;";
+    }
 }

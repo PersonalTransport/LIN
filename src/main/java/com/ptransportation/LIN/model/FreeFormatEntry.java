@@ -73,4 +73,10 @@ public class FreeFormatEntry extends ScheduleTableEntry {
     public void setD8(int d8) {
         this.d8 = d8;
     }
+
+    @Override
+    public String toString() {
+        return "FreeFormat { " + d1 + ", " + d2 + ", " + d3 + ", " + d4 + ", " + d5 + ", " + d6 + ", " + d7 + ", " + d8 + " } delay "
+                + getFrameTime()+" ms;";
+    }
 }

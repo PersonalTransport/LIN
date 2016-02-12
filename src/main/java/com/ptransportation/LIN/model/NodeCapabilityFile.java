@@ -19,4 +19,13 @@ public class NodeCapabilityFile {
     public void setNode(Node node) {
         this.node = node;
     }
+
+    @Override
+    public String toString() {
+        String s = "";
+        s += "node_capability_file;\n";
+        s += "LIN_language_version = \""+languageVersion+"\";\n";
+        s += getNode().toString()+"\n";
+        return s;
+    }
 }

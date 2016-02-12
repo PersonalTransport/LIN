@@ -32,4 +32,12 @@ public class ScheduleTable {
     public List<ScheduleTableEntry> getEntries() {
         return entries;
     }
+
+    @Override
+    public String toString() {
+        String s = getName() + " {\n";
+        for(ScheduleTableEntry entry:getEntries())
+            s += "\t" + entry.toString().replaceAll("\n","\n\t") + "\n";
+        return s + "}";
+    }
 }
