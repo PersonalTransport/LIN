@@ -13,6 +13,9 @@ public class Frame {
     private Frame eventTriggeredFrame;
     private List<Signal> signals;
 
+    // TODO minPeriod?
+    // TODO maxPeriod?
+
     public Frame(String name) {
         this.name = name;
         this.signals = new ArrayList<Signal>();

@@ -1,6 +1,7 @@
 package com.ptransportation.LIN.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -19,7 +20,11 @@ public class Slave extends Node {
 
     public Slave(String name) {
         super(name);
-        this.supportedSIDS = new ArrayList<Integer>();
+        this.p2Min = 50;
+        this.nAsTimeout = 1000;
+        this.nCrTimeout = 1000;
+        this.supportedSIDS = Arrays.asList(0xB2, 0xB7); // TODO use constants
+        this.maxMessageLength = 4095;
         this.faultStateSignals = new ArrayList<Signal>();
     }
 

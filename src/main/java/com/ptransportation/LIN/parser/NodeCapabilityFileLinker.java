@@ -21,6 +21,7 @@ public class NodeCapabilityFileLinker extends NodeCapabilityFileBaseVisitor<Void
         this.errorModel = errorModel;
     }
 
+    // TODO check that subscribed frames,signals,and encodings match published frames,signals,and encodings.
     public void link(List<NodeCapabilityFileParser.NodeCapabilityFileContext> nodeCapabilityFileContexts, List<NodeCapabilityFile> nodeCapabilityFiles) {
         this.nodeCapabilityFiles = nodeCapabilityFiles;
         for (NodeCapabilityFileParser.NodeCapabilityFileContext fileContext : nodeCapabilityFileContexts)
