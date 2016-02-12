@@ -17,6 +17,8 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) throws IOException {
+        ErrorModel errorModel = new ErrorModel();
+
         List<NodeCapabilityFile> nodeCapabilityFiles = new ArrayList<NodeCapabilityFile>();
         List<NodeCapabilityFileParser.NodeCapabilityFileContext> nodeCapabilityFileContexts = new ArrayList<NodeCapabilityFileParser.NodeCapabilityFileContext>();
 
@@ -28,7 +30,6 @@ public class Main {
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             NodeCapabilityFileParser parser = new NodeCapabilityFileParser(tokens);
 
-
             NodeCapabilityFileParser.NodeCapabilityFileContext context = parser.nodeCapabilityFile();
 
             NodeCapabilityFileConverter converter = new NodeCapabilityFileConverter();
@@ -38,11 +39,11 @@ public class Main {
             nodeCapabilityFileContexts.add(context);
         }
 
-        NodeCapabilityFileLinker linker = new NodeCapabilityFileLinker(nodeCapabilityFiles);
+        NodeCapabilityFileLinker linker = new NodeCapabilityFileLinker(nodeCapabilityFiles, errorModel);
         for (NodeCapabilityFileParser.NodeCapabilityFileContext context : nodeCapabilityFileContexts)
             linker.visit(context);
 
-        DefaultValidator validator = new DefaultValidator();
+        DefaultValidator validator = new DefaultValidator(errorModel);
         for (NodeCapabilityFile nodeCapabilityFile : nodeCapabilityFiles) {
             validator.validate(nodeCapabilityFile);
             System.out.println(nodeCapabilityFile.toString());

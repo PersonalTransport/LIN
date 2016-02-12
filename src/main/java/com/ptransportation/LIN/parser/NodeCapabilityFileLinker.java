@@ -1,12 +1,14 @@
 package com.ptransportation.LIN.parser;
 
 
+import com.ptransportation.LIN.ErrorModel;
 import com.ptransportation.LIN.model.*;
 
 import java.util.List;
 
 public class NodeCapabilityFileLinker extends NodeCapabilityFileBaseVisitor<Void> {
     private List<NodeCapabilityFile> nodeCapabilityFiles;
+    private ErrorModel errorModel;
 
     private Node node;
     private Slave slave;
@@ -15,16 +17,17 @@ public class NodeCapabilityFileLinker extends NodeCapabilityFileBaseVisitor<Void
     private ScheduleTable scheduleTable;
     private int entryIndex;
 
-    public NodeCapabilityFileLinker(List<NodeCapabilityFile> nodeCapabilityFiles) {
+    public NodeCapabilityFileLinker(List<NodeCapabilityFile> nodeCapabilityFiles, ErrorModel errorModel) {
         this.nodeCapabilityFiles = nodeCapabilityFiles;
+        this.errorModel = errorModel;
     }
 
     public void error(String message, Object object, String field) {
-        System.err.println(message);
+        errorModel.error(message,object,field);
     }
 
     public void error(String message, Object object, String field, int index) {
-        System.err.println(message);
+        errorModel.error(message,object,field,index);
     }
 
     @Override

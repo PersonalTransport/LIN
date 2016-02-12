@@ -1,5 +1,6 @@
 package com.ptransportation.LIN.validation;
 
+import com.ptransportation.LIN.ErrorModel;
 import com.ptransportation.LIN.util.IPropertyListener;
 import com.ptransportation.LIN.util.PropertyWalker;
 
@@ -8,8 +9,10 @@ import java.lang.reflect.Method;
 
 public abstract class AbstractValidator {
     private PropertyWalker walker;
+    private ErrorModel errorModel;
 
-    public AbstractValidator() {
+    public AbstractValidator(ErrorModel errorModel) {
+        this.errorModel = errorModel;
         this.walker = new PropertyWalker();
         this.walker.addPropertyListener(new IPropertyListener() {
             @Override
@@ -20,11 +23,11 @@ public abstract class AbstractValidator {
     }
 
     public void error(String message, Object object, String field) {
-        System.err.println(message);
+        errorModel.error(message,object,field);
     }
 
     public void error(String message, Object object, String field, int index) {
-        System.err.println(message);
+        errorModel.error(message,object,field,index);
     }
 
     public void validate(Object object) {
@@ -35,7 +38,6 @@ public abstract class AbstractValidator {
         for (Method method : this.getClass().getMethods()) {
             if (method.isAnnotationPresent(Check.class)) {
                 Check check = method.getAnnotation(Check.class);
-                //if (!(object instanceof Reference) || check.checkReference()) { // TODO check if reference
                 Class<?>[] parameters = method.getParameterTypes();
                 if (parameters.length == 1 && parameters[0].isAssignableFrom(object.getClass())) {
                     try {
@@ -46,7 +48,6 @@ public abstract class AbstractValidator {
                         e.printStackTrace();
                     }
                 }
-                //}
             }
         }
     }

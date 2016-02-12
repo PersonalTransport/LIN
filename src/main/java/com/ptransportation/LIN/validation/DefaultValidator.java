@@ -1,5 +1,6 @@
 package com.ptransportation.LIN.validation;
 
+import com.ptransportation.LIN.ErrorModel;
 import com.ptransportation.LIN.model.*;
 
 import java.util.Arrays;
@@ -8,6 +9,9 @@ import java.util.List;
 public class DefaultValidator extends AbstractValidator {
     public static List<Double> LIN_VERSIONS = Arrays.asList(1.0, 1.1, 1.2, 1.3, 2.0, 2.1, 2.2);
 
+    public DefaultValidator(ErrorModel errorModel) {
+        super(errorModel);
+    }
 
     @Check
     public void checkThatLanguageVersionIsValidLINVersion(NodeCapabilityFile file) {
