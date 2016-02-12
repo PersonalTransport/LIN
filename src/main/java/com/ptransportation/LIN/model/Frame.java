@@ -89,7 +89,7 @@ public class Frame {
 
     @Override
     public String toString() {
-        String s = (getPublishes() ? "publish" : "subscribe") + getName() + " {\n";
+        String s = (getPublishes() ? "publish " : "subscribe ") + getName() + " {\n";
         s += "\tlength = " + getLength() + ";\n";
         s += "\tmin_period = " + getMinPeriod() + ";\n";
         s += "\tmax_period = " + getMaxPeriod() + ";\n";
