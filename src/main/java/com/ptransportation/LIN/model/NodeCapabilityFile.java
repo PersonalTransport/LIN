@@ -25,7 +25,7 @@ public class NodeCapabilityFile {
         String s = "";
         s += "node_capability_file;\n";
         s += "LIN_language_version = \"" + languageVersion + "\";\n";
-        s += getNode().toString() + "\n";
+        s += getNode().toString();
         return s;
     }
 }
