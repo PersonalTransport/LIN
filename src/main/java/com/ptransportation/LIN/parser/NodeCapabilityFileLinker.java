@@ -17,17 +17,21 @@ public class NodeCapabilityFileLinker extends NodeCapabilityFileBaseVisitor<Void
     private ScheduleTable scheduleTable;
     private int entryIndex;
 
-    public NodeCapabilityFileLinker(List<NodeCapabilityFile> nodeCapabilityFiles, ErrorModel errorModel) {
-        this.nodeCapabilityFiles = nodeCapabilityFiles;
+    public NodeCapabilityFileLinker(ErrorModel errorModel) {
         this.errorModel = errorModel;
     }
 
-    public void error(String message, Object object, String field) {
-        errorModel.error(message,object,field);
-    }
-
-    public void error(String message, Object object, String field, int index) {
-        errorModel.error(message,object,field,index);
+    public void link(List<NodeCapabilityFileParser.NodeCapabilityFileContext> nodeCapabilityFileContexts, List<NodeCapabilityFile> nodeCapabilityFiles) {
+        this.nodeCapabilityFiles = nodeCapabilityFiles;
+        for(NodeCapabilityFileParser.NodeCapabilityFileContext fileContext:nodeCapabilityFileContexts)
+            this.visit(fileContext);
+        this.nodeCapabilityFiles = null;
+        this.node = null;
+        this.slave = null;
+        this.master = null;
+        this.frame = null;
+        this.scheduleTable = null;
+        this.entryIndex = 0;
     }
 
     @Override
@@ -239,5 +243,13 @@ public class NodeCapabilityFileLinker extends NodeCapabilityFileBaseVisitor<Void
             }
         }
         return null;
+    }
+
+    protected void error(String message, Object object, String field) {
+        errorModel.error(message,object,field);
+    }
+
+    protected void error(String message, Object object, String field, int index) {
+        errorModel.error(message,object,field,index);
     }
 }

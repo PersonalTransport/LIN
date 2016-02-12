@@ -39,15 +39,11 @@ public class Main {
             nodeCapabilityFileContexts.add(context);
         }
 
-        NodeCapabilityFileLinker linker = new NodeCapabilityFileLinker(nodeCapabilityFiles, errorModel);
-        for (NodeCapabilityFileParser.NodeCapabilityFileContext context : nodeCapabilityFileContexts)
-            linker.visit(context);
+        NodeCapabilityFileLinker linker = new NodeCapabilityFileLinker(errorModel);
+        linker.link(nodeCapabilityFileContexts,nodeCapabilityFiles);
 
         DefaultValidator validator = new DefaultValidator(errorModel);
-        for (NodeCapabilityFile nodeCapabilityFile : nodeCapabilityFiles) {
-            validator.validate(nodeCapabilityFile);
-            System.out.println(nodeCapabilityFile.toString());
-        }
+        validator.validate(nodeCapabilityFiles);
     }
 
 }
