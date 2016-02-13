@@ -147,6 +147,8 @@ public class DefaultValidator extends AbstractValidator {
                 error("Frame can not contain a null signal.", frame, "signals", i);
     }
 
+    // TODO check that signals do not overlap!
+
     @Check
     public void checkThatFrameEntryFrameIsNotNull(FrameEntry entry) {
         if (entry.getFrame() == null)

@@ -49,32 +49,6 @@ public class Compiler {
         compiler.compile(compilerOptions);
     }
 
-    private static List<NodeCapabilityFile> generateModel(List<String> sourceFiles, ErrorModel errorModel) throws IOException {
-        List<NodeCapabilityFile> nodeCapabilityFiles = new ArrayList<NodeCapabilityFile>();
-        List<NodeCapabilityFileParser.NodeCapabilityFileContext> nodeCapabilityFileContexts = new ArrayList<NodeCapabilityFileParser.NodeCapabilityFileContext>();
-
-        for (String file : sourceFiles) {
-            ANTLRInputStream stream = new ANTLRInputStream(new FileInputStream(file));
-            stream.name = file;
-
-            NodeCapabilityFileLexer lexer = new NodeCapabilityFileLexer(stream);
-            CommonTokenStream tokens = new CommonTokenStream(lexer);
-            NodeCapabilityFileParser parser = new NodeCapabilityFileParser(tokens);
-
-            NodeCapabilityFileParser.NodeCapabilityFileContext context = parser.nodeCapabilityFile();
-
-            NodeCapabilityFileConverter converter = new NodeCapabilityFileConverter();
-            NodeCapabilityFile nodeCapabilityFile = converter.visit(context);
-
-            nodeCapabilityFiles.add(nodeCapabilityFile);
-            nodeCapabilityFileContexts.add(context);
-        }
-
-        NodeCapabilityFileLinker linker = new NodeCapabilityFileLinker(errorModel);
-        linker.link(nodeCapabilityFileContexts, nodeCapabilityFiles);
-        return nodeCapabilityFiles;
-    }
-
     private void compile(CompilerOptions compilerOptions) throws IOException {
         ErrorModel errorModel = new ErrorModel();
         DefaultValidator validator = new DefaultValidator(errorModel);
@@ -105,7 +79,8 @@ public class Compiler {
             for (NodeCapabilityFile nodeCapabilityFile : nodeCapabilityFiles) {
                 if (nodeCapabilityFile.getNode() instanceof Slave) {
                     validator.validate(nodeCapabilityFile);
-                    generateDriver(target, inf, outputDir, nodeCapabilityFile.getNode());
+                    if(errorModel.getErrorCount() == 0)
+                        generateDriver(target, inf, outputDir, nodeCapabilityFile.getNode());
                     return; // TODO check for -s flag.
                 }
             }
@@ -119,11 +94,44 @@ public class Compiler {
             for (NodeCapabilityFile nodeCapabilityFile : nodeCapabilityFiles) {
                 if (nodeCapabilityFile.getNode() instanceof Master) {
                     validator.validate(nodeCapabilityFile);
-                    generateDriver(target, inf, outputDir, nodeCapabilityFile.getNode());
+                    if(errorModel.getErrorCount() == 0)
+                        generateDriver(target, inf, outputDir, nodeCapabilityFile.getNode());
                     return; // TODO check for more than one master.
                 }
             }
         }
+    }
+
+    private static List<NodeCapabilityFile> generateModel(List<String> sourceFiles, ErrorModel errorModel) throws IOException {
+        List<NodeCapabilityFile> nodeCapabilityFiles = new ArrayList<NodeCapabilityFile>();
+        List<NodeCapabilityFileParser.NodeCapabilityFileContext> nodeCapabilityFileContexts = new ArrayList<NodeCapabilityFileParser.NodeCapabilityFileContext>();
+
+        for (String file : sourceFiles) {
+            ANTLRInputStream stream = new ANTLRInputStream(new FileInputStream(file));
+            stream.name = file;
+
+            NodeCapabilityFileLexer lexer = new NodeCapabilityFileLexer(stream);
+            CommonTokenStream tokens = new CommonTokenStream(lexer);
+            NodeCapabilityFileParser parser = new NodeCapabilityFileParser(tokens);
+
+            lexer.removeErrorListeners();
+            parser.removeErrorListeners();
+
+            lexer.addErrorListener(errorModel);
+            parser.addErrorListener(errorModel);
+
+            NodeCapabilityFileParser.NodeCapabilityFileContext context = parser.nodeCapabilityFile();
+
+            NodeCapabilityFileConverter converter = new NodeCapabilityFileConverter();
+            NodeCapabilityFile nodeCapabilityFile = converter.visit(context);
+
+            nodeCapabilityFiles.add(nodeCapabilityFile);
+            nodeCapabilityFileContexts.add(context);
+        }
+
+        NodeCapabilityFileLinker linker = new NodeCapabilityFileLinker(errorModel);
+        linker.link(nodeCapabilityFileContexts, nodeCapabilityFiles);
+        return nodeCapabilityFiles;
     }
 
     public void generateDriver(Target target, Interface inf, File outputDir, Node node) throws FileNotFoundException {
