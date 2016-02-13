@@ -1,7 +1,7 @@
-package com.ptransportation.LIN.generator.generation.targets.PIC24FJxxGB00x;
+package com.ptransportation.LIN.generation.targets.PIC24FJxxGB00x;
 
-import com.ptransportation.LIN.generator.generation.Interface;
-import com.ptransportation.LIN.generator.generation.Target;
+import com.ptransportation.LIN.generation.Interface;
+import com.ptransportation.LIN.generation.Target;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
@@ -24,12 +24,12 @@ public class PIC24FJxxGB00x extends Target {
 
     @Override
     public void addSourceGroups(STGroup sourceGroup) {
-        sourceGroup.importTemplates(new STGroupFile("com/ptransportation/LIN/compiler/generation/targets/PIC24FJxxGB00x/DriverSource.stg"));
+        sourceGroup.importTemplates(new STGroupFile("com/ptransportation/LIN/generation/targets/PIC24FJxxGB00x/DriverSource.stg"));
     }
 
     @Override
     public void addHeaderGroups(STGroup headerGroup) {
-        headerGroup.importTemplates(new STGroupFile("com/ptransportation/LIN/compiler/generation/targets/PIC24FJxxGB00x/DriverHeader.stg"));
+        headerGroup.importTemplates(new STGroupFile("com/ptransportation/LIN/generation/targets/PIC24FJxxGB00x/DriverHeader.stg"));
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.ptransportation.LIN.generator;
+package com.ptransportation.LIN;
 
 
 import com.beust.jcommander.JCommander;

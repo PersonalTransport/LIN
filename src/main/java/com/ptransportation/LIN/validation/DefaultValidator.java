@@ -361,6 +361,12 @@ public class DefaultValidator extends AbstractValidator {
     }
 
     @Check
+    public void checkThatScheduleTableEntryScheduleTableIsNotNull(ScheduleTableEntry entry) {
+        if (entry.getScheduleTable() == null)
+            error("ScheduleTableEntry schedule table must not be null.", entry, "scheduleTable");
+    }
+
+    @Check
     public void checkThatScheduleTableEntryFrameTimeIsGreaterThanZero(ScheduleTableEntry entry) {
         if (entry.getFrameTime() <= 0)
             error("Invalid frame time '" + entry.getFrameTime() + " ms'. Frame time must be greater than zero ms.",

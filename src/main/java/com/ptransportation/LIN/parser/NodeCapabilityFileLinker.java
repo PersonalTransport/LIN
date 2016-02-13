@@ -60,6 +60,13 @@ public class NodeCapabilityFileLinker extends NodeCapabilityFileBaseVisitor<Void
     }
 
     @Override
+    public Void visitScheduleTableEntry(NodeCapabilityFileParser.ScheduleTableEntryContext ctx) {
+        ScheduleTableEntry entry = (ScheduleTableEntry) scheduleTable.getEntries().get(entryIndex);
+        entry.setScheduleTable(scheduleTable);
+        return super.visitScheduleTableEntry(ctx);
+    }
+
+    @Override
     public Void visitFrameEntry(NodeCapabilityFileParser.FrameEntryContext ctx) {
         FrameEntry entry = (FrameEntry) scheduleTable.getEntries().get(entryIndex);
 

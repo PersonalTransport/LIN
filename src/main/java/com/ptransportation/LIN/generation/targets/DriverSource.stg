@@ -1,9 +1,9 @@
 driverSource(node,target,interface) ::= <<
 #include "<node.name>.h"
-«IF(target.includes)><(target.includes)()>«ENDIF»
-«IF(interface.includes)><(interface.includes)()>«ENDIF»
+<if(target.includes)><(target.includes)()><endif>
+<if(interface.includes)><(interface.includes)()><endif>
 
-<node.frames:{frame|#define «frame.name»_INDEX <i0>};separator="\n">
+<node.frames:{frame|#define <frame.name>_INDEX <i0>};separator="\n">
 
 enum l_buffer_state {
     L_BREAK_SYNC,
@@ -64,7 +64,7 @@ union l_status_register {
     l_u16 raw_data;
 };
 
-«IF(node instanceof Master)>
+<if(node.master)>
 enum l_schedule_entry_type {
     ASSIGN_FRAME_ID_ENTRY,//??
     ASSIGN_FRAME_ID_RANGE_ENTRY,
@@ -99,9 +99,9 @@ struct l_schedule_instance {
     l_u8 index;
     struct l_schedule_entry *entry;
 };
-«ENDIF»
+<endif>
 
-union l_status_register «iii.name»_status = {.raw_data=0};
+union l_status_register <interface.name>_status = {.raw_data=0};
 
 static struct {
     enum l_buffer_state state;
@@ -126,14 +126,14 @@ static struct l_frame slave_response_frame =
 
 static struct l_frame frames[] = {
 <node.frames:{frame|
-    {   // «frame.name»
-        .PID = «IF(frame.ID && node.master)>L_FRAME_PID(<frame.ID>)<else>0x00«ENDIF»
+    {   // <frame.name>
+        .PID = <if(node.master)>L_FRAME_PID(<i>)<else>0x00<endif>,
         .data.scalar = 0ULL // TODO initial data
     \}};separator=",\n">
 };
 
-«IF(node instanceof Master)>
-enum l_configuration_status «iii.name»_configuration_status = LD_SERVICE_IDLE;
+<if(node.master)>
+enum l_configuration_status <interface.name>_configuration_status = LD_SERVICE_IDLE;
 
 struct l_schedule _L_NULL_SCHEDULE = {0,NULL};
 
@@ -151,21 +151,21 @@ static l_u8 NAD = <node.initialNAD.hex>; // TODO this needs to be implemented.
 static l_u16 supplier_id = <node.supplier.hex>;
 static l_u16 function_id = <node.function.hex>;
 static l_u8 variant_id = <node.variant>;
-«ENDIF»
+<endif>
 
 <node.frames:{frame|
 
-static l_bool «frame.name»_flag = false;
+static l_bool <frame.name>_flag = false;
 <frame.signals:{signal|
 
 static l_bool <signal.name>_flag = false;}>}>
 
-static void setup_tx_«iii.name»(l_u8 PID);
-static void setup_rx_«iii.name»(l_u8 PID);
-static void cleanup_tx_«iii.name»();
-static void cleanup_rx_«iii.name»();
-«IF(target.globals)><(target.globals)(node)>«ENDIF»
-«IF(interface.globals)><(interface.globals)(node)>«ENDIF»
+static void setup_tx_<interface.name>(l_u8 PID);
+static void setup_rx_<interface.name>(l_u8 PID);
+static void cleanup_tx_<interface.name>();
+static void cleanup_rx_<interface.name>();
+<if(target.globals)><(target.globals)(node)><endif>
+<if(interface.globals)><(interface.globals)(node)><endif>
 
 l_bool l_sys_init() {
     tx_buffer.PID = 0xFF;
@@ -184,9 +184,9 @@ l_bool l_sys_init() {
 
     return false;
 }
-«IF(node instanceof Master)>
+<if(node.master)>
 
-l_u8 l_sch_tick_«iii.name»() {
+l_u8 l_sch_tick_<interface.name>() {
     // TODO the spec hints at using l_sys_irq_disable
     // but I do not see a need for it; maybe around setup/cleanup.
     if(next.schedule != NULL && current.tick == 0) {
@@ -204,16 +204,16 @@ l_u8 l_sch_tick_«iii.name»() {
         case MASTER_REQ_ENTRY:
         case UNCONDITIONAL_ENTRY: {
             if(rx_buffer.state == L_IDLE && rx_buffer.size != 0)
-                cleanup_rx_«iii.name»();
+                cleanup_rx_<interface.name>();
 
             if(tx_buffer.state == L_IDLE && tx_buffer.size != 0)
-                cleanup_tx_«iii.name»();
+                cleanup_tx_<interface.name>();
 
             struct l_frame *frame = entry->data.frame;
             if(current.tick == 0) {
-                setup_tx_«iii.name»(frame->PID);
-                setup_rx_«iii.name»(frame->PID);
-                l_ifc_tx_«iii.name»();
+                setup_tx_<interface.name>(frame->PID);
+                setup_rx_<interface.name>(frame->PID);
+                l_ifc_tx_<interface.name>();
             }
 
             break;
@@ -232,7 +232,7 @@ l_u8 l_sch_tick_«iii.name»() {
     return 0;
 }
 
-void l_sch_set_«iii.name»(struct l_schedule *schedule, l_u8 entry) {
+void l_sch_set_<interface.name>(struct l_schedule *schedule, l_u8 entry) {
     if(schedule != NULL) {
         next.schedule = schedule;
         next.tick     = 0;
@@ -240,36 +240,36 @@ void l_sch_set_«iii.name»(struct l_schedule *schedule, l_u8 entry) {
         next.entry    =  &schedule->entries[next.index];
     }
 }
-«ENDIF»
+<endif>
 
-l_bool l_ifc_init_«iii.name»() {
+l_bool l_ifc_init_<interface.name>() {
     <(interface.initialization)(node)>
     return false;
 }
-«IF(node instanceof Master)>
+<if(node.master)>
 
-void l_ifc_goto_sleep_«iii.name»() {
+void l_ifc_goto_sleep_<interface.name>() {
     // TODO implement!
 }
-«ENDIF»
-«IF(node.sendsWakeUpSignal)>
+<endif>
+<if(node.sendsWakeUpSignal)>
 
-void l_ifc_wake_up_«iii.name»()  {
+void l_ifc_wake_up_<interface.name>()  {
     // TODO implement!
 }
-«ENDIF»
+<endif>
 
-l_u16 l_ifc_ioctl_«iii.name»(struct l_ioctl_op op, void* pv) {
+l_u16 l_ifc_ioctl_<interface.name>(struct l_ioctl_op op, void* pv) {
     // TODO implement!
 }
 
-static inline void setup_rx_«iii.name»(l_u8 PID) {
+static inline void setup_rx_<interface.name>(l_u8 PID) {
     rx_buffer.PID = PID;
 
     if(PID == 0xff) {
         // TODO special??
     }
-«IF(node.slave)>
+<if(node.slave)>
     else if(PID == 0x3C) { // Master request frame
         rx_buffer.state = L_DATA_CHECKSUM;
         rx_buffer.size = 8;
@@ -281,9 +281,9 @@ static inline void setup_rx_«iii.name»(l_u8 PID) {
         rx_buffer.size = 8;
         rx_buffer.index = 0;
     }
-«ENDIF»
+<endif>
 <node.subscribe_frames:{frame|
-    else if(PID == frames[«frame.name»_INDEX].PID) {
+    else if(PID == frames[<frame.name>_INDEX].PID) {
         rx_buffer.state = L_DATA_CHECKSUM;
         rx_buffer.size = <frame.length>;
         rx_buffer.index = 0;
@@ -295,7 +295,7 @@ static inline void setup_rx_«iii.name»(l_u8 PID) {
     }
 }
 
-static inline void cleanup_rx_«iii.name»() {
+static inline void cleanup_rx_<interface.name>() {
     l_u16 classic_checksum = 0;
     l_u16 enhanced_checksum = rx_buffer.PID;
 
@@ -314,17 +314,17 @@ static inline void cleanup_rx_«iii.name»() {
     if(rx_buffer.PID == 0xff) {
         // TODO special??
     }
-«IF(node.slave)>
+<if(node.slave)>
     else if(rx_buffer.PID == 0x3C) { // Master request frame
         if((l_u8)classic_checksum == rx_buffer.checksum) {
             switch((enum service_identifier)rx_buffer.data.PUD.SID) {
                 case ASSIGN_FRAME_IDENTIFIER_RANGE: { // Assign frame identifier range (Mandatory)
                     if(rx_buffer.data.PUD.NAD == NAD) {
-                        «iii.name»_status.reg.PID = rx_buffer.PID;
-                        «iii.name»_status.reg.overrun = «iii.name»_status.reg.has_frame;
-                        «iii.name»_status.reg.has_frame = true;
+                        <interface.name>_status.reg.PID = rx_buffer.PID;
+                        <interface.name>_status.reg.overrun = <interface.name>_status.reg.has_frame;
+                        <interface.name>_status.reg.has_frame = true;
 
-                        «iii.name»_status.reg.successful_transfer = true;
+                        <interface.name>_status.reg.successful_transfer = true;
                         master_request_frame.data.scalar = rx_buffer.data.scalar; // TODO not really needed!
 
                         l_u8 start_index = rx_buffer.data.PUD.D1;
@@ -348,48 +348,48 @@ static inline void cleanup_rx_«iii.name»() {
             }
         }
         else {
-            «iii.name»_status.reg.error_in_response = true;
-            «iii.name»_status.reg.successful_transfer = false;
+            <interface.name>_status.reg.error_in_response = true;
+            <interface.name>_status.reg.successful_transfer = false;
             // TODO should set response_error signal
         }
     }
 <else>
     else if(rx_buffer.PID == 0x3D) { // Slave response frame
-        «iii.name»_status.reg.PID = rx_buffer.PID;
-        «iii.name»_status.reg.overrun = «iii.name»_status.reg.has_frame;
-        «iii.name»_status.reg.has_frame = true;
+        <interface.name>_status.reg.PID = rx_buffer.PID;
+        <interface.name>_status.reg.overrun = <interface.name>_status.reg.has_frame;
+        <interface.name>_status.reg.has_frame = true;
         if((l_u8)classic_checksum == rx_buffer.checksum) {
-            «iii.name»_status.reg.successful_transfer = true;
+            <interface.name>_status.reg.successful_transfer = true;
             slave_response_frame.data.scalar = rx_buffer.data.scalar; // TODO not really needed!
 
             if(tx_buffer.data.PUD.SID >= (ASSIGN_NAD + 0x40) && tx_buffer.data.PUD.SID \<= (ASSIGN_FRAME_IDENTIFIER_RANGE + 0x40)) { // Configuration
                 // TODO check PCI.
                 // TODO add checks that the NAD and RSID match the master request frame.
-                «iii.name»_configuration_status = LD_SERVICE_IDLE;
+                <interface.name>_configuration_status = LD_SERVICE_IDLE;
             }
         }
         else {
-            «iii.name»_status.reg.error_in_response = true;
-            «iii.name»_status.reg.successful_transfer = false;
+            <interface.name>_status.reg.error_in_response = true;
+            <interface.name>_status.reg.successful_transfer = false;
             // TODO should set response_error signal
-            // TODO «iii.name»_configuration_status = LD_SERVICE_ERROR?
+            // TODO <interface.name>_configuration_status = LD_SERVICE_ERROR?
         }
     }
-«ENDIF»
+<endif>
 <node.subscribe_frames:{frame|
-    else if(rx_buffer.PID == frames[«frame.name»_INDEX].PID) {
-        «iii.name»_status.reg.PID = rx_buffer.PID;
-        «iii.name»_status.reg.overrun = «iii.name»_status.reg.has_frame;
-        «iii.name»_status.reg.has_frame = true;
-        if((l_u8)«IF(frame.useClassicChecksum)>classic_checksum<else>enhanced_checksum«ENDIF»
-            «iii.name»_status.reg.successful_transfer = true;
-            frames[«frame.name»_INDEX].data.scalar = rx_buffer.data.scalar;
-            «frame.name»_flag = true;
+    else if(rx_buffer.PID == frames[<frame.name>_INDEX].PID) {
+        <interface.name>_status.reg.PID = rx_buffer.PID;
+        <interface.name>_status.reg.overrun = <interface.name>_status.reg.has_frame;
+        <interface.name>_status.reg.has_frame = true;
+        if((l_u8)<if(frame.useClassicChecksum)>classic_checksum<else>enhanced_checksum<endif> == rx_buffer.checksum) {
+            <interface.name>_status.reg.successful_transfer = true;
+            frames[<frame.name>_INDEX].data.scalar = rx_buffer.data.scalar;
+            <frame.name>_flag = true;
             <frame.signals:{signal|<signal.name>_flag = true;};separator="\n">
         \}
         else {
-            «iii.name»_status.reg.error_in_response = true;
-            «iii.name»_status.reg.successful_transfer = false;
+            <interface.name>_status.reg.error_in_response = true;
+            <interface.name>_status.reg.successful_transfer = false;
             // TODO should set response_error signal
         \}
     \}};separator="\n">
@@ -400,24 +400,24 @@ static inline void cleanup_rx_«iii.name»() {
     rx_buffer.state = L_IDLE;
 }
 
-void l_ifc_rx_«iii.name»() {
+void l_ifc_rx_<interface.name>() {
     while(<(interface.rxDataAvailable)()>) {
         switch(rx_buffer.state) {
             case L_BREAK_SYNC: {
                 rx_buffer.state = L_PID;
-                «IF(node.slave)>
+                <if(node.slave)>
                 <(interface.rxBreakSync)()>
-                «ENDIF»
+                <endif>
                 break;
             }
             case L_PID: {
                 rx_buffer.state = L_DATA_CHECKSUM;
-                «IF(node.slave)>
+                <if(node.slave)>
                 <(interface.rxData)("rx_buffer.PID")>
-                setup_tx_«iii.name»(rx_buffer.PID);
-                setup_rx_«iii.name»(rx_buffer.PID);
-                l_ifc_tx_«iii.name»();
-                «ENDIF»
+                setup_tx_<interface.name>(rx_buffer.PID);
+                setup_rx_<interface.name>(rx_buffer.PID);
+                l_ifc_tx_<interface.name>();
+                <endif>
                 break;
             }
             case L_DATA_CHECKSUM: {
@@ -429,9 +429,9 @@ void l_ifc_rx_«iii.name»() {
                     rx_buffer.state = L_IDLE;
                     if(rx_buffer.size > 0) {
                         <(interface.rxData)("rx_buffer.checksum")>
-                        «IF(node.slave)>
-                        cleanup_rx_«iii.name»();
-                        «ENDIF»
+                        <if(node.slave)>
+                        cleanup_rx_<interface.name>();
+                        <endif>
                     }
                 }
                 break;
@@ -446,14 +446,14 @@ void l_ifc_rx_«iii.name»() {
     }
 }
 
-static inline void setup_tx_«iii.name»(l_u8 PID) {
+static inline void setup_tx_<interface.name>(l_u8 PID) {
     l_u16 checksum = 0;
     tx_buffer.PID = PID;
 
     if(PID == 0xff) {
         // TODO special
     }
-«IF(node instanceof Master)>
+<if(node.master)>
     else if(PID == 0x3C) { // Master request frame
         tx_buffer.state = L_BREAK_SYNC;
         tx_buffer.size = 8;
@@ -467,25 +467,25 @@ static inline void setup_tx_«iii.name»(l_u8 PID) {
         tx_buffer.index = 0;
         tx_buffer.data.scalar = slave_response_frame.data.scalar;
     }
-«ENDIF»
+<endif>
 <node.publish_frames:{frame|
-    else if(PID == frames[«frame.name»_INDEX].PID) {
-    «IF(node instanceof Master)>
+    else if(PID == frames[<frame.name>_INDEX].PID) {
+    <if(node.master)>
         tx_buffer.state = L_BREAK_SYNC;
     <else>
         tx_buffer.state = L_DATA_CHECKSUM;
-    «ENDIF»
+    <endif>
         tx_buffer.size = <frame.length>;
         tx_buffer.index = 0;
-        «IF(!frame.useClassicChecksum)>checksum = PID;«ENDIF»
-        tx_buffer.data.scalar = frames[«frame.name»_INDEX].data.scalar;
+        <if(!frame.useClassicChecksum)>checksum = PID;<endif>
+        tx_buffer.data.scalar = frames[<frame.name>_INDEX].data.scalar;
     \}};separator="\n">
     else {
-«IF(node instanceof Master)>
+<if(node.master)>
         tx_buffer.state = L_BREAK_SYNC;
 <else>
         tx_buffer.state = L_IDLE;
-«ENDIF»
+<endif>
         tx_buffer.size  = 0;
         tx_buffer.index = 0;
     }
@@ -498,29 +498,29 @@ static inline void setup_tx_«iii.name»(l_u8 PID) {
     tx_buffer.checksum = (l_u8)~checksum;
 }
 
-static inline void cleanup_tx_«iii.name»() {
-    «iii.name»_status.reg.PID = tx_buffer.PID;
-    «iii.name»_status.reg.successful_transfer = true;
-    «iii.name»_status.reg.overrun = «iii.name»_status.reg.has_frame;
-    «iii.name»_status.reg.has_frame = true;
+static inline void cleanup_tx_<interface.name>() {
+    <interface.name>_status.reg.PID = tx_buffer.PID;
+    <interface.name>_status.reg.successful_transfer = true;
+    <interface.name>_status.reg.overrun = <interface.name>_status.reg.has_frame;
+    <interface.name>_status.reg.has_frame = true;
 
     if(tx_buffer.PID == 0xff) {
         // TODO special
     }
-«IF(node instanceof Master)>
+<if(node.master)>
     else if(tx_buffer.PID == 0x3C) {
         // TODO master request
         if(tx_buffer.data.PUD.SID >= ASSIGN_NAD && tx_buffer.data.PUD.SID \<= ASSIGN_FRAME_IDENTIFIER_RANGE) { // Configuration
-            «iii.name»_configuration_status = LD_REQUEST_FINISHED;
+            <interface.name>_configuration_status = LD_REQUEST_FINISHED;
         }
     }
-«ENDIF»
+<endif>
     else if(tx_buffer.PID == 0x3D) {
         // TODO slave response
     }
 <node.publish_frames:{frame|
-    else if(tx_buffer.PID == frames[«frame.name»_INDEX].PID) {
-        «frame.name»_flag = true;
+    else if(tx_buffer.PID == frames[<frame.name>_INDEX].PID) {
+        <frame.name>_flag = true;
         <frame.signals:{signal|<signal.name>_flag = true;};separator="\n">
     \}};separator="\n">
     tx_buffer.PID = 0xFF;
@@ -530,21 +530,21 @@ static inline void cleanup_tx_«iii.name»() {
     tx_buffer.state = L_IDLE;
 }
 
-void l_ifc_tx_«iii.name»() {
+void l_ifc_tx_<interface.name>() {
     switch(tx_buffer.state) {
         case L_BREAK_SYNC: {
             tx_buffer.state = L_PID;
-            «IF(node instanceof Master)>
+            <if(node.master)>
             <(interface.txBreakAndSync)()>
-            «ENDIF»
+            <endif>
             break;
         }
         case L_PID: {
             tx_buffer.state = L_DATA_CHECKSUM;
             tx_buffer.index = 0;
-            «IF(node instanceof Master)>
+            <if(node.master)>
             <(interface.txData)("tx_buffer.PID")>  // Send the PID.
-            «ENDIF»
+            <endif>
             break;
         }
         case L_DATA_CHECKSUM: {
@@ -558,9 +558,9 @@ void l_ifc_tx_«iii.name»() {
                     tx_buffer.size  = 0;
                     tx_buffer.index = 0;
                     <(interface.txData)("tx_buffer.checksum")> // Send the checksum.
-                    «IF(node.slave)>
-                    cleanup_tx_«iii.name»();
-                    «ENDIF»
+                    <if(node.slave)>
+                    cleanup_tx_<interface.name>();
+                    <endif>
                 }
             }
             break;
@@ -571,28 +571,28 @@ void l_ifc_tx_«iii.name»() {
     }
 }
 
-void l_ifc_aux_«iii.name»() {
+void l_ifc_aux_<interface.name>() {
     // TODO implement!
 }
 
-l_u16 l_ifc_read_status_«iii.name»() {
-    l_u16 r = «iii.name»_status.raw_data;
-    «iii.name»_status.raw_data = 0;
+l_u16 l_ifc_read_status_<interface.name>() {
+    l_u16 r = <interface.name>_status.raw_data;
+    <interface.name>_status.raw_data = 0;
     return r & 0xFF7F;
 }
-«IF(node instanceof Master)>
+<if(node.master)>
 
-l_u8 ld_is_ready_«iii.name»() {
-    return «iii.name»_configuration_status;
+l_u8 ld_is_ready_<interface.name>() {
+    return <interface.name>_configuration_status;
 }
 
-void ld_check_response_«iii.name»(l_u8* const RSID,l_u8* const error_code) {
+void ld_check_response_<interface.name>(l_u8* const RSID,l_u8* const error_code) {
     // TODO implement!
 }
 
-void ld_assign_frame_id_range_«iii.name»(l_u8 NAD,l_u8 start_index,const l_u8* const PIDs) {
+void ld_assign_frame_id_range_<interface.name>(l_u8 NAD,l_u8 start_index,const l_u8* const PIDs) {
     // TODO implement!
-    «iii.name»_configuration_status = LD_SERVICE_BUSY;
+    <interface.name>_configuration_status = LD_SERVICE_BUSY;
     master_request_frame.data.PUD.NAD = NAD;
     master_request_frame.data.PUD.PCI = 0x06;
     master_request_frame.data.PUD.SID = ASSIGN_FRAME_IDENTIFIER_RANGE;
@@ -603,22 +603,22 @@ void ld_assign_frame_id_range_«iii.name»(l_u8 NAD,l_u8 start_index,const l_u8*
     master_request_frame.data.PUD.D5 = PIDs[3];
 }
 
-void ld_assign_NAD_«iii.name»(l_u8 initial_NAD,l_u16 supplier_id,l_u16 function_id,l_u8 new_NAD) {
+void ld_assign_NAD_<interface.name>(l_u8 initial_NAD,l_u16 supplier_id,l_u16 function_id,l_u8 new_NAD) {
     // TODO implement!
-    «iii.name»_configuration_status = LD_SERVICE_BUSY;
+    <interface.name>_configuration_status = LD_SERVICE_BUSY;
     master_request_frame.data.PUD.NAD = initial_NAD;
     master_request_frame.data.PUD.PCI = 0x06;
     master_request_frame.data.PUD.SID = ASSIGN_NAD;
     master_request_frame.data.PUD.D1 = (l_u8)supplier_id;
-    master_request_frame.data.PUD.D2 = (l_u8)(supplier_id \>\> 8);
+    master_request_frame.data.PUD.D2 = (l_u8)(supplier_id >\> 8);
     master_request_frame.data.PUD.D3 = (l_u8)function_id;
-    master_request_frame.data.PUD.D4 = (l_u8)(function_id \>\> 8);
+    master_request_frame.data.PUD.D4 = (l_u8)(function_id >\> 8);
     master_request_frame.data.PUD.D5 = new_NAD;
 }
 
-void ld_save_configuration_«iii.name»(l_u8 NAD) {
+void ld_save_configuration_<interface.name>(l_u8 NAD) {
     // TODO implement!
-    «iii.name»_configuration_status = LD_SERVICE_BUSY;
+    <interface.name>_configuration_status = LD_SERVICE_BUSY;
     master_request_frame.data.PUD.NAD = NAD;
     master_request_frame.data.PUD.PCI = 0x01;
     master_request_frame.data.PUD.SID = SAVE_CONFIGURATION;
@@ -629,9 +629,9 @@ void ld_save_configuration_«iii.name»(l_u8 NAD) {
     master_request_frame.data.PUD.D5 = 0xFF;
 }
 
-void ld_conditional_change_NAD_«iii.name»(l_u8 NAD,l_u8 id,l_u8 byte,l_u8 mask,l_u8 invert,l_u8 new_NAD) {
+void ld_conditional_change_NAD_<interface.name>(l_u8 NAD,l_u8 id,l_u8 byte,l_u8 mask,l_u8 invert,l_u8 new_NAD) {
     // TODO implement!
-    «iii.name»_configuration_status = LD_SERVICE_BUSY;
+    <interface.name>_configuration_status = LD_SERVICE_BUSY;
     master_request_frame.data.PUD.NAD = NAD;
     master_request_frame.data.PUD.PCI = 0x06;
     master_request_frame.data.PUD.SID = CONDITIONAL_CHANGE_NAD;
@@ -642,20 +642,20 @@ void ld_conditional_change_NAD_«iii.name»(l_u8 NAD,l_u8 id,l_u8 byte,l_u8 mask
     master_request_frame.data.PUD.D5 = new_NAD;
 }
 
-void ld_read_by_id_«iii.name»(l_u8 NAD,l_u16 supplier_id,l_u16 function_id,l_u8 id,l_u8* const data) {
+void ld_read_by_id_<interface.name>(l_u8 NAD,l_u16 supplier_id,l_u16 function_id,l_u8 id,l_u8* const data) {
     // TODO implement!
-    «iii.name»_configuration_status = LD_SERVICE_BUSY;
+    <interface.name>_configuration_status = LD_SERVICE_BUSY;
 }
 <else>
 
-l_u8 ld_read_configuration_«iii.name»(l_u8* const data,l_u8* const length) {
+l_u8 ld_read_configuration_<interface.name>(l_u8* const data,l_u8* const length) {
     // TODO implement!
 }
 
-l_u8 ld_set_configuration_«iii.name»(const l_u8* const data,l_u16 length) {
+l_u8 ld_set_configuration_<interface.name>(const l_u8* const data,l_u16 length) {
     // TODO implement!
 }
-«ENDIF»
+<endif>
 
 <testFlagImplementations(node)>
 <clearFlagImplementations(node)>
@@ -684,7 +684,7 @@ readSignalImplementations(node) ::= <<
 
 writeSignalImplementations(node) ::= <<
 <node.frames:{frame|
-«IF(frame.publishes)><frame.signals:{signal|<signal:(signal.signalType_WriteImplementation)()>}>«ENDIF»
+<if(frame.publishes)><frame.signals:{signal|<signal:(signal.signalType_WriteImplementation)()>}><endif>}>
 >>
 
 boolReadImplementation(signal) ::= <<

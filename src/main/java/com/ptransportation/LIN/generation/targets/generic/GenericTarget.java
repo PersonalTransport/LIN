@@ -1,7 +1,7 @@
-package com.ptransportation.LIN.generator.generation.targets.generic;
+package com.ptransportation.LIN.generation.targets.generic;
 
-import com.ptransportation.LIN.generator.generation.Interface;
-import com.ptransportation.LIN.generator.generation.Target;
+import com.ptransportation.LIN.generation.Interface;
+import com.ptransportation.LIN.generation.Target;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
@@ -21,6 +21,6 @@ public class GenericTarget extends Target {
 
     @Override
     public void addSourceGroups(STGroup sourceGroup) {
-        sourceGroup.importTemplates(new STGroupFile("com/ptransportation/LIN/compiler/generation/targets/generic/DriverSource.stg"));
+        sourceGroup.importTemplates(new STGroupFile("com/ptransportation/LIN/generation/targets/generic/DriverSource.stg"));
     }
 }

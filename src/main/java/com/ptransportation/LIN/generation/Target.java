@@ -1,4 +1,4 @@
-package com.ptransportation.LIN.generator.generation;
+package com.ptransportation.LIN.generation;
 
 import org.stringtemplate.v4.STGroup;
 

@@ -1,6 +1,7 @@
-package com.ptransportation.LIN.generator.generation.targets.PIC24FJxxGB00x;
+package com.ptransportation.LIN.generation.targets.PIC24FJxxGB00x;
 
-import com.ptransportation.LIN.generator.generation.Interface;
+
+import com.ptransportation.LIN.generation.Interface;
 
 public class UART extends Interface {
     private int version;
@@ -16,7 +17,7 @@ public class UART extends Interface {
 
     @Override
     public String getGlobals() {
-        return "globalsUART1";
+        return "globalsUART" + version;
     }
 
     @Override
