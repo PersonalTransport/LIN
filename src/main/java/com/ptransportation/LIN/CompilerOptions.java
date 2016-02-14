@@ -59,7 +59,7 @@ public class CompilerOptions {
     }
 
     public class NodeTypeOptions {
-        @Parameter(description = "(*.nfc *.ldf)+", required = true)
+        @Parameter(description = "source files...", required = true)
         private List<String> sources = new ArrayList<String>();
 
         @Parameter(names = {"-o", "--output"}, description = "Output directory.")
