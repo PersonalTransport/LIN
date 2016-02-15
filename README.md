@@ -36,8 +36,7 @@ LIN is a compiler (written in java) that will parse [LIN Node capability](http:/
 
 ## Usage ##
 ```
-LIN
-The following options are required: -i, --target-interface -t, --target
+The following options are required: -t, --target -i, --target-interface
 
 Usage: LIN [options] [command] [command options]
   Options:
@@ -48,21 +47,26 @@ Usage: LIN [options] [command] [command options]
        The target device.
   * -i, --target-interface
        The target device's interface.
+    --version
+       Display compiler version information.
+       Default: false
   Commands:
     slave      Generate the slave C slave driver.
-      Usage: slave [options] sources...
+      Usage: slave [options] source files...
         Options:
           -o, --output
              Output directory.
              Default: gen
           -s, --slave
              name of slave node to export
+             Default: <empty string>
 
     master      Generate the slave C master driver.
-      Usage: master [options] sources...
+      Usage: master [options] source files...
         Options:
           -o, --output
              Output directory.
+             Default: gen
 ```
 
 ## Examples ##

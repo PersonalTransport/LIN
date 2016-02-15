@@ -20,8 +20,10 @@ import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
 import java.io.*;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 public class Compiler {
     private Target[] targets = {
@@ -40,8 +42,20 @@ public class Compiler {
             System.exit(-1);
         }
 
-        if (args.length == 0 || compilerOptions.getHelp()) {
+        if (args.length == 0 || compilerOptions.isHelp()) {
             compilerOptions.usage();
+            return;
+        }
+        if(compilerOptions.isVersion()) {
+
+            try {
+                final URL resource = Compiler.class.getClassLoader().getResource("config.properties");
+                Properties props = new Properties();
+                props.load(resource.openConnection().getInputStream());
+                System.out.println(props.getProperty("version"));
+            }
+            catch (IOException e) {
+            }
             return;
         }
 

@@ -32,6 +32,13 @@ antlr4 {
     source = file('src/main/antlr')
 }
 
+version = 'git describe --tags --always HEAD'.execute().text.trim()
+
+processResources {
+    inputs.property "version", project.version
+    filter(org.apache.tools.ant.filters.ReplaceTokens, tokens: [version: project.version])
+}
+
 distributions {
     main {
         mainClassName = "com.ptransportation.LIN.Compiler"

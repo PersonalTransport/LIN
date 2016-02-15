@@ -9,15 +9,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CompilerOptions {
+    private JCommander jCommander;
     private SlaveDriverOptions slaveDriverOptions = new SlaveDriverOptions();
     private MasterDriverOptions masterDriverOptions = new MasterDriverOptions();
+
     @Parameter(names = {"-h", "--help"}, help = true, description = "Show help this message.")
     private boolean help = false;
+
+    @Parameter(names = {"--version"}, help = true, description = "Display compiler version information.")
+    private boolean version = false;
+
     @Parameter(names = {"-t", "--target"}, required = true, description = "The target device.")
     private String targetDevice;
+
     @Parameter(names = {"-i", "--target-interface"}, required = true, description = "The target device's interface.")
     private String targetInterface;
-    private JCommander jCommander;
 
     public CompilerOptions() {
         jCommander = new JCommander(this);
@@ -28,10 +34,6 @@ public class CompilerOptions {
 
     public void parse(String[] args) {
         jCommander.parse(args);
-    }
-
-    public boolean getHelp() {
-        return help;
     }
 
     public String getTargetDevice() {
@@ -48,6 +50,14 @@ public class CompilerOptions {
 
     public MasterDriverOptions getMasterDriverOptions() {
         return jCommander.getParsedCommand().equals("master") ? masterDriverOptions : null;
+    }
+
+    public boolean isHelp() {
+        return help;
+    }
+
+    public boolean isVersion() {
+        return version;
     }
 
     public void usage() {
