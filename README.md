@@ -23,7 +23,7 @@ LIN is a compiler (written in java) that will parse [LIN Node capability](http:/
 #### Unix ####
  - Extract the downloaded zip file where ever you feel fit.
   - I put it in /opt/LIN-v0.2.0-beta
- - Add that location to your PATH so you can run the LIN-v0.2.0-beta/LIN bash script.
+ - Add that location to your PATH so you can run the LIN-v0.2.0-beta/bin/LIN bash script.
 
 ## Supported Targets ##
 - PIC24FJXXGB00X family.
