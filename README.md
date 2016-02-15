@@ -4,24 +4,26 @@
 LIN is a compiler (written in java) that will parse [LIN Node capability](http://www.cs-group.de/fileadmin/media/Documents/LIN_Specification_Package_2.2A.pdf#page=164) and [LIN description](http://www.cs-group.de/fileadmin/media/Documents/LIN_Specification_Package_2.2A.pdf#page=175) files and generate C source code that implements the LIN 2.2 spec for slave or master nodes.
 
 ## Download ##
-- [Latest release (v0.1.2)](https://github.com/PersonalTransport/LIN/releases/download/v0.1.2-alpha/LIN-v0.1.2-alpha-install.zip).
+- [Latest release (v0.2.0-beta)](https://github.com/PersonalTransport/LIN/releases/download/v0.2.0-beta/LIN-v0.2.0-beta.zip).
 - Previous releases can be found on the GitHub [releases](https://github.com/PersonalTransport/LIN/releases) page.
 
 ## Install ##
 ##### Windows #####
- - Extract the downloaded zip file into the path "C:\Program Files\LIN-v0.1.2-alpha"
+ - Extract the downloaded zip file into the path "C:\Program Files\LIN-v0.2.0-beta"
   - The final folder structure should look something like this.
-    * C:\Program Files\LIN-v0.1.2-alpha
-      * LIN
-      * LIN.bat
-      * LIN-v0.1.2-alpha.jar
-  - Then finally add "C:\Program Files\LIN-v0.1.2-alpha" to the environment PATH variable.
-    - [Here](https://youtu.be/dU_ca27EGT8?t=98) is a short video on how to do this in this video he adds C:\Python27 just type C:\Program Files\LIN-v0.1.2-alpha instead. You should also make sure that Java is also on your PATH variable as well.
+    * C:\Program Files\LIN-v0.2.0-beta
+        * bin
+            * LIN
+            * LIN.bat
+        * lib
+            * LIN-v0.2.0-beta.jar
+  - Then finally add "C:\Program Files\LIN-v0.2.0-beta\bin" to the environment PATH variable.
+    - [Here](https://youtu.be/dU_ca27EGT8?t=98) is a short video on how to do this in this video he adds C:\Python27 just type C:\Program Files\LIN-v0.2.0-beta\bin instead. You should also make sure that Java is also on your PATH variable as well.
 
 #### Unix ####
  - Extract the downloaded zip file where ever you feel fit.
-  - I put it in /opt/LIN-v0.1.2-alpha
- - Add that location to your PATH so you can run the LIN-v0.1.2-alpha/LIN bash script.
+  - I put it in /opt/LIN-v0.2.0-beta
+ - Add that location to your PATH so you can run the LIN-v0.2.0-beta/LIN bash script.
 
 ## Supported Targets ##
 - PIC24FJXXGB00X family.
