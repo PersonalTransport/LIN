@@ -66,16 +66,11 @@ Usage: LIN [options] [command] [command options]
 ```
 
 ## Examples ##
-##### Generate a master node from a LIN description file. #####
-  - ```LIN -t PIC24FJ64GB002 -i UART1 LIN.jar master CEM.ldf```
+##### Generate a master node from a LIN Node capability file. #####
+  - ```LIN -t PIC24FJ64GB002 -i UART1 master CEM.ncf```
   - This will generate two files gen/CEM.h and gen/CEM.c that targets the PIC24FJ64GB002 and uses the first UART module, you will include these files in your master node project.
 
 </br>
 ##### Generate a slave node from a LIN Node capability file. #####
- - ```LIN -t PIC24FJ32GB002 -i UART1 LIN.jar slave LSM.ncf```
+ - ```LIN -t PIC24FJ32GB002 -i UART1 slave LSM.ncf```
  - This will generate two files gen/LSM.h and gen/LSM.c that targets the PIC24FJ32GB002 and uses the first UART module, you will include these files in your slave node project.
-
-</br>
-##### Generate a slave node from a LIN description file (this is not a preferred method). #####
-  - ```LIN -t PIC24FJ32GB002 -i UART1 LIN.jar slave -s LSM CEM.ldf```
-  - This will generate two files gen/LSM.h and gen/LSM.c that targets the PIC24FJ32GB002 and uses the first UART module, you will include these files in your slave node project.
