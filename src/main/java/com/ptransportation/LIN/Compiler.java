@@ -180,7 +180,7 @@ public class Compiler {
     private void addModelAdaptors(STGroup group) {
         group.registerModelAdaptor(Integer.class, new IntegerModelAdaptor());
 
-        group.registerModelAdaptor(Master.class, new MasterModelAdaptor());
+        group.registerModelAdaptor(Node.class, new NodeModelAdaptor());
         group.registerModelAdaptor(Slave.class, new SlaveModelAdaptor());
         group.registerModelAdaptor(EncodedValue.class, new EncodedValueModelAdaptor());
         group.registerModelAdaptor(Bitrate.class, new BitrateModelAdaptor());

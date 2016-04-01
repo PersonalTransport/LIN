@@ -45,8 +45,10 @@ public class NodeCapabilityFileLinker extends NodeCapabilityFileBaseVisitor<Void
         for (int i = 0; i < ctx.slaves.size(); ++i) {
             String slaveName = ctx.slaves.get(i).getText();
             Slave slave = getSlave(slaveName);
-            if (slave != null)
+            if (slave != null) {
                 master.getSlaves().add(slave);
+                master.getFrames().addAll(slave.getPublishFrames());
+            }
             else
                 error("Slave '" + slaveName + "' was not defined.", master, "slaves", i);
         }

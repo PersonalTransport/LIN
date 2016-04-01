@@ -10,7 +10,7 @@ import org.stringtemplate.v4.misc.STNoSuchPropertyException;
 
 import java.util.List;
 
-public abstract class NodeModelAdaptor extends PolymorphismModelAdaptor {
+public class NodeModelAdaptor extends PolymorphismModelAdaptor {
     @Override
     public synchronized Object getProperty(Interpreter interp, ST self, Object o, Object property, String propertyName) throws STNoSuchPropertyException {
         Node node = (Node) o;
@@ -19,18 +19,10 @@ public abstract class NodeModelAdaptor extends PolymorphismModelAdaptor {
         } else if (propertyName.equals("master")) {
             return o instanceof Master;
         } else if (propertyName.equals("publish_frames")) {
-            return getPublishFrames(node);
+            return node.getPublishFrames();
         } else if (propertyName.equals("subscribe_frames")) {
-            return getSubscribeFrames(node);
+            return node.getSubscribeFrames();
         }
         return super.getProperty(interp, self, o, property, propertyName);
-    }
-
-    public List<Frame> getPublishFrames(Node node) {
-        return node.getPublishFrames();
-    }
-
-    public List<Frame> getSubscribeFrames(Node node) {
-        return node.getSubscribeFrames();
     }
 }
