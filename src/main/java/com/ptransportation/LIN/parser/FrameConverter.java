@@ -12,13 +12,7 @@ public class FrameConverter extends NodeCapabilityFileBaseVisitor<Frame> {
 
     @Override
     public Frame visitFrame(NodeCapabilityFileParser.FrameContext ctx) {
-        Frame frame;
-        if (ctx.publishes != null)
-            frame = new Frame(ctx.name.getText());
-        else
-            frame = new Frame(ctx.name.getText());
-
-        frame.setPublishes(ctx.publishes != null);
+        Frame frame = new Frame(ctx.name.getText());
 
         frame.setLength(Integer.decode(ctx.length.getText()));
 
@@ -32,11 +26,8 @@ public class FrameConverter extends NodeCapabilityFileBaseVisitor<Frame> {
             frame.setEventTriggeredFrame(new Frame(ctx.eventTriggeredFrame.getText()));
 
         for (NodeCapabilityFileParser.SignalContext signalCtx : ctx.signals) {
-            Signal signal;
-            if (frame.getPublishes())
-                signal = new Signal(signalCtx.name.getText());
-            else
-                signal = new Signal(signalCtx.name.getText());
+            Signal signal = new Signal(signalCtx.name.getText());
+            
             signal.setFrame(frame);
 
             signal.setSize(Integer.decode(signalCtx.size.getText()));

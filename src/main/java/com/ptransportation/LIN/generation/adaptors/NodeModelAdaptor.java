@@ -38,7 +38,7 @@ public abstract class NodeModelAdaptor extends PolymorphismModelAdaptor {
         } else {
             List<Frame> frames = new ArrayList<Frame>();
             for (Frame frame : node.getFrames()) {
-                if (frame.getPublishes())
+                if (frame.getPublisher() == node) // TODO check names instead of objects?
                     frames.add(frame);
             }
             publishFrames.put(node, frames);
@@ -52,7 +52,7 @@ public abstract class NodeModelAdaptor extends PolymorphismModelAdaptor {
         } else {
             List<Frame> frames = new ArrayList<Frame>();
             for (Frame frame : node.getFrames()) {
-                if (frame.getSubscribes())
+                if (frame.getPublisher() != node)
                     frames.add(frame);
             }
             subscribeFrames.put(node, frames);

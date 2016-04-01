@@ -72,6 +72,24 @@ public abstract class Node {
         return this.frames;
     }
 
+    public List<Frame> getPublishFrames() {
+        ArrayList<Frame> publishFrames = new ArrayList<>();
+        for(Frame frame:this.frames) {
+            if(frame.getPublisher() == this)
+                publishFrames.add(frame);
+        }
+        return publishFrames;
+    }
+
+    public List<Frame> getSubscribeFrames() {
+        ArrayList<Frame> subscribeFrames = new ArrayList<>();
+        for(Frame frame:this.frames) {
+            if(frame.getPublisher() != this)
+                subscribeFrames.add(frame);
+        }
+        return subscribeFrames;
+    }
+
     public List<Encoding> getEncodings() {
         return this.encodings;
     }

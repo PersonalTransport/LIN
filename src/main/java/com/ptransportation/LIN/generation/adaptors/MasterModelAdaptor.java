@@ -30,9 +30,16 @@ public class MasterModelAdaptor extends NodeModelAdaptor {
             return allFrames.get(master);
         } else {
             List<Frame> frames = new ArrayList<Frame>();
-            frames.addAll(master.getFrames());
-            for (Slave slave : master.getSlaves())
-                frames.addAll(slave.getFrames());
+            for(Frame frame:master.getFrames()) {
+                if(frame.getPublisher() == master)
+                    frames.add(frame);
+            }
+            for (Slave slave : master.getSlaves()) {
+                for(Frame frame:slave.getFrames()) {
+                    if(frame.getPublisher() == slave)
+                        frames.add(frame);
+                }
+            }
             allFrames.put(master, frames);
             return frames;
         }

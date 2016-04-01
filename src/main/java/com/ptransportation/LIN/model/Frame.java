@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Frame {
-    private Node node;
-    private boolean publishes;
+    private Node node; // TODO is this needed?
+    private Node publisher;
     private String name;
     private int length;
     private double minPeriod;
@@ -29,20 +29,12 @@ public class Frame {
         this.node = node;
     }
 
-    public boolean getPublishes() {
-        return this.publishes;
+    public Node getPublisher() {
+        return this.publisher;
     }
 
-    public void setPublishes(boolean publishes) {
-        this.publishes = publishes;
-    }
-
-    public boolean getSubscribes() {
-        return !this.publishes;
-    }
-
-    public void setSubscribes(boolean subscribes) {
-        this.publishes = !subscribes;
+    public void setPublisher(Node publisher) {
+        this.publisher = publisher;
     }
 
     public String getName() {
@@ -92,7 +84,8 @@ public class Frame {
 
     @Override
     public String toString() {
-        String s = (getPublishes() ? "publish " : "subscribe ") + getName() + " {\n";
+        // TODO (getPublishes() ? "publish " : "subscribe ")
+        String s = getName() + " {\n";
         s += "\tlength = " + getLength() + ";\n";
         s += "\tmin_period = " + getMinPeriod() + ";\n";
         s += "\tmax_period = " + getMaxPeriod() + ";\n";

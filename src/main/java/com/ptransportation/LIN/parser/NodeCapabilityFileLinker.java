@@ -7,6 +7,10 @@ import com.ptransportation.LIN.model.*;
 import java.util.List;
 
 public class NodeCapabilityFileLinker extends NodeCapabilityFileBaseVisitor<Void> {
+
+    // TODO link subscribe frames to publish frames
+
+
     private List<NodeCapabilityFile> nodeCapabilityFiles;
     private ErrorModel errorModel;
 
@@ -246,7 +250,7 @@ public class NodeCapabilityFileLinker extends NodeCapabilityFileBaseVisitor<Void
     private Frame getFrame(String name) {
         for (NodeCapabilityFile file : nodeCapabilityFiles) {
             for (Frame frame : file.getNode().getFrames()) {
-                if (frame.getPublishes() && frame.getName().equals(name))
+                if (frame.getName().equals(name) && frame.getPublisher() != null) // TODO this does not look right.
                     return frame;
             }
         }

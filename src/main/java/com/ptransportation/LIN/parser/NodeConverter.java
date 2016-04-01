@@ -46,6 +46,8 @@ public class NodeConverter extends NodeCapabilityFileBaseVisitor<Node> {
 
         for (NodeCapabilityFileParser.FrameContext frameCtx : ctx.frames) {
             Frame frame = frameConverter.visit(frameCtx);
+            if(frameCtx.publishes != null)
+                frame.setPublisher(node);
             frame.setNode(node);
             node.getFrames().add(frame);
         }
@@ -74,6 +76,8 @@ public class NodeConverter extends NodeCapabilityFileBaseVisitor<Node> {
 
         for (NodeCapabilityFileParser.FrameContext frameCtx : ctx.frames) {
             Frame frame = frameConverter.visit(frameCtx);
+            if(frameCtx.publishes != null)
+                frame.setPublisher(node);
             frame.setNode(node);
             node.getFrames().add(frame);
         }

@@ -39,6 +39,30 @@ public class Master extends Node {
         return this.scheduleTables;
     }
 
+    /*@Override
+    public List<Frame> getFrames() {
+        ArrayList<Frame> frames = new ArrayList<>();
+        for(Frame frame:super.getFrames()) {
+            if(frame.getPublisher() == this)
+                frames.add(frame);
+        }
+        for(Slave slave:this.slaves) {
+            for(Frame frame:slave.getFrames()) {
+                if(frame.getPublisher() == slave)
+                    frames.add(frame);
+            }
+        }
+        return frames;
+    }*/
+
+    @Override
+    public List<Frame> getSubscribeFrames() {
+        ArrayList<Frame> frames = new ArrayList<>();
+        frames.addAll(super.getSubscribeFrames());
+        for(Slave slave:this.slaves)
+            frames.addAll(slave.getPublishFrames());
+        return frames;
+    }
 
     @Override
     public String toString() {
