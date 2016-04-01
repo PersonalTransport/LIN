@@ -33,30 +33,10 @@ public abstract class NodeModelAdaptor extends PolymorphismModelAdaptor {
     }
 
     public List<Frame> getPublishFrames(Node node) {
-        if (publishFrames.containsKey(node)) {
-            return publishFrames.get(node);
-        } else {
-            List<Frame> frames = new ArrayList<Frame>();
-            for (Frame frame : node.getFrames()) {
-                if (frame.getPublisher() == node) // TODO check names instead of objects?
-                    frames.add(frame);
-            }
-            publishFrames.put(node, frames);
-            return frames;
-        }
+        return node.getPublishFrames();
     }
 
     public List<Frame> getSubscribeFrames(Node node) {
-        if (subscribeFrames.containsKey(node)) {
-            return subscribeFrames.get(node);
-        } else {
-            List<Frame> frames = new ArrayList<Frame>();
-            for (Frame frame : node.getFrames()) {
-                if (frame.getPublisher() != node)
-                    frames.add(frame);
-            }
-            subscribeFrames.put(node, frames);
-            return frames;
-        }
+        return node.getSubscribeFrames();
     }
 }
