@@ -1,6 +1,5 @@
 package com.ptransportation.LIN.generation.adaptors;
 
-
 import com.ptransportation.LIN.model.Frame;
 import com.ptransportation.LIN.model.Master;
 import com.ptransportation.LIN.model.Node;
@@ -9,14 +8,9 @@ import org.stringtemplate.v4.Interpreter;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.misc.STNoSuchPropertyException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public abstract class NodeModelAdaptor extends PolymorphismModelAdaptor {
-    private final HashMap<Node, List<Frame>> publishFrames = new HashMap<Node, List<Frame>>();
-    private final HashMap<Node, List<Frame>> subscribeFrames = new HashMap<Node, List<Frame>>();
-
     @Override
     public synchronized Object getProperty(Interpreter interp, ST self, Object o, Object property, String propertyName) throws STNoSuchPropertyException {
         Node node = (Node) o;

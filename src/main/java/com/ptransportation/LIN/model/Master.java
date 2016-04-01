@@ -41,18 +41,12 @@ public class Master extends Node {
 
     /*@Override
     public List<Frame> getFrames() {
-        ArrayList<Frame> frames = new ArrayList<>();
-        for(Frame frame:super.getFrames()) {
-            if(frame.getPublisher() == this)
-                frames.add(frame);
+        List<Frame> allFrames = new ArrayList<Frame>();
+        allFrames.addAll(super.getPublishFrames());
+        for (Slave slave : slaves) {
+            allFrames.addAll(slave.getPublishFrames());
         }
-        for(Slave slave:this.slaves) {
-            for(Frame frame:slave.getFrames()) {
-                if(frame.getPublisher() == slave)
-                    frames.add(frame);
-            }
-        }
-        return frames;
+        return allFrames;
     }*/
 
     @Override

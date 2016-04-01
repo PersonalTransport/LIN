@@ -14,9 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 
 public class MasterModelAdaptor extends NodeModelAdaptor {
-    private final HashMap<Master, List<Frame>> allFrames = new HashMap<Master, List<Frame>>();
-    private final HashMap<Master, List<Frame>> subscribeFrames = new HashMap<Master, List<Frame>>();
-
     @Override
     public synchronized Object getProperty(Interpreter interp, ST self, Object o, Object property, String propertyName) throws STNoSuchPropertyException {
         Master master = (Master) o;
@@ -26,37 +23,11 @@ public class MasterModelAdaptor extends NodeModelAdaptor {
     }
 
     public List<Frame> getFrames(Master master) {
-        if (allFrames.containsKey(master)) {
-            return allFrames.get(master);
-        } else {
-            List<Frame> frames = new ArrayList<Frame>();
-            for(Frame frame:master.getFrames()) {
-                if(frame.getPublisher() == master)
-                    frames.add(frame);
-            }
-            for (Slave slave : master.getSlaves()) {
-                for(Frame frame:slave.getFrames()) {
-                    if(frame.getPublisher() == slave)
-                        frames.add(frame);
-                }
-            }
-            allFrames.put(master, frames);
-            return frames;
+        List<Frame> frames = new ArrayList<Frame>();
+        frames.addAll(master.getPublishFrames());
+        for (Slave slave : master.getSlaves()) {
+            frames.addAll(slave.getPublishFrames());
         }
-    }
-
-    @Override
-    public List<Frame> getSubscribeFrames(Node node) {
-        Master master = (Master) node;
-        if (subscribeFrames.containsKey(master)) {
-            return subscribeFrames.get(master);
-        } else {
-            List<Frame> frames = new ArrayList<Frame>();
-            frames.addAll(super.getSubscribeFrames(node));
-            for (Slave slave : master.getSlaves())
-                frames.addAll(super.getPublishFrames(slave));
-            subscribeFrames.put(master, frames);
-            return frames;
-        }
+        return frames;
     }
 }
