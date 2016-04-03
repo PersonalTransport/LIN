@@ -47,9 +47,13 @@ void __attribute__((interrupt,no_auto_psv)) _IC1Interrupt() {
 initializationUART1(node) ::= <<
 
 //========================================================================//
-AD1PCFGLbits.PCFG15 = 1; // Set RB15 to digital
-AD1PCFGLbits.PCFG5 = 1; // Set RB3 to digital
-TRISBbits.TRISB15  = 0;  // Turn RB15 into output for UART1 TX
+AD1PCFGL = 0xFFFF;
+//AD1PCFGLbits.PCFG15 = 1; // Set RB15 to digital
+//AD1PCFGLbits.PCFG5 = 1; // Set RB3 to digital
+
+TRISBbits.TRISB4  = 0; // Turn RB4 into output for CS/LWAKE
+TRISBbits.TRISB7  = 0; // Turn RB7 into output for !FAULT/TXE
+TRISBbits.TRISB15 = 0;  // Turn RB15 into output for UART1 TX
 TRISBbits.TRISB3  = 1;  // Turn RB3 into input for UART1 RX
 //========================================================================//
 
@@ -127,10 +131,8 @@ IC1TMR = 0;
 //========================================================================//
 <endif>
 
-TRISBbits.TRISB4 = 0;
+// Force MCP2050 into operation mode
 LATBbits.LATB4 = 1;
-
-TRISBbits.TRISB7 = 0;
 LATBbits.LATB7 = 1;
 >>
 
