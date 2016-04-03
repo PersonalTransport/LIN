@@ -47,9 +47,9 @@ void __attribute__((interrupt,no_auto_psv)) _IC1Interrupt() {
 initializationUART1(node) ::= <<
 
 //========================================================================//
-AD1PCFGLbits.PCFG4 = 1; // Set RB2 to digital
+AD1PCFGLbits.PCFG15 = 1; // Set RB15 to digital
 AD1PCFGLbits.PCFG5 = 1; // Set RB3 to digital
-TRISBbits.TRISB2  = 0;  // Turn RB2 into output for UART1 TX
+TRISBbits.TRISB15  = 0;  // Turn RB15 into output for UART1 TX
 TRISBbits.TRISB3  = 1;  // Turn RB3 into input for UART1 RX
 //========================================================================//
 
@@ -62,7 +62,7 @@ TRISBbits.TRISB3  = 1;  // Turn RB3 into input for UART1 RX
 __builtin_write_OSCCONL(OSCCON & ~(1\<\<6));
 
 //Configure Output Functions
-RPOR1bits.RP2R = 3; //Assign U1TX To Pin RP2
+RPOR7bits.RP15R = 3; //Assign U1TX To Pin RP15
 
 //Configure Input Functions
 RPINR18bits.U1RXR = 3; //Assign U1RX To Pin RP3
@@ -126,6 +126,12 @@ IC1CON2bits.SYNCSEL = 0xB;
 IC1TMR = 0;
 //========================================================================//
 <endif>
+
+TRISBbits.TRISB4 = 0;
+LATBbits.LATB4 = 1;
+
+TRISBbits.TRISB7 = 0;
+LATBbits.LATB7 = 1;
 >>
 
 rxDataAvailableUART1() ::= "U1STAbits.URXDA"
