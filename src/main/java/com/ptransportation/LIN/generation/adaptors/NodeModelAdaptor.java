@@ -18,10 +18,6 @@ public class NodeModelAdaptor extends PolymorphismModelAdaptor {
             return o instanceof Slave;
         } else if (propertyName.equals("master")) {
             return o instanceof Master;
-        } else if (propertyName.equals("publish_frames")) {
-            return node.getPublishFrames();
-        } else if (propertyName.equals("subscribe_frames")) {
-            return node.getSubscribeFrames();
         }
         return super.getProperty(interp, self, o, property, propertyName);
     }

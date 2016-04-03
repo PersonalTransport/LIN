@@ -282,7 +282,7 @@ static inline void setup_rx_<interface.name>(l_u8 PID) {
         rx_buffer.index = 0;
     }
 <endif>
-<node.subscribe_frames:{frame|
+<node.subscribeFrames:{frame|
     else if(PID == frames[<frame.name>_INDEX].PID) {
         rx_buffer.state = L_DATA_CHECKSUM;
         rx_buffer.size = <frame.length>;
@@ -376,7 +376,7 @@ static inline void cleanup_rx_<interface.name>() {
         }
     }
 <endif>
-<node.subscribe_frames:{frame|
+<node.subscribeFrames:{frame|
     else if(rx_buffer.PID == frames[<frame.name>_INDEX].PID) {
         <interface.name>_status.reg.PID = rx_buffer.PID;
         <interface.name>_status.reg.overrun = <interface.name>_status.reg.has_frame;
@@ -468,7 +468,7 @@ static inline void setup_tx_<interface.name>(l_u8 PID) {
         tx_buffer.data.scalar = slave_response_frame.data.scalar;
     }
 <endif>
-<node.publish_frames:{frame|
+<node.publishFrames:{frame|
     else if(PID == frames[<frame.name>_INDEX].PID) {
     <if(node.master)>
         tx_buffer.state = L_BREAK_SYNC;
@@ -518,7 +518,7 @@ static inline void cleanup_tx_<interface.name>() {
     else if(tx_buffer.PID == 0x3D) {
         // TODO slave response
     }
-<node.publish_frames:{frame|
+<node.publishFrames:{frame|
     else if(tx_buffer.PID == frames[<frame.name>_INDEX].PID) {
         <frame.name>_flag = true;
         <frame.signals:{signal|<signal.name>_flag = true;};separator="\n">
@@ -683,8 +683,8 @@ readSignalImplementations(node) ::= <<
 
 
 writeSignalImplementations(node) ::= <<
-<node.frames:{frame|
-<if(frame.publishes)><frame.signals:{signal|<signal:(signal.signalType_WriteImplementation)()>}><endif>}>
+<node.publishFrames:{frame|
+<frame.signals:{signal|<signal:(signal.signalType_WriteImplementation)()>}>}>
 >>
 
 boolReadImplementation(signal) ::= <<

@@ -273,8 +273,8 @@ readSignalPrototypes(node) ::= <<
 
 
 writeSignalPrototypes(node) ::= <<
-<node.frames:{frame|
-<if(frame.publishes)><frame.signals:{signal|<signal:(signal.signalType_WritePrototype)()>}><endif>}>
+<node.publishFrames:{frame|
+<frame.signals:{signal|<signal:(signal.signalType_WritePrototype)()>}>}>
 >>
 
 scalarReadSignalComment(signal) ::= <<
