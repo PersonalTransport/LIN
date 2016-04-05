@@ -1,4 +1,4 @@
-driverHeader(node,target,interface) ::= <<
+driverHeader(node,interface,target) ::= <<
 #ifndef <node.name>_<interface.name>_DRIVER_H
 #define <node.name>_<interface.name>_DRIVER_H
 
@@ -245,39 +245,39 @@ l_u8 ld_read_configuration_<interface.name>(l_u8* const data,l_u8* const length)
 l_u8 ld_set_configuration_<interface.name>(const l_u8* const data,l_u16 length);
 <endif>
 
-<testFlagPrototypes(node)>
-<clearFlagPrototypes(node)>
-<readSignalPrototypes(node)>
-<writeSignalPrototypes(node)>
+<testFlagPrototypes(node,interface,target)>
+<clearFlagPrototypes(node,interface,target)>
+<readSignalPrototypes(node,interface,target)>
+<writeSignalPrototypes(node,interface,target)>
 
 #endif //<node.name>_<interface.name>_DRIVER_H
 >>
 
-testFlagPrototypes(node) ::= <<
+testFlagPrototypes(node,interface,target) ::= <<
 <node.frames:{frame|
-<testFlagPrototype(frame.name)>
+<testFlagPrototype(frame.name,node,interface,target)>
 <frame.signals:{signal|
-<testFlagPrototype(signal.name)>}>}>
+<testFlagPrototype(signal.name,node,interface,target)>}>}>
 >>
 
-clearFlagPrototypes(node) ::= <<
+clearFlagPrototypes(node,interface,target) ::= <<
 <node.frames:{frame|
-<clearFlagPrototype(frame.name)>
-<frame.signals:{signal|<clearFlagPrototype(signal.name)>}>}>
+<clearFlagPrototype(frame.name,node,interface,target)>
+<frame.signals:{signal|<clearFlagPrototype(signal.name,node,interface,target)>}>}>
 >>
 
-readSignalPrototypes(node) ::= <<
+readSignalPrototypes(node,interface,target) ::= <<
 <node.frames:{frame|
-<frame.signals:{signal|<signal:(signal.signalType_ReadPrototype)()>}>}>
+<frame.signals:{signal|<signal:(signal.signalType_ReadPrototype)(frame,node,interface,target)>}>}>
 >>
 
 
-writeSignalPrototypes(node) ::= <<
+writeSignalPrototypes(node,interface,target) ::= <<
 <node.publishFrames:{frame|
-<frame.signals:{signal|<signal:(signal.signalType_WritePrototype)()>}>}>
+<frame.signals:{signal|<signal:(signal.signalType_WritePrototype)(frame,node,interface,target)>}>}>
 >>
 
-scalarReadSignalComment(signal) ::= <<
+scalarReadSignalComment(signal,frame,node,interface,target) ::= <<
 
 
 /**
@@ -290,22 +290,22 @@ scalarReadSignalComment(signal) ::= <<
 **/
 >>
 
-boolReadPrototype(signal) ::= <<
-<scalarReadSignalComment(signal)>
+boolReadPrototype(signal,frame,node,interface,target) ::= <<
+<scalarReadSignalComment(signal,frame,node,interface,target)>
 l_bool l_bool_rd_<signal.name>();
 >>
 
-u8ReadPrototype(signal) ::= <<
-<scalarReadSignalComment(signal)>
+u8ReadPrototype(signal,frame,node,interface,target) ::= <<
+<scalarReadSignalComment(signal,frame,node,interface,target)>
 l_u8 l_u8_rd_<signal.name>();
 >>
 
-u16ReadPrototype(signal) ::= <<
-<scalarReadSignalComment(signal)>
+u16ReadPrototype(signal,frame,node,interface,target) ::= <<
+<scalarReadSignalComment(signal,frame,node,interface,target)>
 l_u16 l_u16_rd_<signal.name>();
 >>
 
-bytesReadPrototype(signal) ::= <<
+bytesReadPrototype(signal,frame,node,interface,target) ::= <<
 
 
 /**
@@ -323,7 +323,7 @@ void l_bytes_rd_<signal.name>(l_u8 start,l_u8 count,l_u8* const data);
 
 
 
-scalarWriteSignalComment(signal) ::= <<
+scalarWriteSignalComment(signal,frame,node,interface,target) ::= <<
 
 
 /**
@@ -336,22 +336,22 @@ scalarWriteSignalComment(signal) ::= <<
 **/
 >>
 
-boolWritePrototype(signal) ::= <<
-<scalarWriteSignalComment(signal)>
+boolWritePrototype(signal,frame,node,interface,target) ::= <<
+<scalarWriteSignalComment(signal,frame,node,interface,target)>
 void l_bool_wr_<signal.name>(l_bool v);
 >>
 
-u8WritePrototype(signal) ::= <<
-<scalarWriteSignalComment(signal)>
+u8WritePrototype(signal,frame,node,interface,target) ::= <<
+<scalarWriteSignalComment(signal,frame,node,interface,target)>
 void l_u8_wr_<signal.name>(l_u8 v);
 >>
 
-u16WritePrototype(signal) ::= <<
-<scalarWriteSignalComment(signal)>
+u16WritePrototype(signal,frame,node,interface,target) ::= <<
+<scalarWriteSignalComment(signal,frame,node,interface,target)>
 void l_u16_wr_<signal.name>(l_u16 v);
 >>
 
-bytesWritePrototype(signal) ::= <<
+bytesWritePrototype(signal,frame,node,interface,target) ::= <<
 
 
 /**
@@ -369,7 +369,7 @@ void l_bytes_wr_<signal.name>(l_u8 start,l_u8 count,const l_u8* const data);
 
 
 
-testFlagPrototype(name) ::= <<
+testFlagPrototype(name,node,interface,target) ::= <<
 
 
 /**
@@ -378,7 +378,7 @@ testFlagPrototype(name) ::= <<
 l_bool l_flg_tst_<name>();
 >>
 
-clearFlagPrototype(name) ::= <<
+clearFlagPrototype(name,node,interface,target) ::= <<
 
 
 /**
