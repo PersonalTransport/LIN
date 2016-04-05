@@ -17,7 +17,7 @@ systemInitialization(node,interface,target) ::= <<
 
 interfaceGlobals(node,interface,target) ::= <<
 <if(node.slave)>
-static l_u16 break_ticks_UART1 = 0;
+static l_u16 break_ticks_<interface.name> = 0;
 
 void __attribute__((interrupt,no_auto_psv)) _IC1Interrupt() {
     if(IFS0bits.IC1IF) {
@@ -27,14 +27,14 @@ void __attribute__((interrupt,no_auto_psv)) _IC1Interrupt() {
             IC1CON1bits.ICM = 0x03;
         }
         else if(IC1CON1bits.ICM == 0x03) {
-            if(break_ticks_UART1 == 0) {
-                U1BRG = time/52-1; // TODO this does not look right
-                break_ticks_UART1 = 44*U1BRG+44; // TODO this does not look right
-                U1MODEbits.UARTEN = 1;
+            if(break_ticks_<interface.name> == 0) {
+            <interface.baudRateRegister> = time/52-1; // TODO this does not look right
+                break_ticks_<interface.name> = 44<interface.baudRateRegister>+44; // TODO this does not look right
+                <interface.modeRegister>.UARTEN = 1;
             }
-            if(time >= break_ticks_UART1) {
+            if(time >= break_ticks_<interface.name>) {
                 rx_buffer.state = L_BREAK_SYNC;
-                U1MODEbits.ABAUD = 1;
+                <interface.modeRegister>.ABAUD = 1;
             }
             IC1CON1bits.ICM = 0x02;
         }
@@ -66,10 +66,10 @@ TRISBbits.TRISB3  = 1;  // Turn RB3 into input for UART1 RX
 __builtin_write_OSCCONL(OSCCON & ~(1\<\<6));
 
 //Configure Output Functions
-RPOR7bits.RP15R = 3; //Assign U1TX To Pin RP15
+RPOR7bits.RP15R = <interface.outputFunction>; //Assign U1TX To Pin RP15
 
 //Configure Input Functions
-RPINR18bits.U1RXR = 3; //Assign U1RX To Pin RP3
+<interface.inputFunction> = 3; //Assign U1RX To Pin RP3
 <if(node.slave)>
 RPINR7bits.IC1R = 3; //Assign IC1 To Pin RP3
 <endif>
@@ -84,25 +84,25 @@ __builtin_write_OSCCONL(OSCCON | (1\<\<6));
 // TODO make this adjustable.
 // BRG = FCY    /(4*BAUD_RATE) - 1
 // RGB = 2000000/(4*10000     ) - 1 = 49
-U1BRG = 49; // Set Baud Rate to 10000
+<interface.baudRateRegister> = 49; // Set Baud Rate to 10000
 
-U1MODEbits.BRGH  = 1; // High Baud Rate
-U1MODEbits.PDSEL = 0; // 8-bit data, no parity
-U1MODEbits.STSEL = 0; // One stop bit
+<interface.modeRegister>.BRGH  = 1; // High Baud Rate
+<interface.modeRegister>.PDSEL = 0; // 8-bit data, no parity
+<interface.modeRegister>.STSEL = 0; // One stop bit
 
-U1STAbits.UTXISEL1 = 1; // Interrupt when the last character is shifted out of the Transmit Shift Register; all transmit operations are completed. Part(1/2)
-U1STAbits.UTXISEL0 = 0; // Part (2/2)
+<interface.statusRegister>.UTXISEL1 = 1; // Interrupt when the last character is shifted out of the Transmit Shift Register; all transmit operations are completed. Part(1/2)
+<interface.statusRegister>.UTXISEL0 = 0; // Part (2/2)
 
-U1STAbits.URXISEL1 = 0;
-U1STAbits.URXISEL0 = 0;
+<interface.statusRegister>.URXISEL1 = 0;
+<interface.statusRegister>.URXISEL0 = 0;
 
 // TODO URXISEL??
 
 l_sys_irq_disable();
 <if(node.master)>
-U1MODEbits.UARTEN = 1; // Enable the UART 1 module.
+<interface.modeRegister>.UARTEN = 1; // Enable the UART 1 module.
 <elseif(node.slave)>
-U1MODEbits.UARTEN = 0; // Disable the UART 1 module until first break.
+<interface.modeRegister>.UARTEN = 0; // Disable the UART 1 module until first break.
 <endif>
 //========================================================================//
 <if(node.slave)>
@@ -136,22 +136,22 @@ LATBbits.LATB4 = 1;
 LATBbits.LATB7 = 1;
 >>
 
-interfaceRxDataAvailable(node,interface,target) ::= "U1STAbits.URXDA"
+interfaceRxDataAvailable(node,interface,target) ::= "<interface.statusRegister>.URXDA"
 
-interfaceRxData(cVarToStoreIn,node,interface,target) ::= "<cVarToStoreIn> = (l_u8)U1RXREG;"
+interfaceRxData(cVarToStoreIn,node,interface,target) ::= "<cVarToStoreIn> = (l_u8)<interface.rxRegister>;"
 
-interfaceRxBreakSync(node,interface,target) ::= "break_ticks_UART1 = 44*U1BRG+44;" // TODO this does not look right
+interfaceRxBreakSync(node,interface,target) ::= "break_ticks_<interface.name> = 44<interface.baudRateRegister>+44;" // TODO this does not look right
 
 interfaceTxData(cVarToTx,node,interface,target) ::= <<
-U1STAbits.UTXEN  = 1; // Signal the send 2 clock cycles from now.
-U1TXREG = (l_u8)<cVarToTx>;
+<interface.statusRegister>.UTXEN  = 1; // Signal the send 2 clock cycles from now.
+<interface.txRegister> = (l_u8)<cVarToTx>;
 >>
 
 interfaceTxBreakAndSync(node,interface,target) ::= <<
 // Send the break and sync.
-while(!U1STAbits.TRMT); // Wait for tx to complete.
-U1STAbits.UTXBRK = 1; // Enable a break sequence.
-U1STAbits.UTXEN  = 1; // Signal the send 2 clock cycles from now.
-U1TXREG = 0x00;  // Value is ignored.
-U1TXREG = 0x55; // Send the sync character.
+while(!<interface.statusRegister>.TRMT); // Wait for tx to complete.
+<interface.statusRegister>.UTXBRK = 1; // Enable a break sequence.
+<interface.statusRegister>.UTXEN  = 1; // Signal the send 2 clock cycles from now.
+<interface.txRegister> = 0x00;  // Value is ignored.
+<interface.txRegister> = 0x55; // Send the sync character.
 >>
