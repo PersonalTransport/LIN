@@ -5,8 +5,8 @@ driverHeader(node,interface,target) ::= <<
 #include \<stdlib.h>
 #include \<stdint.h>
 #include \<stdbool.h>
-<if(target.includes)><(target.includes)()><endif>
-<if(interface.includes)><(interface.includes)()><endif>
+<if(target.includes)><(target.includes)(node,interface,target)><endif>
+<if(interface.includes)><(interface.includes)(node,interface,target)><endif>
 
 #define L_FRAME_PID(id) (~((id \<\< 6) ^ (id \<\< 4) ^ (id \<\< 3) ^ (id \<\< 2)) & 0x80) |\
                          (((id \<\< 6) ^ (id \<\< 5) ^ (id \<\< 4) ^ (id \<\< 2)) & 0x40) |\
@@ -35,8 +35,8 @@ extern struct l_schedule _L_NULL_SCHEDULE;
 <node.scheduleTables:{schedule|#define <schedule.name> &_<schedule.name>};separator="\n">
 <endif>
 
-<if(target.globals)><(target.globals)(node)><endif>
-<if(interface.globals)><(interface.globals)(node)><endif>
+<if(target.globals)><(target.globals)(node,interface,target)><endif>
+<if(interface.globals)><(interface.globals)(node,interface,target)><endif>
 
 /**
 * Initialize the core api.

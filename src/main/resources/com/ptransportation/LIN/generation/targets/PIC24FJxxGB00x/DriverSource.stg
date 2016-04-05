@@ -1,4 +1,4 @@
-includes() ::= <<
+includes(node,interface,target) ::= <<
 #include \<xc.h>
 
 #define MIN_BAUD 10000
@@ -9,13 +9,13 @@ includes() ::= <<
 #endif
 >>
 
-pic24FJxxGB00xGlobals(node) ::= ""
+pic24FJxxGB00xGlobals(node,interface,target) ::= ""
 
-systemInitialization() ::= <<
+systemInitialization(node,interface,target) ::= <<
 // TODO implement!
 >>
 
-globalsUART1(node) ::= <<
+globalsUART1(node,interface,target) ::= <<
 <if(node.slave)>
 static l_u16 break_ticks_UART1 = 0;
 
@@ -44,7 +44,7 @@ void __attribute__((interrupt,no_auto_psv)) _IC1Interrupt() {
 <endif>
 >>
 
-initializationUART1(node) ::= <<
+initializationUART1(node,interface,target) ::= <<
 
 //========================================================================//
 AD1PCFGL = 0xFFFF;
@@ -136,18 +136,18 @@ LATBbits.LATB4 = 1;
 LATBbits.LATB7 = 1;
 >>
 
-rxDataAvailableUART1() ::= "U1STAbits.URXDA"
+rxDataAvailableUART1(node,interface,target) ::= "U1STAbits.URXDA"
 
-rxDataUART1(cVarToStoreIn) ::= "<cVarToStoreIn> = (l_u8)U1RXREG;"
+rxDataUART1(cVarToStoreIn,node,interface,target) ::= "<cVarToStoreIn> = (l_u8)U1RXREG;"
 
-rxBreakSyncUART1() ::= "break_ticks_UART1 = 44*U1BRG+44;" // TODO this does not look right
+rxBreakSyncUART1(node,interface,target) ::= "break_ticks_UART1 = 44*U1BRG+44;" // TODO this does not look right
 
-txDataUART1(cVarToTx) ::= <<
+txDataUART1(cVarToTx,node,interface,target) ::= <<
 U1STAbits.UTXEN  = 1; // Signal the send 2 clock cycles from now.
 U1TXREG = (l_u8)<cVarToTx>;
 >>
 
-txBreakAndSyncUART1() ::= <<
+txBreakAndSyncUART1(node,interface,target) ::= <<
 // Send the break and sync.
 while(!U1STAbits.TRMT); // Wait for tx to complete.
 U1STAbits.UTXBRK = 1; // Enable a break sequence.

@@ -1,7 +1,7 @@
-driverSource(node,target,interface) ::= <<
+driverSource(node,interface,target) ::= <<
 #include "<node.name>.h"
-<if(target.includes)><(target.includes)()><endif>
-<if(interface.includes)><(interface.includes)()><endif>
+<if(target.includes)><(target.includes)(node,interface,target)><endif>
+<if(interface.includes)><(interface.includes)(node,interface,target)><endif>
 
 <node.frames:{frame|#define <frame.name>_INDEX <i0>};separator="\n">
 
@@ -164,8 +164,8 @@ static void setup_tx_<interface.name>(l_u8 PID);
 static void setup_rx_<interface.name>(l_u8 PID);
 static void cleanup_tx_<interface.name>();
 static void cleanup_rx_<interface.name>();
-<if(target.globals)><(target.globals)(node)><endif>
-<if(interface.globals)><(interface.globals)(node)><endif>
+<if(target.globals)><(target.globals)(node,interface,target)><endif>
+<if(interface.globals)><(interface.globals)(node,interface,target)><endif>
 
 l_bool l_sys_init() {
     tx_buffer.PID = 0xFF;
@@ -180,7 +180,7 @@ l_bool l_sys_init() {
     rx_buffer.data.scalar = 0;
     rx_buffer.state = L_IDLE;
 
-    <systemInitialization()>
+    <systemInitialization(node,interface,target)>
 
     return false;
 }
@@ -243,7 +243,7 @@ void l_sch_set_<interface.name>(struct l_schedule *schedule, l_u8 entry) {
 <endif>
 
 l_bool l_ifc_init_<interface.name>() {
-    <(interface.initialization)(node)>
+    <(interface.initialization)(node,interface,target)>
     return false;
 }
 <if(node.master)>
@@ -401,19 +401,19 @@ static inline void cleanup_rx_<interface.name>() {
 }
 
 void l_ifc_rx_<interface.name>() {
-    while(<(interface.rxDataAvailable)()>) {
+    while(<(interface.rxDataAvailable)(node,interface,target)>) {
         switch(rx_buffer.state) {
             case L_BREAK_SYNC: {
                 rx_buffer.state = L_PID;
                 <if(node.slave)>
-                <(interface.rxBreakSync)()>
+                <(interface.rxBreakSync)(node,interface,target)>
                 <endif>
                 break;
             }
             case L_PID: {
                 rx_buffer.state = L_DATA_CHECKSUM;
                 <if(node.slave)>
-                <(interface.rxData)("rx_buffer.PID")>
+                <(interface.rxData)("rx_buffer.PID",node,interface,target)>
                 setup_tx_<interface.name>(rx_buffer.PID);
                 setup_rx_<interface.name>(rx_buffer.PID);
                 l_ifc_tx_<interface.name>();
@@ -422,13 +422,13 @@ void l_ifc_rx_<interface.name>() {
             }
             case L_DATA_CHECKSUM: {
                 if(rx_buffer.index \< rx_buffer.size) {
-                    <(interface.rxData)("rx_buffer.data.array[rx_buffer.index]")>
+                    <(interface.rxData)("rx_buffer.data.array[rx_buffer.index]",node,interface,target)>
                     rx_buffer.index++;
                 }
                 else {
                     rx_buffer.state = L_IDLE;
                     if(rx_buffer.size > 0) {
-                        <(interface.rxData)("rx_buffer.checksum")>
+                        <(interface.rxData)("rx_buffer.checksum",node,interface,target)>
                         <if(node.slave)>
                         cleanup_rx_<interface.name>();
                         <endif>
@@ -438,7 +438,7 @@ void l_ifc_rx_<interface.name>() {
             }
             case L_IDLE: {
                 // TODO only the slave should eat data that this node does not care about, right?
-                <(interface.rxData)("l_u8 data")> // Just eat the data that this node does not care about!
+                <(interface.rxData)("l_u8 data",node,interface,target)> // Just eat the data that this node does not care about!
                 (void)data; // Shut the compiler up about data not being used.
                 break;
             }
@@ -535,7 +535,7 @@ void l_ifc_tx_<interface.name>() {
         case L_BREAK_SYNC: {
             tx_buffer.state = L_PID;
             <if(node.master)>
-            <(interface.txBreakAndSync)()>
+            <(interface.txBreakAndSync)(node,interface,target)>
             <endif>
             break;
         }
@@ -543,13 +543,13 @@ void l_ifc_tx_<interface.name>() {
             tx_buffer.state = L_DATA_CHECKSUM;
             tx_buffer.index = 0;
             <if(node.master)>
-            <(interface.txData)("tx_buffer.PID")>  // Send the PID.
+            <(interface.txData)("tx_buffer.PID",node,interface,target)>  // Send the PID.
             <endif>
             break;
         }
         case L_DATA_CHECKSUM: {
             if(tx_buffer.index \< tx_buffer.size) {
-                <(interface.txData)("tx_buffer.data.array[tx_buffer.index]")> // Send the data.
+                <(interface.txData)("tx_buffer.data.array[tx_buffer.index]",node,interface,target)> // Send the data.
                 tx_buffer.index++;
             }
             else {
@@ -557,7 +557,7 @@ void l_ifc_tx_<interface.name>() {
                 if(tx_buffer.size > 0) {
                     tx_buffer.size  = 0;
                     tx_buffer.index = 0;
-                    <(interface.txData)("tx_buffer.checksum")> // Send the checksum.
+                    <(interface.txData)("tx_buffer.checksum",node,interface,target)> // Send the checksum.
                     <if(node.slave)>
                     cleanup_tx_<interface.name>();
                     <endif>
@@ -657,58 +657,58 @@ l_u8 ld_set_configuration_<interface.name>(const l_u8* const data,l_u16 length) 
 }
 <endif>
 
-<testFlagImplementations(node)>
-<clearFlagImplementations(node)>
-<readSignalImplementations(node)>
-<writeSignalImplementations(node)>
+<testFlagImplementations(node,interface,target)>
+<clearFlagImplementations(node,interface,target)>
+<readSignalImplementations(node,interface,target)>
+<writeSignalImplementations(node,interface,target)>
 >>
 
-testFlagImplementations(node) ::= <<
+testFlagImplementations(node,interface,target) ::= <<
 <node.frames:{frame|
-<testFlagImplementation(frame.name)>
+<testFlagImplementation(frame.name,node,interface,target)>
 <frame.signals:{signal|
-<testFlagImplementation(signal.name)>}>}>
+<testFlagImplementation(signal.name,node,interface,target)>}>}>
 >>
 
-clearFlagImplementations(node) ::= <<
+clearFlagImplementations(node,interface,target) ::= <<
 <node.frames:{frame|
-<clearFlagImplementation(frame.name)>
-<frame.signals:{signal|<clearFlagImplementation(signal.name)>}>}>
+<clearFlagImplementation(frame.name,node,interface,target)>
+<frame.signals:{signal|<clearFlagImplementation(signal.name,node,interface,target)>}>}>
 >>
 
-readSignalImplementations(node) ::= <<
+readSignalImplementations(node,interface,target) ::= <<
 <node.frames:{frame|
-<frame.signals:{signal|<signal:(signal.signalType_ReadImplementation)()>}>}>
+<frame.signals:{signal|<signal:(signal.signalType_ReadImplementation)(frame,node,interface,target)>}>}>
 >>
 
 
-writeSignalImplementations(node) ::= <<
+writeSignalImplementations(node,interface,target) ::= <<
 <node.publishFrames:{frame|
-<frame.signals:{signal|<signal:(signal.signalType_WriteImplementation)()>}>}>
+<frame.signals:{signal|<signal:(signal.signalType_WriteImplementation)(frame,node,interface,target)>}>}>
 >>
 
-boolReadImplementation(signal) ::= <<
+boolReadImplementation(signal,frame,node,interface,target) ::= <<
 
 
 l_bool l_bool_rd_<signal.name>() {
     return (l_bool)((frames[<signal.frame.name>_INDEX].data.scalar >\> <signal.offset>) & <signal.signalMask.hex>ULL);
 }>>
 
-u8ReadImplementation(signal) ::= <<
+u8ReadImplementation(signal,frame,node,interface,target) ::= <<
 
 
 l_u8 l_u8_rd_<signal.name>() {
     return (l_u8)((frames[<signal.frame.name>_INDEX].data.scalar >\> <signal.offset>) & <signal.signalMask.hex>ULL);
 }>>
 
-u16ReadImplementation(signal) ::= <<
+u16ReadImplementation(signal,frame,node,interface,target) ::= <<
 
 
 l_u16 l_u16_rd_<signal.name>() {
     return (l_u16)((frames[<signal.frame.name>_INDEX].data.scalar >\> <signal.offset>) & <signal.signalMask.hex>ULL);
 }>>
 
-bytesReadImplementation(signal) ::= <<
+bytesReadImplementation(signal,frame,node,interface,target) ::= <<
 
 
 void l_bytes_rd_<signal.name>(l_u8 start,l_u8 count,l_u8* const data) {
@@ -719,7 +719,7 @@ void l_bytes_rd_<signal.name>(l_u8 start,l_u8 count,l_u8* const data) {
 
 
 
-boolWriteImplementation(signal) ::= <<
+boolWriteImplementation(signal,frame,node,interface,target) ::= <<
 
 
 void l_bool_wr_<signal.name>(l_bool v) {
@@ -727,7 +727,7 @@ void l_bool_wr_<signal.name>(l_bool v) {
     frames[<signal.frame.name>_INDEX].data.scalar |= (((uint64_t)v & <signal.signalMask.hex>ULL) \<\< <signal.offset>);
 }>>
 
-u8WriteImplementation(signal) ::= <<
+u8WriteImplementation(signal,frame,node,interface,target) ::= <<
 
 
 void l_u8_wr_<signal.name>(l_u8 v) {
@@ -735,7 +735,7 @@ void l_u8_wr_<signal.name>(l_u8 v) {
     frames[<signal.frame.name>_INDEX].data.scalar |= (((uint64_t)v & <signal.signalMask.hex>ULL) \<\< <signal.offset>);
 }>>
 
-u16WriteImplementation(signal) ::= <<
+u16WriteImplementation(signal,frame,node,interface,target) ::= <<
 
 
 void l_u16_wr_<signal.name>(l_u16 v) {
@@ -743,7 +743,7 @@ void l_u16_wr_<signal.name>(l_u16 v) {
     frames[<signal.frame.name>_INDEX].data.scalar |= (((uint64_t)v & <signal.signalMask.hex>ULL) \<\< <signal.offset>);
 }>>
 
-bytesWriteImplementation(signal) ::= <<
+bytesWriteImplementation(signal,frame,node,interface,target) ::= <<
 
 
 void l_bytes_wr_<signal.name>(l_u8 start,l_u8 count,const l_u8* const data) {
@@ -753,7 +753,7 @@ void l_bytes_wr_<signal.name>(l_u8 start,l_u8 count,const l_u8* const data) {
 
 
 
-testFlagImplementation(name) ::= <<
+testFlagImplementation(name,node,interface,target) ::= <<
 
 
 l_bool l_flg_tst_<name>() {
@@ -761,7 +761,7 @@ l_bool l_flg_tst_<name>() {
 }
 >>
 
-clearFlagImplementation(name) ::= <<
+clearFlagImplementation(name,node,interface,target) ::= <<
 
 
 void l_flg_clr_<name>() {

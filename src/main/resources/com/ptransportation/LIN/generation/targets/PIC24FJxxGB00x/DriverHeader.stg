@@ -1,6 +1,6 @@
-includes() ::= ""
+includes(node,interface,target) ::= ""
 
-pic24FJxxGB00xGlobals(node) ::= <<
+pic24FJxxGB00xGlobals(node,interface,target) ::= <<
 struct l_irqmask {
     unsigned int rx_level : 3;
     unsigned int tx_level : 3;
@@ -10,4 +10,4 @@ struct l_irqmask {
 };
 >>
 
-globalsUART1(node) ::= ""
+globalsUART1(node,interface,target) ::= ""
