@@ -17,36 +17,36 @@ public class UART extends Interface {
 
     @Override
     public String getGlobals() {
-        return "globalsUART" + version;
+        return "interfaceGlobals";
     }
 
     @Override
     public String getInitialization() {
-        return "initializationUART" + version;
+        return "interfaceInitialization";
     }
 
     @Override
     public String getRxBreakSync() {
-        return "rxBreakSyncUART" + version;
+        return "interfaceRxBreakSync";
     }
 
     @Override
     public String getRxDataAvailable() {
-        return "rxDataAvailableUART" + version;
+        return "interfaceRxDataAvailable";
     }
 
     @Override
     public String getRxData() {
-        return "rxDataUART" + version;
+        return "interfaceRxData";
     }
 
     @Override
     public String getTxData() {
-        return "txDataUART" + version;
+        return "interfaceTxData";
     }
 
     @Override
     public String getTxBreakAndSync() {
-        return "txBreakAndSyncUART" + version;
+        return "interfaceTxBreakAndSync";
     }
 }
