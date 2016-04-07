@@ -29,7 +29,7 @@ void __attribute__((interrupt,no_auto_psv)) _IC1Interrupt() {
         else if(IC1CON1bits.ICM == 0x03) {
             if(break_ticks_<interface.name> == 0) {
             <interface.baudRateRegister> = time/52-1; // TODO this does not look right
-                break_ticks_<interface.name> = 44<interface.baudRateRegister>+44; // TODO this does not look right
+                break_ticks_<interface.name> = 44*<interface.baudRateRegister>+44; // TODO this does not look right
                 <interface.modeRegister>.UARTEN = 1;
             }
             if(time >= break_ticks_<interface.name>) {
@@ -140,7 +140,7 @@ interfaceRxDataAvailable(node,interface,target) ::= "<interface.statusRegister>.
 
 interfaceRxData(cVarToStoreIn,node,interface,target) ::= "<cVarToStoreIn> = (l_u8)<interface.rxRegister>;"
 
-interfaceRxBreakSync(node,interface,target) ::= "break_ticks_<interface.name> = 44<interface.baudRateRegister>+44;" // TODO this does not look right
+interfaceRxBreakSync(node,interface,target) ::= "break_ticks_<interface.name> = 44 * <interface.baudRateRegister> + 44;" // TODO this does not look right
 
 interfaceTxData(cVarToTx,node,interface,target) ::= <<
 <interface.statusRegister>.UTXEN  = 1; // Signal the send 2 clock cycles from now.
