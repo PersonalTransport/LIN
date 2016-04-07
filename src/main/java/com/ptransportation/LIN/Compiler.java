@@ -55,17 +55,19 @@ public class Compiler {
                 System.out.println(props.getProperty("version"));
             }
             catch (IOException e) {
+                System.exit(-1);
             }
             return;
         }
 
         Compiler compiler = new Compiler();
-        compiler.compile(compilerOptions);
+        if(!compiler.compile(compilerOptions)) {
+            System.exit(-1);
+        }
     }
 
-    private void compile(CompilerOptions compilerOptions) throws IOException {
+    private boolean compile(CompilerOptions compilerOptions) throws IOException {
         ErrorModel errorModel = new ErrorModel();
-        DefaultValidator validator = new DefaultValidator(errorModel);
 
         Target target = null;
         for (Target t : targets) {
@@ -74,13 +76,13 @@ public class Compiler {
         }
         if (target == null) {
             System.err.println("Not target named '" + compilerOptions.getTargetDevice() + "'.");
-            return;
+            return false;
         }
 
         Interface inf = target.getInterface(compilerOptions.getTargetInterface());
         if (inf == null) {
             System.err.println(compilerOptions.getTargetDevice() + " doe not have a interface named '" + compilerOptions.getTargetInterface() + "'.");
-            return;
+            return false;
         }
 
         if (compilerOptions.getSlaveDriverOptions() != null) {
@@ -89,40 +91,35 @@ public class Compiler {
             if (!outputDir.exists())
                 outputDir.mkdirs();
 
-            List<NodeCapabilityFile> nodeCapabilityFiles = generateModel(slaveOptions.getSources(), errorModel);
-            for (NodeCapabilityFile nodeCapabilityFile : nodeCapabilityFiles) {
-                if (nodeCapabilityFile.getNode() instanceof Slave) {
-                    validator.validate(nodeCapabilityFile);
-                    if(errorModel.getErrorCount() == 0)
-                        generateDriver(target, inf, outputDir, nodeCapabilityFile.getNode());
-                    return; // TODO check for -s flag.
-                }
+            Slave slave = (Slave)generateModel(slaveOptions.getSources(), errorModel);
+            if(slave != null) {
+                generateDriver(target, inf, outputDir, slave);
+                return true;
             }
+
         } else if (compilerOptions.getMasterDriverOptions() != null) {
             CompilerOptions.MasterDriverOptions masterOptions = compilerOptions.getMasterDriverOptions();
             File outputDir = new File(masterOptions.getOutputDirectory()).getCanonicalFile();
             if (!outputDir.exists())
                 outputDir.mkdirs();
 
-            List<NodeCapabilityFile> nodeCapabilityFiles = generateModel(masterOptions.getSources(), errorModel);
-            for (NodeCapabilityFile nodeCapabilityFile : nodeCapabilityFiles) {
-                if (nodeCapabilityFile.getNode() instanceof Master) {
-                    validator.validate(nodeCapabilityFile);
-                    if(errorModel.getErrorCount() == 0)
-                        generateDriver(target, inf, outputDir, nodeCapabilityFile.getNode());
-                    return; // TODO check for more than one master.
-                }
+            Master master = (Master)generateModel(masterOptions.getSources(), errorModel);
+            if(master != null) {
+                generateDriver(target, inf, outputDir, master);
+                return true;
             }
         }
+        return false;
     }
 
-    private static List<NodeCapabilityFile> generateModel(List<String> sourceFiles, ErrorModel errorModel) throws IOException {
+    private static Node generateModel(List<String> sourceFiles, ErrorModel errorModel) throws IOException {
         List<NodeCapabilityFile> nodeCapabilityFiles = new ArrayList<NodeCapabilityFile>();
         List<NodeCapabilityFileParser.NodeCapabilityFileContext> nodeCapabilityFileContexts = new ArrayList<NodeCapabilityFileParser.NodeCapabilityFileContext>();
 
-        for (String file : sourceFiles) {
-            ANTLRInputStream stream = new ANTLRInputStream(new FileInputStream(file));
-            stream.name = file;
+        boolean hasErrors = false;
+        for (String filepath : sourceFiles) {
+            ANTLRInputStream stream = new ANTLRInputStream(new FileInputStream(filepath));
+            stream.name = new File(filepath).getCanonicalPath();
 
             NodeCapabilityFileLexer lexer = new NodeCapabilityFileLexer(stream);
             CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -135,17 +132,32 @@ public class Compiler {
             parser.addErrorListener(errorModel);
 
             NodeCapabilityFileParser.NodeCapabilityFileContext context = parser.nodeCapabilityFile();
+            if(parser.getNumberOfSyntaxErrors() == 0) {
+                NodeCapabilityFileConverter converter = new NodeCapabilityFileConverter();
+                NodeCapabilityFile nodeCapabilityFile = converter.visit(context);
 
-            NodeCapabilityFileConverter converter = new NodeCapabilityFileConverter();
-            NodeCapabilityFile nodeCapabilityFile = converter.visit(context);
-
-            nodeCapabilityFiles.add(nodeCapabilityFile);
-            nodeCapabilityFileContexts.add(context);
+                nodeCapabilityFiles.add(nodeCapabilityFile);
+                nodeCapabilityFileContexts.add(context);
+            }
+            else {
+                hasErrors = true;
+            }
         }
+        if(!hasErrors) {
+            int startingErrors = errorModel.getErrorCount();
+            NodeCapabilityFileLinker linker = new NodeCapabilityFileLinker(errorModel);
+            linker.link(nodeCapabilityFileContexts, nodeCapabilityFiles);
 
-        NodeCapabilityFileLinker linker = new NodeCapabilityFileLinker(errorModel);
-        linker.link(nodeCapabilityFileContexts, nodeCapabilityFiles);
-        return nodeCapabilityFiles;
+            if(startingErrors == errorModel.getErrorCount()) {
+                startingErrors = errorModel.getErrorCount();
+                DefaultValidator validator = new DefaultValidator(errorModel);
+                validator.validate(nodeCapabilityFiles.get(0).getNode());
+
+                if(startingErrors == errorModel.getErrorCount())
+                    return nodeCapabilityFiles.get(0).getNode();
+            }
+        }
+        return null;
     }
 
     public void generateDriver(Target target, Interface inf, File outputDir, Node node) throws FileNotFoundException {
