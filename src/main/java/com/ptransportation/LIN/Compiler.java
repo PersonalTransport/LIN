@@ -47,7 +47,6 @@ public class Compiler {
             return;
         }
         if(compilerOptions.isVersion()) {
-
             try {
                 final URL resource = Compiler.class.getClassLoader().getResource("config.properties");
                 Properties props = new Properties();
@@ -85,30 +84,17 @@ public class Compiler {
             return false;
         }
 
-        if (compilerOptions.getSlaveDriverOptions() != null) {
-            CompilerOptions.SlaveDriverOptions slaveOptions = compilerOptions.getSlaveDriverOptions();
-            File outputDir = new File(slaveOptions.getOutputDirectory()).getCanonicalFile();
-            if (!outputDir.exists())
-                outputDir.mkdirs();
+        File outputDir = new File(compilerOptions.getOutputDirectory()).getCanonicalFile();
+        if (!outputDir.exists())
+            outputDir.mkdirs();
 
-            Slave slave = (Slave)generateModel(slaveOptions.getSources(), errorModel);
-            if(slave != null) {
-                generateDriver(target, inf, outputDir, slave);
-                return true;
-            }
 
-        } else if (compilerOptions.getMasterDriverOptions() != null) {
-            CompilerOptions.MasterDriverOptions masterOptions = compilerOptions.getMasterDriverOptions();
-            File outputDir = new File(masterOptions.getOutputDirectory()).getCanonicalFile();
-            if (!outputDir.exists())
-                outputDir.mkdirs();
-
-            Master master = (Master)generateModel(masterOptions.getSources(), errorModel);
-            if(master != null) {
-                generateDriver(target, inf, outputDir, master);
-                return true;
-            }
+        Node node = generateModel(compilerOptions.getSources(), errorModel);
+        if(node != null) {
+            generateDriver(target, inf, outputDir, node);
+            return true;
         }
+
         return false;
     }
 

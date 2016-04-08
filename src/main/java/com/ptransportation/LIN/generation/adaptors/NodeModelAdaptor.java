@@ -1,14 +1,11 @@
 package com.ptransportation.LIN.generation.adaptors;
 
-import com.ptransportation.LIN.model.Frame;
 import com.ptransportation.LIN.model.Master;
 import com.ptransportation.LIN.model.Node;
 import com.ptransportation.LIN.model.Slave;
 import org.stringtemplate.v4.Interpreter;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.misc.STNoSuchPropertyException;
-
-import java.util.List;
 
 public class NodeModelAdaptor extends PolymorphismModelAdaptor {
     @Override
