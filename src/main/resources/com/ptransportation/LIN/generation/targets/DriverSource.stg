@@ -243,6 +243,9 @@ void l_sch_set_<interface.name>(struct l_schedule *schedule, l_u8 entry) {
 <endif>
 
 l_bool l_ifc_init_<interface.name>() {
+    <if(node.master)>
+    l_sch_set_<interface.name>(L_NULL_SCHEDULE,0);
+    <endif>
     <(interface.initialization)(node,interface,target)>
     return false;
 }
