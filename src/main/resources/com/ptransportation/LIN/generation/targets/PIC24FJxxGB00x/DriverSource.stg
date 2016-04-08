@@ -1,6 +1,10 @@
 targetIncludes(node,interface,target) ::= <<
 #include \<xc.h>
 
+#ifndef FCY
+#error "FCY must be defined while compiling <node.name>.c"
+#endif
+
 #define MIN_BAUD 10000
 #define MAX_BAUD 20000
 
