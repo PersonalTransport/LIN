@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Properties;
 
 public class Compiler {
-    private Target[] targets = {
+    private static Target[] targets = {
             new GenericTarget(),
             new PIC24FJxxGB00x()
     };
@@ -36,8 +36,6 @@ public class Compiler {
         try {
             compilerOptions.parse(args);
         } catch (ParameterException e) {
-            System.out.println(e.getMessage());
-            System.out.println();
             compilerOptions.usage();
             System.exit(-1);
         }
@@ -65,9 +63,30 @@ public class Compiler {
 
         ErrorModel errorModel = new ErrorModel();
         Compiler compiler = new Compiler(errorModel);
-        if(!compiler.compile(outputDir,compilerOptions)) {
+
+        Node node = compiler.compile(compilerOptions.getSources());
+        if (node == null) {
+            System.err.println("No node found to export.");
             System.exit(-1);
         }
+
+        Target target = null;
+        for (Target t : targets) {
+            if (t.targetMatches(compilerOptions.getTargetDevice()))
+                target = t;
+        }
+        if (target == null) {
+            System.err.println("Not target named '" + compilerOptions.getTargetDevice() + "'.");
+            System.exit(-1);
+        }
+
+        Interface inf = target.getInterface(compilerOptions.getTargetInterface());
+        if (inf == null) {
+            System.err.println(compilerOptions.getTargetDevice() + " doe not have a interface named '" + compilerOptions.getTargetInterface() + "'.");
+            System.exit(-1);
+        }
+
+        compiler.generateDriver(target, inf, outputDir, node);
     }
 
     private ErrorModel errorModel;
@@ -76,33 +95,7 @@ public class Compiler {
         this.errorModel = errorModel;
     }
 
-    private boolean compile(File outputDir,CompilerOptions compilerOptions) throws IOException {
-        Target target = null;
-        for (Target t : targets) {
-            if (t.targetMatches(compilerOptions.getTargetDevice()))
-                target = t;
-        }
-        if (target == null) {
-            System.err.println("Not target named '" + compilerOptions.getTargetDevice() + "'.");
-            return false;
-        }
-
-        Interface inf = target.getInterface(compilerOptions.getTargetInterface());
-        if (inf == null) {
-            System.err.println(compilerOptions.getTargetDevice() + " doe not have a interface named '" + compilerOptions.getTargetInterface() + "'.");
-            return false;
-        }
-
-        Node node = generateModel(compilerOptions.getSources(), errorModel);
-        if(node != null) {
-            generateDriver(target, inf, outputDir, node);
-            return true;
-        }
-
-        return false;
-    }
-
-    private static Node generateModel(List<String> sourceFiles, ErrorModel errorModel) throws IOException {
+    private Node compile(List<String> sourceFiles) throws IOException {
         List<NodeCapabilityFile> nodeCapabilityFiles = new ArrayList<NodeCapabilityFile>();
         List<NodeCapabilityFileParser.NodeCapabilityFileContext> nodeCapabilityFileContexts = new ArrayList<NodeCapabilityFileParser.NodeCapabilityFileContext>();
 
