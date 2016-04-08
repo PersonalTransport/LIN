@@ -59,15 +59,24 @@ public class Compiler {
             return;
         }
 
-        Compiler compiler = new Compiler();
-        if(!compiler.compile(compilerOptions)) {
+        File outputDir = new File(compilerOptions.getOutputDirectory()).getCanonicalFile();
+        if (!outputDir.exists())
+            outputDir.mkdirs();
+
+        ErrorModel errorModel = new ErrorModel();
+        Compiler compiler = new Compiler(errorModel);
+        if(!compiler.compile(outputDir,compilerOptions)) {
             System.exit(-1);
         }
     }
 
-    private boolean compile(CompilerOptions compilerOptions) throws IOException {
-        ErrorModel errorModel = new ErrorModel();
+    private ErrorModel errorModel;
 
+    public Compiler(ErrorModel errorModel) {
+        this.errorModel = errorModel;
+    }
+
+    private boolean compile(File outputDir,CompilerOptions compilerOptions) throws IOException {
         Target target = null;
         for (Target t : targets) {
             if (t.targetMatches(compilerOptions.getTargetDevice()))
@@ -83,11 +92,6 @@ public class Compiler {
             System.err.println(compilerOptions.getTargetDevice() + " doe not have a interface named '" + compilerOptions.getTargetInterface() + "'.");
             return false;
         }
-
-        File outputDir = new File(compilerOptions.getOutputDirectory()).getCanonicalFile();
-        if (!outputDir.exists())
-            outputDir.mkdirs();
-
 
         Node node = generateModel(compilerOptions.getSources(), errorModel);
         if(node != null) {
