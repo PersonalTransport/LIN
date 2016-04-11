@@ -160,8 +160,8 @@ static l_bool <frame.name>_flag = false;
 
 static l_bool <signal.name>_flag = false;}>}>
 
-static void setup_tx_<interface.name>(l_u8 PID);
-static void setup_rx_<interface.name>(l_u8 PID);
+static void setup_tx_<interface.name>(struct l_schedule_entry *entry);
+static void setup_rx_<interface.name>(struct l_schedule_entry *entry);
 static void cleanup_tx_<interface.name>();
 static void cleanup_rx_<interface.name>();
 <if(target.globals)><(target.globals)(node,interface,target)><endif>
@@ -210,8 +210,8 @@ l_u8 l_sch_tick_<interface.name>() {
                 cleanup_tx_<interface.name>();
 
             if(current.tick == 0) {
-                setup_tx_<interface.name>(entry->data.PID);
-                setup_rx_<interface.name>(entry->data.PID);
+                setup_tx_<interface.name>(entry);
+                setup_rx_<interface.name>(entry);
                 l_ifc_tx_<interface.name>();
             }
 
@@ -265,7 +265,8 @@ l_u16 l_ifc_ioctl_<interface.name>(struct l_ioctl_op op, void* pv) {
     // TODO implement!
 }
 
-static inline void setup_rx_<interface.name>(l_u8 PID) {
+static inline void setup_rx_<interface.name>(struct l_schedule_entry *entry) {
+    l_u8 PID = entry->data.PID;
     rx_buffer.PID = PID;
 
     if(PID == 0xff) {
@@ -448,7 +449,8 @@ void l_ifc_rx_<interface.name>() {
     }
 }
 
-static inline void setup_tx_<interface.name>(l_u8 PID) {
+static inline void setup_tx_<interface.name>(struct l_schedule_entry *entry) {
+    l_u8 PID = entry->data.PID;
     l_u16 checksum = 0;
     tx_buffer.PID = PID;
 
