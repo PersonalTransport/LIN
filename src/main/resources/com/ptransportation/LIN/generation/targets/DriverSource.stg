@@ -81,11 +81,7 @@ enum l_schedule_entry_type {
 struct l_schedule_entry {
     enum l_schedule_entry_type type; // TODO could be 4 bit unsigned
     l_u8 ticks;
-    union {
-        l_u8 PID;
-        l_u8 configured_NAD;
-        //TODO add others
-    } data;
+    l_u8 PID;
 };
 
 struct l_schedule {
@@ -160,8 +156,8 @@ static l_bool <frame.name>_flag = false;
 
 static l_bool <signal.name>_flag = false;}>}>
 
-static void setup_tx_<interface.name>(struct l_schedule_entry *entry);
-static void setup_rx_<interface.name>(struct l_schedule_entry *entry);
+static void setup_tx_<interface.name>(l_u8 PID);
+static void setup_rx_<interface.name>(l_u8 PID);
 static void cleanup_tx_<interface.name>();
 static void cleanup_rx_<interface.name>();
 <if(target.globals)><(target.globals)(node,interface,target)><endif>
@@ -199,25 +195,16 @@ l_u8 l_sch_tick_<interface.name>() {
     }
 
     struct l_schedule_entry *entry = current.entry;
-    switch(entry->type) {
-        case SLAVE_RESP_ENTRY:
-        case MASTER_REQ_ENTRY:
-        case UNCONDITIONAL_ENTRY: {
-            if(rx_buffer.state == L_IDLE && rx_buffer.size != 0)
-                cleanup_rx_<interface.name>();
+    if(rx_buffer.state == L_IDLE && rx_buffer.size != 0)
+        cleanup_rx_<interface.name>();
 
-            if(tx_buffer.state == L_IDLE && tx_buffer.size != 0)
-                cleanup_tx_<interface.name>();
+    if(tx_buffer.state == L_IDLE && tx_buffer.size != 0)
+        cleanup_tx_<interface.name>();
 
-            if(current.tick == 0) {
-                setup_tx_<interface.name>(entry);
-                setup_rx_<interface.name>(entry);
-                l_ifc_tx_<interface.name>();
-            }
-
-            break;
-        }
-        // TODO add the rest!
+    if(current.tick == 0) {
+        setup_tx_<interface.name>(entry->PID);
+        setup_rx_<interface.name>(entry->PID);
+        l_ifc_tx_<interface.name>();
     }
 
     if(current.tick >= entry->ticks-1) {
@@ -265,8 +252,7 @@ l_u16 l_ifc_ioctl_<interface.name>(struct l_ioctl_op op, void* pv) {
     // TODO implement!
 }
 
-static inline void setup_rx_<interface.name>(struct l_schedule_entry *entry) {
-    l_u8 PID = entry->data.PID;
+static inline void setup_rx_<interface.name>(l_u8 PID) {
     rx_buffer.PID = PID;
 
     if(PID == 0xff) {
@@ -449,8 +435,7 @@ void l_ifc_rx_<interface.name>() {
     }
 }
 
-static inline void setup_tx_<interface.name>(struct l_schedule_entry *entry) {
-    l_u8 PID = entry->data.PID;
+static inline void setup_tx_<interface.name>(l_u8 PID) {
     l_u16 checksum = 0;
     tx_buffer.PID = PID;
 
@@ -811,7 +796,7 @@ freeFormatEntryInitialization(entry) ::= "{.type = FREE_FORMAT_ENTRY,.ticks = <e
 
 
 //====================================================================================================================//
-masterReqEntryInitialization(entry) ::= "{.type = MASTER_REQ_ENTRY,.ticks = <entry.ticks>,.data.PID = 0x3C}"
+masterReqEntryInitialization(entry) ::= "{.type = MASTER_REQ_ENTRY,.ticks = <entry.ticks>,.PID = 0x3C}"
 //====================================================================================================================//
 
 
@@ -822,10 +807,10 @@ saveConfigurationEntryInitialization(entry) ::= "{.type = SAVE_CONFIGURATION_ENT
 
 
 //====================================================================================================================//
-slaveRespEntryInitialization(entry) ::= "{.type = SLAVE_RESP_ENTRY,.ticks = <entry.ticks>,.data.PID = 0x3D}"
+slaveRespEntryInitialization(entry) ::= "{.type = SLAVE_RESP_ENTRY,.ticks = <entry.ticks>,.PID = 0x3D}"
 //====================================================================================================================//
 
 
 //====================================================================================================================//
-frameEntryInitialization(entry) ::= "{.type = UNCONDITIONAL_ENTRY,.ticks = <entry.ticks>,.data.PID = L_FRAME_PID((<entry.frame.name>_INDEX+1))}"
+frameEntryInitialization(entry) ::= "{.type = UNCONDITIONAL_ENTRY,.ticks = <entry.ticks>,.PID = L_FRAME_PID((<entry.frame.name>_INDEX+1))}"
 //====================================================================================================================//
