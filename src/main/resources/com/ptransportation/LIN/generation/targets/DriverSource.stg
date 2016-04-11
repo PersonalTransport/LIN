@@ -82,7 +82,7 @@ struct l_schedule_entry {
     enum l_schedule_entry_type type; // TODO could be 4 bit unsigned
     l_u8 ticks;
     union {
-        struct l_frame *frame; // TODO change to PID!
+        l_u8 PID;
         l_u8 configured_NAD;
         //TODO add others
     } data;
@@ -209,10 +209,9 @@ l_u8 l_sch_tick_<interface.name>() {
             if(tx_buffer.state == L_IDLE && tx_buffer.size != 0)
                 cleanup_tx_<interface.name>();
 
-            struct l_frame *frame = entry->data.frame;
             if(current.tick == 0) {
-                setup_tx_<interface.name>(frame->PID);
-                setup_rx_<interface.name>(frame->PID);
+                setup_tx_<interface.name>(entry->data.PID);
+                setup_rx_<interface.name>(entry->data.PID);
                 l_ifc_tx_<interface.name>();
             }
 
@@ -810,7 +809,7 @@ freeFormatEntryInitialization(entry) ::= "{.type = FREE_FORMAT_ENTRY,.ticks = <e
 
 
 //====================================================================================================================//
-masterReqEntryInitialization(entry) ::= "{.type = MASTER_REQ_ENTRY,.ticks = <entry.ticks>,.data.frame = &master_request_frame}"
+masterReqEntryInitialization(entry) ::= "{.type = MASTER_REQ_ENTRY,.ticks = <entry.ticks>,.data.PID = 0x3C}"
 //====================================================================================================================//
 
 
@@ -821,10 +820,10 @@ saveConfigurationEntryInitialization(entry) ::= "{.type = SAVE_CONFIGURATION_ENT
 
 
 //====================================================================================================================//
-slaveRespEntryInitialization(entry) ::= "{.type = SLAVE_RESP_ENTRY,.ticks = <entry.ticks>,.data.frame = &slave_response_frame}"
+slaveRespEntryInitialization(entry) ::= "{.type = SLAVE_RESP_ENTRY,.ticks = <entry.ticks>,.data.PID = 0x3D}"
 //====================================================================================================================//
 
 
 //====================================================================================================================//
-frameEntryInitialization(entry) ::= "{.type = UNCONDITIONAL_ENTRY,.ticks = <entry.ticks>,.data.frame = &frames[<entry.frame.name>_INDEX]}"
+frameEntryInitialization(entry) ::= "{.type = UNCONDITIONAL_ENTRY,.ticks = <entry.ticks>,.data.PID = L_FRAME_PID(<entry.frame.name>_INDEX)}"
 //====================================================================================================================//
