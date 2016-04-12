@@ -82,6 +82,7 @@ struct l_schedule_entry {
     enum l_schedule_entry_type type; // TODO could be 4 bit unsigned
     l_u8 ticks;
     l_u8 PID;
+    union l_frame_data data;
 };
 
 struct l_schedule {
@@ -194,13 +195,13 @@ l_u8 l_sch_tick_<interface.name>() {
         return 0;
     }
 
-    struct l_schedule_entry *entry = current.entry;
     if(rx_buffer.state == L_IDLE && rx_buffer.size != 0)
         cleanup_rx_<interface.name>();
 
     if(tx_buffer.state == L_IDLE && tx_buffer.size != 0)
         cleanup_tx_<interface.name>();
 
+    struct l_schedule_entry *entry = current.entry;
     if(current.tick == 0) {
         setup_tx_<interface.name>(entry->PID);
         setup_rx_<interface.name>(entry->PID);
@@ -314,7 +315,7 @@ static inline void cleanup_rx_<interface.name>() {
                         <interface.name>_status.reg.has_frame = true;
 
                         <interface.name>_status.reg.successful_transfer = true;
-                        master_request_frame.data.scalar = rx_buffer.data.scalar; // TODO not really needed!
+                        master_request_frame.data.scalar = rx_buffer.data.scalar;
 
                         l_u8 start_index = rx_buffer.data.PUD.D1;
                         l_u8 *PIDs = &rx_buffer.data.PUD.D2;
@@ -444,6 +445,7 @@ static inline void setup_tx_<interface.name>(l_u8 PID) {
     }
 <if(node.master)>
     else if(PID == 0x3C) { // Master request frame
+        master_request_frame.data.scalar = current.entry->data.scalar;
         tx_buffer.state = L_BREAK_SYNC;
         tx_buffer.size = 8;
         tx_buffer.index = 0;
@@ -451,6 +453,7 @@ static inline void setup_tx_<interface.name>(l_u8 PID) {
     }
 <else>
     else if(PID == 0x3D) { // Slave response frame
+        // TODO only send out if NAD is equal to this NAD
         tx_buffer.state = L_DATA_CHECKSUM;
         tx_buffer.size = 8;
         tx_buffer.index = 0;
@@ -761,37 +764,37 @@ void l_flg_clr_<name>() {
 
 //====================================================================================================================//
 // TODO implement this!
-assignFrameIdEntryInitialization(entry) ::= "{.type = ASSIGN_FRAME_ID_ENTRY,.ticks = <entry.ticks>}"
+assignFrameIdEntryInitialization(entry) ::= "{.type = ASSIGN_FRAME_ID_ENTRY,.ticks = <entry.ticks>,.PID = 0x3C}"
 //====================================================================================================================//
 
 
 //====================================================================================================================//
 // TODO implement this!
-assignFrameIdRangeEntryInitialization(entry) ::= "{.type = ASSIGN_FRAME_ID_RANGE_ENTRY,.ticks = <entry.ticks>}"
+assignFrameIdRangeEntryInitialization(entry) ::= "{.type = ASSIGN_FRAME_ID_RANGE_ENTRY,.ticks = <entry.ticks>,.PID = 0x3C}"
 //====================================================================================================================//
 
 
 //====================================================================================================================//
 // TODO implement this!
-assignNADEntryInitialization(entry) ::= "{.type = ASSIGN_NAD_ENTRY,.ticks = <entry.ticks>,.data.configured_NAD = <entry.slave.configuredNAD.hex>}"
+assignNADEntryInitialization(entry) ::= "{.type = ASSIGN_NAD_ENTRY,.ticks = <entry.ticks>,.PID = 0x3C,.data.configured_NAD = <entry.slave.configuredNAD.hex>}"
 //====================================================================================================================//
 
 
 //====================================================================================================================//
 // TODO implement this!
-conditionalChangeNADEntryInitialization(entry) ::= "{.type = CONDITIONAL_CHANGE_NAD_ENTRY,.ticks = <entry.ticks>}"
+conditionalChangeNADEntryInitialization(entry) ::= "{.type = CONDITIONAL_CHANGE_NAD_ENTRY,.ticks = <entry.ticks>,.PID = 0x3C}"
 //====================================================================================================================//
 
 
 //====================================================================================================================//
 // TODO implement this!
-dataDumpEntryInitialization(entry) ::= "{.type = DATA_DUMP_ENTRY,.ticks = <entry.ticks>}"
+dataDumpEntryInitialization(entry) ::= "{.type = DATA_DUMP_ENTRY,.ticks = <entry.ticks>,.PID = 0x3C}"
 //====================================================================================================================//
 
 
 //====================================================================================================================//
 // TODO implement this!
-freeFormatEntryInitialization(entry) ::= "{.type = FREE_FORMAT_ENTRY,.ticks = <entry.ticks>}"
+freeFormatEntryInitialization(entry) ::= "{.type = FREE_FORMAT_ENTRY,.ticks = <entry.ticks>,.PID = 0x3C}"
 //====================================================================================================================//
 
 
@@ -802,7 +805,7 @@ masterReqEntryInitialization(entry) ::= "{.type = MASTER_REQ_ENTRY,.ticks = <ent
 
 //====================================================================================================================//
 // TODO implement this!
-saveConfigurationEntryInitialization(entry) ::= "{.type = SAVE_CONFIGURATION_ENTRY,.ticks = <entry.ticks>}"
+saveConfigurationEntryInitialization(entry) ::= "{.type = SAVE_CONFIGURATION_ENTRY,.ticks = <entry.ticks>,.PID = 0x3C}"
 //====================================================================================================================//
 
 

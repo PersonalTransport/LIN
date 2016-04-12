@@ -51,9 +51,11 @@ void __attribute__((interrupt,no_auto_psv)) _IC1Interrupt() {
 interfaceInitialization(node,interface,target) ::= <<
 
 //========================================================================//
+#ifdef PIC24FJxxGBxxx
 AD1PCFGL = 0xFFFF;
-//AD1PCFGLbits.PCFG15 = 1; // Set RB15 to digital
-//AD1PCFGLbits.PCFG5 = 1; // Set RB3 to digital
+#elif PIC24FJxxGAxxx
+AD1PCFG = 0xFFFF;
+#endif
 
 TRISBbits.TRISB4  = 0; // Turn RB4 into output for CS/LWAKE
 TRISBbits.TRISB7  = 0; // Turn RB7 into output for !FAULT/TXE

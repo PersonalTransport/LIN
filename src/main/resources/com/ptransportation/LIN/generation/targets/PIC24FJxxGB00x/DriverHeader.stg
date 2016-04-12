@@ -1,4 +1,10 @@
-targetIncludes(node,interface,target) ::= ""
+targetIncludes(node,interface,target) ::= <<
+#if defined(__PIC24FJ32GB002__) || defined(__PIC24FJ64GB002__) || defined(__PIC24FJ32GB004__) || defined(__PIC24FJ64GB004__)
+#define PIC24FJxxGBxxx
+#elif defined(__PIC24FJ32GA002__) || defined(__PIC24FJ64GA002__) || defined(__PIC24FJ32GA004__) || defined(__PIC24FJ64GA004__)
+#define PIC24FJxxGAxxx
+#endif
+>>
 
 targetGlobals(node,interface,target) ::= <<
 struct l_irqmask {
