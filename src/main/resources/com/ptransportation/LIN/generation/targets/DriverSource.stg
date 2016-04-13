@@ -244,6 +244,7 @@ l_bool l_ifc_init_<interface.name>() {
     <if(node.master)>
     l_sch_set_<interface.name>(L_NULL_SCHEDULE,0);
     <endif>
+    <interface.name>_status.raw_data = 0;
     <(interface.initialization)(node,interface,target)>
     return false;
 }
@@ -328,6 +329,8 @@ static inline void cleanup_rx_<interface.name>() {
                         l_u16 rx_function = ((l_u16)rx_buffer.data.PUD.D4) \<\< 8 | rx_buffer.data.PUD.D3;
                         if((rx_supplier == supplier_id || rx_supplier == 0x7FFF) &&
                            (rx_function == function_id || rx_function == 0xFFFF)) {
+                           master_request_frame.data.scalar = rx_buffer.data.scalar;
+
                            NAD =  rx_buffer.data.PUD.D5;
                            <interface.name>_has_slave_response = true;
                            slave_response_frame.data.PUD.NAD = initialNAD;
@@ -361,6 +364,24 @@ static inline void cleanup_rx_<interface.name>() {
                         slave_response_frame.data.PUD.NAD = NAD;
                         slave_response_frame.data.PUD.PCI = 0x01;
                         slave_response_frame.data.PUD.SID = 0xF7;
+                        slave_response_frame.data.PUD.D1 = 0xFF;
+                        slave_response_frame.data.PUD.D2 = 0xFF;
+                        slave_response_frame.data.PUD.D3 = 0xFF;
+                        slave_response_frame.data.PUD.D4 = 0xFF;
+                        slave_response_frame.data.PUD.D5 = 0xFF;
+                    }
+                    break;
+                }
+                case SAVE_CONFIGURATION: {
+                    if(rx_buffer.data.PUD.NAD == NAD) {
+                        master_request_frame.data.scalar = rx_buffer.data.scalar;
+
+                        <interface.name>_status.reg.save_configuration = true;
+
+                        <interface.name>_has_slave_response = true;
+                        slave_response_frame.data.PUD.NAD = NAD;
+                        slave_response_frame.data.PUD.PCI = 0x01;
+                        slave_response_frame.data.PUD.SID = 0xF6;
                         slave_response_frame.data.PUD.D1 = 0xFF;
                         slave_response_frame.data.PUD.D2 = 0xFF;
                         slave_response_frame.data.PUD.D3 = 0xFF;
