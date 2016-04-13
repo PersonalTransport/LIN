@@ -683,11 +683,21 @@ void ld_read_by_id_<interface.name>(l_u8 NAD,l_u16 supplier_id,l_u16 function_id
 <else>
 
 l_u8 ld_read_configuration_<interface.name>(l_u8* const data,l_u8* const length) {
-    // TODO implement!
+    if(length < LAST_FRAME + 1)
+        return LD_LENGTH_TOO_SHORT;
+    data[0] = (NAD != 0xFF) ? NAD : initialNAD;
+    for(l_u8 i = 0;i<LAST_FRAME;++i)
+        data[i+1] = frames[i].PID;
+    return LD_READ_OK;
 }
 
 l_u8 ld_set_configuration_<interface.name>(const l_u8* const data,l_u16 length) {
-    // TODO implement!
+    if(length != LAST_FRAME + 1)
+        return LD_LENGTH_NOT_CORRECT;
+    NAD = data[0];
+    for(l_u8 i = 0;i<LAST_FRAME;++i)
+        frames[i].PID = data[i+1];
+    return LD_SET_OK;
 }
 <endif>
 

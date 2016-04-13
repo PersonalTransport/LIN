@@ -33,6 +33,16 @@ extern struct l_schedule _L_NULL_SCHEDULE;
 
 #define L_NULL_SCHEDULE &_L_NULL_SCHEDULE
 <node.scheduleTables:{schedule|#define <schedule.name> &_<schedule.name>};separator="\n">
+<else>
+enum l_set_configuration_status {
+    LD_SET_OK,
+    LD_LENGTH_NOT_CORRECT,
+    LD_DATA_ERROR
+};
+enum l_read_configuration_status {
+    LD_READ_OK,
+    LD_LENGTH_TOO_SHORT
+};
 <endif>
 
 <if(target.globals)><(target.globals)(node,interface,target)><endif>
