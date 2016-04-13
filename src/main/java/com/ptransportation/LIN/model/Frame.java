@@ -4,6 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Frame {
+
+    public static int getFramePIDFromID(int id) {
+        return (~((id << 6) ^ (id << 4) ^ (id << 3) ^ (id << 2)) & 0x80) |
+        (((id << 6) ^ (id << 5) ^ (id << 4) ^ (id << 2)) & 0x40) |
+        (id & 0x3F);
+    }
+
     private Node node; // TODO is this needed?
     private Node publisher;
     private String name;

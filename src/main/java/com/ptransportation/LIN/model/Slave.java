@@ -8,6 +8,8 @@ import java.util.List;
 public class Slave extends Node {
     private boolean sendsWakeUpSignal;
     private NadSet nadSet;
+    private int initialNAD;
+    private int NAD;
     private int diagnosticClass;
     private double p2Min;
     private double stMin;
@@ -20,6 +22,7 @@ public class Slave extends Node {
 
     public Slave(String name) {
         super(name);
+        this.initialNAD = 0x7F;
         this.p2Min = 50;
         this.nAsTimeout = 1000;
         this.nCrTimeout = 1000;
@@ -42,6 +45,22 @@ public class Slave extends Node {
 
     public void setNadSet(NadSet nadSet) {
         this.nadSet = nadSet;
+    }
+
+    public int getInitialNAD() {
+        return initialNAD;
+    }
+
+    public void setInitialNAD(int initialNAD) {
+        this.initialNAD = initialNAD;
+    }
+
+    public int getNAD() {
+        return this.NAD;
+    }
+
+    public void setNAD(int NAD) {
+        this.NAD = NAD;
     }
 
     public int getDiagnosticClass() {

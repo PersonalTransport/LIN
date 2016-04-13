@@ -121,6 +121,10 @@ static struct l_frame slave_response_frame =
     .data.scalar = 0ULL
 };
 
+<if(node.master)>
+<node.slaves:{slave|#define <slave.name>_NAD <slave.NAD.hex>};separator="\n">
+<endif>
+
 static struct l_frame frames[] = {
 <node.frames:{frame|
     {   // <frame.name>
@@ -570,7 +574,7 @@ void l_ifc_aux_<interface.name>() {
 l_u16 l_ifc_read_status_<interface.name>() {
     l_u16 r = <interface.name>_status.raw_data;
     <interface.name>_status.raw_data = 0;
-    return r & 0xFF7F;
+    return r <if(node.master)>& 0xFF7F<endif>;
 }
 <if(node.master)>
 
@@ -764,56 +768,174 @@ void l_flg_clr_<name>() {
 
 //====================================================================================================================//
 // TODO implement this!
-assignFrameIdEntryInitialization(entry) ::= "{.type = ASSIGN_FRAME_ID_ENTRY,.ticks = <entry.ticks>,.PID = 0x3C}"
+assignFrameIdEntryInitialization(entry) ::= <<
+{
+    .type = ASSIGN_FRAME_ID_ENTRY,
+    .ticks = <entry.ticks>,
+    .PID = 0x3C
+}
+>>
+//====================================================================================================================//
+
+
+//====================================================================================================================//
+assignFrameIdRangeEntryInitialization(entry) ::= <<
+{
+    .type = ASSIGN_FRAME_ID_RANGE_ENTRY,
+    .ticks = <entry.ticks>,
+    .PID = 0x3C,
+    .data.PUD.NAD = <entry.slave.name>_NAD,
+    .data.PUD.PCI = 0x06,
+    .data.PUD.SID = ASSIGN_FRAME_IDENTIFIER_RANGE,
+    .data.PUD.D1 = <entry.startIndex.hex>,
+    .data.PUD.D2 = <entry.PID0.hex>,
+    .data.PUD.D3 = <entry.PID1.hex>,
+    .data.PUD.D4 = <entry.PID2.hex>,
+    .data.PUD.D5 = <entry.PID3.hex>
+},
+{
+    .type = SLAVE_RESP_ENTRY,
+    .ticks = <entry.ticks>,
+    .PID = 0x3D
+}
+>>
+//====================================================================================================================//
+
+
+//====================================================================================================================//
+assignNADEntryInitialization(entry) ::= <<
+{
+    .type = ASSIGN_NAD_ENTRY,
+    .ticks = <entry.ticks>,
+    .PID = 0x3C,
+    .data.PUD.NAD = <entry.slave.initialNAD.hex>,
+    .data.PUD.PCI = 0x06,
+    .data.PUD.SID = ASSIGN_NAD,
+    .data.PUD.D1 = (l_u8)<entry.slave.supplier.hex>,
+    .data.PUD.D2 = (l_u8)(<entry.slave.supplier.hex> >\> 8),
+    .data.PUD.D3 = (l_u8)<entry.slave.function.hex>,
+    .data.PUD.D4 = (l_u8)(<entry.slave.function.hex> >\> 8),
+    .data.PUD.D5 = <entry.slave.NAD.hex>
+},
+{
+    .type = SLAVE_RESP_ENTRY,
+    .ticks = <entry.ticks>,
+    .PID = 0x3D
+}
+>>
+//====================================================================================================================//
+
+
+//====================================================================================================================//
+conditionalChangeNADEntryInitialization(entry) ::= <<
+{
+    .type = CONDITIONAL_CHANGE_NAD_ENTRY,
+    .ticks = <entry.ticks>,
+    .PID = 0x3C,
+    .data.PUD.NAD = <entry.NAD.hex>,
+    .data.PUD.PCI = 0x06,
+    .data.PUD.SID = CONDITIONAL_CHANGE_NAD,
+    .data.PUD.D1 = <entry.id.hex>,
+    .data.PUD.D2 = <entry.byte.hex>,
+    .data.PUD.D3 = <entry.mask.hex>,
+    .data.PUD.D4 = <entry.invert.hex>,
+    .data.PUD.D5 = <entry.newNAD.hex>
+},
+{
+    .type = SLAVE_RESP_ENTRY,
+    .ticks = <entry.ticks>,
+    .PID = 0x3D
+}
+>>
 //====================================================================================================================//
 
 
 //====================================================================================================================//
 // TODO implement this!
-assignFrameIdRangeEntryInitialization(entry) ::= "{.type = ASSIGN_FRAME_ID_RANGE_ENTRY,.ticks = <entry.ticks>,.PID = 0x3C}"
+dataDumpEntryInitialization(entry) ::= <<
+{
+    .type = DATA_DUMP_ENTRY,
+    .ticks = <entry.ticks>,
+    .PID = 0x3C
+},
+{
+    .type = SLAVE_RESP_ENTRY,
+    .ticks = <entry.ticks>,
+    .PID = 0x3D
+}
+>>
 //====================================================================================================================//
 
 
 //====================================================================================================================//
 // TODO implement this!
-assignNADEntryInitialization(entry) ::= "{.type = ASSIGN_NAD_ENTRY,.ticks = <entry.ticks>,.PID = 0x3C,.data.configured_NAD = <entry.slave.configuredNAD.hex>}"
+freeFormatEntryInitialization(entry) ::= <<
+{
+    .type = FREE_FORMAT_ENTRY,
+    .ticks = <entry.ticks>,
+    .PID = 0x3C
+},
+{
+    .type = SLAVE_RESP_ENTRY,
+    .ticks = <entry.ticks>,
+    .PID = 0x3D
+}
+>>
 //====================================================================================================================//
 
 
 //====================================================================================================================//
-// TODO implement this!
-conditionalChangeNADEntryInitialization(entry) ::= "{.type = CONDITIONAL_CHANGE_NAD_ENTRY,.ticks = <entry.ticks>,.PID = 0x3C}"
+masterReqEntryInitialization(entry) ::= <<
+{
+    .type = MASTER_REQ_ENTRY,
+    .ticks = <entry.ticks>,
+    .PID = 0x3C
+}
+>>
 //====================================================================================================================//
 
 
 //====================================================================================================================//
-// TODO implement this!
-dataDumpEntryInitialization(entry) ::= "{.type = DATA_DUMP_ENTRY,.ticks = <entry.ticks>,.PID = 0x3C}"
+saveConfigurationEntryInitialization(entry) ::= <<
+{
+    .type = SAVE_CONFIGURATION_ENTRY,
+    .ticks = <entry.ticks>,
+    .PID = 0x3C,
+    .data.PUD.NAD = <entry.slave.NAD.hex>,
+    .data.PUD.PCI = 0x01,
+    .data.PUD.SID = SAVE_CONFIGURATION,
+    .data.PUD.D1 = 0xFF,
+    .data.PUD.D2 = 0xFF,
+    .data.PUD.D3 = 0xFF,
+    .data.PUD.D4 = 0xFF,
+    .data.PUD.D5 = 0xFF
+},
+{
+    .type = SLAVE_RESP_ENTRY,
+    .ticks = <entry.ticks>,
+    .PID = 0x3D
+}
+>>
 //====================================================================================================================//
 
 
 //====================================================================================================================//
-// TODO implement this!
-freeFormatEntryInitialization(entry) ::= "{.type = FREE_FORMAT_ENTRY,.ticks = <entry.ticks>,.PID = 0x3C}"
+slaveRespEntryInitialization(entry) ::= <<
+{
+    .type = SLAVE_RESP_ENTRY,
+    .ticks = <entry.ticks>,
+    .PID = 0x3D
+}
+>>
 //====================================================================================================================//
 
 
 //====================================================================================================================//
-masterReqEntryInitialization(entry) ::= "{.type = MASTER_REQ_ENTRY,.ticks = <entry.ticks>,.PID = 0x3C}"
-//====================================================================================================================//
-
-
-//====================================================================================================================//
-// TODO implement this!
-saveConfigurationEntryInitialization(entry) ::= "{.type = SAVE_CONFIGURATION_ENTRY,.ticks = <entry.ticks>,.PID = 0x3C}"
-//====================================================================================================================//
-
-
-//====================================================================================================================//
-slaveRespEntryInitialization(entry) ::= "{.type = SLAVE_RESP_ENTRY,.ticks = <entry.ticks>,.PID = 0x3D}"
-//====================================================================================================================//
-
-
-//====================================================================================================================//
-frameEntryInitialization(entry) ::= "{.type = UNCONDITIONAL_ENTRY,.ticks = <entry.ticks>,.PID = L_FRAME_PID((<entry.frame.name>_INDEX+1))}"
+frameEntryInitialization(entry) ::= <<
+{
+    .type = UNCONDITIONAL_ENTRY,
+    .ticks = <entry.ticks>,
+    .PID = L_FRAME_PID((<entry.frame.name>_INDEX+1))
+}
+>>
 //====================================================================================================================//

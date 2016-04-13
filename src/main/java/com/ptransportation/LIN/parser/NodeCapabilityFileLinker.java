@@ -47,11 +47,13 @@ public class NodeCapabilityFileLinker extends NodeCapabilityFileBaseVisitor<Void
             Slave slave = getSlave(slaveName);
             if (slave != null) {
                 master.getSlaves().add(slave);
+                slave.setNAD(((NadList)slave.getNadSet()).getValues().get(0));// TODO this is a hack.
                 master.getFrames().addAll(slave.getPublishFrames());
             }
             else
                 error("Slave '" + slaveName + "' was not defined.", master, "slaves", i);
         }
+
         return super.visitMaster(ctx);
     }
 
@@ -117,10 +119,39 @@ public class NodeCapabilityFileLinker extends NodeCapabilityFileBaseVisitor<Void
         AssignFrameIdRangeEntry entry = (AssignFrameIdRangeEntry) scheduleTable.getEntries().get(entryIndex);
 
         Slave slave = getSlave(ctx.slaveName.getText());
-        if (slave != null)
+        if (slave != null) {
             entry.setSlave(slave);
-        else
+
+            if(entry.isLookupIDs()) {
+                entry.setPID0(0xFF);
+                entry.setPID1(0xFF);
+                entry.setPID2(0xFF);
+                entry.setPID3(0xFF);
+
+                List<Frame> slaveFrames = slave.getFrames();
+                List<Frame> masterFrames = master.getFrames();
+
+                int index = entry.getStartIndex();
+                int size = slaveFrames.size();
+
+                entry.setPID0(Frame.getFramePIDFromID(masterFrames.indexOf(slaveFrames.get(index))+1));
+
+                index++;
+                if(index < size)
+                    entry.setPID1(Frame.getFramePIDFromID(masterFrames.indexOf(slaveFrames.get(index))+1));
+
+                index++;
+                if(index < size)
+                    entry.setPID2(Frame.getFramePIDFromID(masterFrames.indexOf(slaveFrames.get(index))+1));
+
+                index++;
+                if(index < size)
+                    entry.setPID3(Frame.getFramePIDFromID(masterFrames.indexOf(slaveFrames.get(index))+1));
+            }
+        }
+        else {
             error("Slave '" + ctx.slaveName.getText() + "' was not defined.", entry, "slave");
+        }
 
         return super.visitAssignFrameIdRangeEntry(ctx);
     }
