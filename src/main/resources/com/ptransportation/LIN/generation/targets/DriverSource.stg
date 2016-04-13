@@ -40,7 +40,7 @@ union l_frame_data {
         l_u8 D3;
         l_u8 D4;
         l_u8 D5;
-    } PUD; // TODO is this the right order?
+    } PUD;
 };
 
 struct l_frame {
@@ -60,7 +60,7 @@ union l_status_register {
         unsigned int goto_sleep: 1; // TODO update this value
         unsigned int bus_activity : 1; // TODO update this value
         unsigned int event_triggered_frame_collision : 1; // TODO update this value
-        unsigned int save_configuration : 1; // TODO update this value
+        unsigned int save_configuration : 1;
         unsigned int has_frame: 1;
         unsigned int PID : 8;
     } reg;
@@ -82,7 +82,7 @@ enum l_schedule_entry_type {
 };
 
 struct l_schedule_entry {
-    enum l_schedule_entry_type type; // TODO could be 4 bit unsigned
+    enum l_schedule_entry_type type;
     l_u8 ticks;
     l_u8 PID;
     union l_frame_data data;
@@ -234,7 +234,7 @@ void l_sch_set_<interface.name>(struct l_schedule *schedule, l_u8 entry) {
     if(schedule != NULL) {
         next.schedule = schedule;
         next.tick     = 0;
-        next.index    = (entry > 0) ? entry-1 : 0; // TODO check if the entry is in the schedule??
+        next.index    = (entry > 0) ? entry-1 : 0;
         next.entry    =  &schedule->entries[next.index];
     }
 }
@@ -315,11 +315,8 @@ static inline void cleanup_rx_<interface.name>() {
     classic_checksum = ~classic_checksum;
     enhanced_checksum = ~enhanced_checksum;
 
-    if(rx_buffer.PID == 0xff) {
-        // TODO special??
-    }
 <if(node.slave)>
-    else if(rx_buffer.PID == MASTER_REQUEST_PID) { // Master request frame
+    if(rx_buffer.PID == MASTER_REQUEST_PID) { // Master request frame
         if((l_u8)classic_checksum == rx_buffer.checksum) {
             <interface.name>_has_slave_response = false;
             switch((enum service_identifier)rx_buffer.data.PUD.SID) {
@@ -399,7 +396,7 @@ static inline void cleanup_rx_<interface.name>() {
         }
     }
 <else>
-    else if(rx_buffer.PID == SLAVE_RESPONSE_PID) { // Slave response frame
+    if(rx_buffer.PID == SLAVE_RESPONSE_PID) { // Slave response frame
         if((l_u8)classic_checksum == rx_buffer.checksum) {
             slave_response_frame.data.scalar = rx_buffer.data.scalar; // TODO not really needed!
 
@@ -475,8 +472,8 @@ void l_ifc_rx_<interface.name>() {
             }
             case L_IDLE: {
                 // TODO only the slave should eat data that this node does not care about, right?
-                <(interface.rxData)("l_u8 data",node,interface,target)> // Just eat the data that this node does not care about!
-                (void)data; // Shut the compiler up about data not being used.
+                <(interface.rxData)("l_u8 data",node,interface,target)>
+                (void)data;
                 break;
             }
         }
@@ -625,7 +622,6 @@ void ld_check_response_<interface.name>(l_u8* const RSID,l_u8* const error_code)
 }
 
 void ld_assign_frame_id_range_<interface.name>(l_u8 NAD,l_u8 start_index,const l_u8* const PIDs) {
-    // TODO implement!
     <interface.name>_configuration_status = LD_SERVICE_BUSY;
     master_request_frame.data.PUD.NAD = NAD;
     master_request_frame.data.PUD.PCI = 0x06;
@@ -638,7 +634,6 @@ void ld_assign_frame_id_range_<interface.name>(l_u8 NAD,l_u8 start_index,const l
 }
 
 void ld_assign_NAD_<interface.name>(l_u8 initial_NAD,l_u16 supplier_id,l_u16 function_id,l_u8 new_NAD) {
-    // TODO implement!
     <interface.name>_configuration_status = LD_SERVICE_BUSY;
     master_request_frame.data.PUD.NAD = initial_NAD;
     master_request_frame.data.PUD.PCI = 0x06;
@@ -651,7 +646,6 @@ void ld_assign_NAD_<interface.name>(l_u8 initial_NAD,l_u16 supplier_id,l_u16 fun
 }
 
 void ld_save_configuration_<interface.name>(l_u8 NAD) {
-    // TODO implement!
     <interface.name>_configuration_status = LD_SERVICE_BUSY;
     master_request_frame.data.PUD.NAD = NAD;
     master_request_frame.data.PUD.PCI = 0x01;
@@ -664,7 +658,6 @@ void ld_save_configuration_<interface.name>(l_u8 NAD) {
 }
 
 void ld_conditional_change_NAD_<interface.name>(l_u8 NAD,l_u8 id,l_u8 byte,l_u8 mask,l_u8 invert,l_u8 new_NAD) {
-    // TODO implement!
     <interface.name>_configuration_status = LD_SERVICE_BUSY;
     master_request_frame.data.PUD.NAD = NAD;
     master_request_frame.data.PUD.PCI = 0x06;
