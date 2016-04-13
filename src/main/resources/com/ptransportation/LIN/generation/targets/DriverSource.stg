@@ -112,16 +112,18 @@ static struct {
     l_u8 index;
 } tx_buffer, rx_buffer;
 
+#define MASTER_REQUEST_PID 0x3C
 static struct l_frame master_request_frame =
 {   // master request frame
-    .PID = 0x3C,
+    .PID = MASTER_REQUEST_PID,
     .data.scalar = 0ULL
 };
 
+#define SLAVE_RESPONSE_PID 0x7D
 static l_bool <interface.name>_has_slave_response = false;
 static struct l_frame slave_response_frame =
 {   //  slave response frame
-    .PID = 0x3D,
+    .PID = SLAVE_RESPONSE_PID,
     .data.scalar = 0ULL
 };
 
@@ -266,13 +268,13 @@ static inline void setup_rx_<interface.name>(l_u8 PID) {
     rx_buffer.PID = PID;
 
 <if(node.slave)>
-    if(PID == 0x3C) { // Master request frame
+    if(PID == MASTER_REQUEST_PID) { // Master request frame
         rx_buffer.state = L_DATA_CHECKSUM;
         rx_buffer.size = 8;
         rx_buffer.index = 0;
     }
 <else>
-    if(PID == 0x3D) { // Slave response frame
+    if(PID == SLAVE_RESPONSE_PID) { // Slave response frame
         rx_buffer.state = L_DATA_CHECKSUM;
         rx_buffer.size = 8;
         rx_buffer.index = 0;
@@ -316,7 +318,7 @@ static inline void cleanup_rx_<interface.name>() {
         // TODO special??
     }
 <if(node.slave)>
-    else if(rx_buffer.PID == 0x3C) { // Master request frame
+    else if(rx_buffer.PID == MASTER_REQUEST_PID) { // Master request frame
         if((l_u8)classic_checksum == rx_buffer.checksum) {
             <interface.name>_has_slave_response = false;
             switch((enum service_identifier)rx_buffer.data.PUD.SID) {
@@ -356,7 +358,7 @@ static inline void cleanup_rx_<interface.name>() {
         }
     }
 <else>
-    else if(rx_buffer.PID == 0x3D) { // Slave response frame
+    else if(rx_buffer.PID == SLAVE_RESPONSE_PID) { // Slave response frame
         if((l_u8)classic_checksum == rx_buffer.checksum) {
             slave_response_frame.data.scalar = rx_buffer.data.scalar; // TODO not really needed!
 
@@ -445,7 +447,7 @@ static inline void setup_tx_<interface.name>(l_u8 PID) {
     tx_buffer.PID = PID;
 
 <if(node.master)>
-    if(PID == 0x3C) { // Master request frame
+    if(PID == MASTER_REQUEST_PID) { // Master request frame
         <interface.name>_configuration_status = LD_SERVICE_BUSY;
         master_request_frame.data.scalar = current.entry->data.scalar;
         tx_buffer.state = L_BREAK_SYNC;
@@ -454,7 +456,7 @@ static inline void setup_tx_<interface.name>(l_u8 PID) {
         tx_buffer.data.scalar = master_request_frame.data.scalar;
     }
 <else>
-    if(PID == 0x3D && <interface.name>_has_slave_response) { // Slave response frame
+    if(PID == SLAVE_RESPONSE_PID && <interface.name>_has_slave_response) { // Slave response frame
         tx_buffer.state = L_DATA_CHECKSUM;
         tx_buffer.size = 8;
         tx_buffer.index = 0;
@@ -499,14 +501,14 @@ static inline void cleanup_tx_<interface.name>() {
     <interface.name>_status.reg.has_frame = true;
 
 <if(node.master)>
-    if(tx_buffer.PID == 0x3C) {
+    if(tx_buffer.PID == MASTER_REQUEST_PID) {
         // TODO master request
         if(tx_buffer.data.PUD.SID >= ASSIGN_NAD && tx_buffer.data.PUD.SID \<= ASSIGN_FRAME_IDENTIFIER_RANGE) { // Configuration
             <interface.name>_configuration_status = LD_REQUEST_FINISHED;
         }
     }
 <endif>
-    if(tx_buffer.PID == 0x3D) {
+    if(tx_buffer.PID == SLAVE_RESPONSE_PID) {
         // TODO slave response
     }
 <node.publishFrames:{frame|
@@ -767,7 +769,7 @@ assignFrameIdEntryInitialization(entry) ::= <<
 {
     .type = ASSIGN_FRAME_ID_ENTRY,
     .ticks = <entry.ticks>,
-    .PID = 0x3C
+    .PID = MASTER_REQUEST_PID
 }
 >>
 //====================================================================================================================//
@@ -778,7 +780,7 @@ assignFrameIdRangeEntryInitialization(entry) ::= <<
 {
     .type = ASSIGN_FRAME_ID_RANGE_ENTRY,
     .ticks = <entry.ticks>,
-    .PID = 0x3C,
+    .PID = MASTER_REQUEST_PID,
     .data.PUD.NAD = <entry.slave.name>_NAD,
     .data.PUD.PCI = 0x06,
     .data.PUD.SID = ASSIGN_FRAME_IDENTIFIER_RANGE,
@@ -791,7 +793,7 @@ assignFrameIdRangeEntryInitialization(entry) ::= <<
 {
     .type = SLAVE_RESP_ENTRY,
     .ticks = <entry.ticks>,
-    .PID = 0x3D
+    .PID = SLAVE_RESPONSE_PID
 }
 >>
 //====================================================================================================================//
@@ -802,7 +804,7 @@ assignNADEntryInitialization(entry) ::= <<
 {
     .type = ASSIGN_NAD_ENTRY,
     .ticks = <entry.ticks>,
-    .PID = 0x3C,
+    .PID = MASTER_REQUEST_PID,
     .data.PUD.NAD = <entry.slave.initialNAD.hex>,
     .data.PUD.PCI = 0x06,
     .data.PUD.SID = ASSIGN_NAD,
@@ -815,7 +817,7 @@ assignNADEntryInitialization(entry) ::= <<
 {
     .type = SLAVE_RESP_ENTRY,
     .ticks = <entry.ticks>,
-    .PID = 0x3D
+    .PID = SLAVE_RESPONSE_PID
 }
 >>
 //====================================================================================================================//
@@ -826,7 +828,7 @@ conditionalChangeNADEntryInitialization(entry) ::= <<
 {
     .type = CONDITIONAL_CHANGE_NAD_ENTRY,
     .ticks = <entry.ticks>,
-    .PID = 0x3C,
+    .PID = MASTER_REQUEST_PID,
     .data.PUD.NAD = <entry.NAD.hex>,
     .data.PUD.PCI = 0x06,
     .data.PUD.SID = CONDITIONAL_CHANGE_NAD,
@@ -839,7 +841,7 @@ conditionalChangeNADEntryInitialization(entry) ::= <<
 {
     .type = SLAVE_RESP_ENTRY,
     .ticks = <entry.ticks>,
-    .PID = 0x3D
+    .PID = SLAVE_RESPONSE_PID
 }
 >>
 //====================================================================================================================//
@@ -851,12 +853,12 @@ dataDumpEntryInitialization(entry) ::= <<
 {
     .type = DATA_DUMP_ENTRY,
     .ticks = <entry.ticks>,
-    .PID = 0x3C
+    .PID = MASTER_REQUEST_PID
 },
 {
     .type = SLAVE_RESP_ENTRY,
     .ticks = <entry.ticks>,
-    .PID = 0x3D
+    .PID = SLAVE_RESPONSE_PID
 }
 >>
 //====================================================================================================================//
@@ -868,12 +870,12 @@ freeFormatEntryInitialization(entry) ::= <<
 {
     .type = FREE_FORMAT_ENTRY,
     .ticks = <entry.ticks>,
-    .PID = 0x3C
+    .PID = MASTER_REQUEST_PID
 },
 {
     .type = SLAVE_RESP_ENTRY,
     .ticks = <entry.ticks>,
-    .PID = 0x3D
+    .PID = SLAVE_RESPONSE_PID
 }
 >>
 //====================================================================================================================//
@@ -884,7 +886,7 @@ masterReqEntryInitialization(entry) ::= <<
 {
     .type = MASTER_REQ_ENTRY,
     .ticks = <entry.ticks>,
-    .PID = 0x3C
+    .PID = MASTER_REQUEST_PID
 }
 >>
 //====================================================================================================================//
@@ -895,7 +897,7 @@ saveConfigurationEntryInitialization(entry) ::= <<
 {
     .type = SAVE_CONFIGURATION_ENTRY,
     .ticks = <entry.ticks>,
-    .PID = 0x3C,
+    .PID = MASTER_REQUEST_PID,
     .data.PUD.NAD = <entry.slave.NAD.hex>,
     .data.PUD.PCI = 0x01,
     .data.PUD.SID = SAVE_CONFIGURATION,
@@ -908,7 +910,7 @@ saveConfigurationEntryInitialization(entry) ::= <<
 {
     .type = SLAVE_RESP_ENTRY,
     .ticks = <entry.ticks>,
-    .PID = 0x3D
+    .PID = SLAVE_RESPONSE_PID
 }
 >>
 //====================================================================================================================//
@@ -919,7 +921,7 @@ slaveRespEntryInitialization(entry) ::= <<
 {
     .type = SLAVE_RESP_ENTRY,
     .ticks = <entry.ticks>,
-    .PID = 0x3D
+    .PID = SLAVE_RESPONSE_PID
 }
 >>
 //====================================================================================================================//
