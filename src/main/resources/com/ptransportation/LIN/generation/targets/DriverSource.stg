@@ -322,6 +322,26 @@ static inline void cleanup_rx_<interface.name>() {
         if((l_u8)classic_checksum == rx_buffer.checksum) {
             <interface.name>_has_slave_response = false;
             switch((enum service_identifier)rx_buffer.data.PUD.SID) {
+                case ASSIGN_NAD: {
+                    if(rx_buffer.data.PUD.NAD == initialNAD || rx_buffer.data.PUD.NAD == 0x7F) {
+                        l_u16 rx_supplier = ((l_u16)rx_buffer.data.PUD.D2) \<\< 8 | rx_buffer.data.PUD.D1;
+                        l_u16 rx_function = ((l_u16)rx_buffer.data.PUD.D4) \<\< 8 | rx_buffer.data.PUD.D3;
+                        if((rx_supplier == supplier_id || rx_supplier == 0x7FFF) &&
+                           (rx_function == function_id || rx_function == 0xFFFF)) {
+                           NAD =  rx_buffer.data.PUD.D5;
+                           <interface.name>_has_slave_response = true;
+                           slave_response_frame.data.PUD.NAD = initialNAD;
+                           slave_response_frame.data.PUD.PCI = 0x01;
+                           slave_response_frame.data.PUD.SID = 0xF0;
+                           slave_response_frame.data.PUD.D1 = 0xFF;
+                           slave_response_frame.data.PUD.D2 = 0xFF;
+                           slave_response_frame.data.PUD.D3 = 0xFF;
+                           slave_response_frame.data.PUD.D4 = 0xFF;
+                           slave_response_frame.data.PUD.D5 = 0xFF;
+                        }
+                    }
+                    break;
+                }
                 case ASSIGN_FRAME_IDENTIFIER_RANGE: { // Assign frame identifier range (Mandatory)
                     if(rx_buffer.data.PUD.NAD == NAD) {
                         master_request_frame.data.scalar = rx_buffer.data.scalar;
