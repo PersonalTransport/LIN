@@ -152,7 +152,8 @@ static struct l_schedule_instance current = {L_NULL_SCHEDULE,0,0,NULL};
 static struct l_schedule_instance next    = {NULL,0,0,NULL};
 
 <else>
-static l_u8 NAD = <node.initialNAD.hex>; // TODO this needs to be implemented.
+static l_u8 initialNAD = <node.initialNAD.hex>;
+static l_u8 NAD = <node.NAD.hex>;
 static l_u16 supplier_id = <node.supplier.hex>;
 static l_u16 function_id = <node.function.hex>;
 static l_u8 variant_id = <node.variant>;
