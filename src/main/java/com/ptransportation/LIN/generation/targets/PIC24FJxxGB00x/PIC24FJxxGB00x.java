@@ -8,7 +8,7 @@ import org.stringtemplate.v4.STGroupFile;
 public class PIC24FJxxGB00x extends Target {
 
     public boolean targetMatches(String targetDevice) {
-        return targetDevice.trim().toUpperCase().matches("^(PIC24FJ\\d\\dGB00\\d)");
+        return targetDevice.trim().toUpperCase().matches("^(PIC24FJ\\d\\dG[A|B]00\\d)");
     }
 
     @Override

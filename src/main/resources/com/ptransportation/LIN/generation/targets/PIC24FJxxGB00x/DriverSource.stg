@@ -51,9 +51,9 @@ void __attribute__((interrupt,no_auto_psv)) _IC1Interrupt() {
 interfaceInitialization(node,interface,target) ::= <<
 
 //========================================================================//
-#ifdef PIC24FJxxGBxxx
+#if defined(PIC24FJxxGBxxx)
 AD1PCFGL = 0xFFFF;
-#elif PIC24FJxxGAxxx
+#elif defined(PIC24FJxxGAxxx)
 AD1PCFG = 0xFFFF;
 #endif
 
