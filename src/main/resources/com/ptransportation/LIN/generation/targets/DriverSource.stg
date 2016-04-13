@@ -3,7 +3,10 @@ driverSource(node,interface,target) ::= <<
 <if(target.includes)><(target.includes)(node,interface,target)><endif>
 <if(interface.includes)><(interface.includes)(node,interface,target)><endif>
 
-<node.frames:{frame|#define <frame.name>_INDEX <i0>};separator="\n">
+enum frame_indices {
+    <node.frames:{frame|<frame.name>_INDEX};separator=",\n">,
+    LAST_FRAME
+};
 
 enum l_buffer_state {
     L_BREAK_SYNC,
@@ -320,7 +323,7 @@ static inline void cleanup_rx_<interface.name>() {
 
                         l_u8 start_index = rx_buffer.data.PUD.D1;
                         l_u8 *PIDs = &rx_buffer.data.PUD.D2;
-                        for(l_u8 i=0;i\<4;++i) {
+                        for(l_u8 i=0;i\<4 && i \< start_index+LAST_FRAME;++i) {
                             if(PIDs[i] != 0xFF)
                                 frames[i+start_index].PID = PIDs[i];
                         }
