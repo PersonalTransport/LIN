@@ -118,6 +118,7 @@ static struct l_frame master_request_frame =
     .data.scalar = 0ULL
 };
 
+static l_bool <interface.name>_has_slave_response = false;
 static struct l_frame slave_response_frame =
 {   //  slave response frame
     .PID = 0x3D,
@@ -210,8 +211,8 @@ l_u8 l_sch_tick_<interface.name>() {
 
     struct l_schedule_entry *entry = current.entry;
     if(current.tick == 0) {
-        setup_tx_<interface.name>(entry->PID);
         setup_rx_<interface.name>(entry->PID);
+        setup_tx_<interface.name>(entry->PID);
         l_ifc_tx_<interface.name>();
     }
 
@@ -316,6 +317,7 @@ static inline void cleanup_rx_<interface.name>() {
 <if(node.slave)>
     else if(rx_buffer.PID == 0x3C) { // Master request frame
         if((l_u8)classic_checksum == rx_buffer.checksum) {
+            <interface.name>_has_slave_response = false;
             switch((enum service_identifier)rx_buffer.data.PUD.SID) {
                 case ASSIGN_FRAME_IDENTIFIER_RANGE: { // Assign frame identifier range (Mandatory)
                     if(rx_buffer.data.PUD.NAD == NAD) {
@@ -328,6 +330,11 @@ static inline void cleanup_rx_<interface.name>() {
                                 frames[i+start_index].PID = PIDs[i];
                         }
 
+                        // TODO check that if start_index+LAST_FRAME
+                        // is less than 4 then check that the extra
+                        // PIDs are 0xFF
+
+                        <interface.name>_has_slave_response = true;
                         slave_response_frame.data.PUD.NAD = NAD;
                         slave_response_frame.data.PUD.PCI = 0x01;
                         slave_response_frame.data.PUD.SID = 0xF7;
@@ -400,8 +407,8 @@ void l_ifc_rx_<interface.name>() {
                 rx_buffer.state = L_DATA_CHECKSUM;
                 <if(node.slave)>
                 <(interface.rxData)("rx_buffer.PID",node,interface,target)>
-                setup_tx_<interface.name>(rx_buffer.PID);
                 setup_rx_<interface.name>(rx_buffer.PID);
+                setup_tx_<interface.name>(rx_buffer.PID);
                 l_ifc_tx_<interface.name>();
                 <endif>
                 break;
@@ -446,12 +453,12 @@ static inline void setup_tx_<interface.name>(l_u8 PID) {
         tx_buffer.data.scalar = master_request_frame.data.scalar;
     }
 <else>
-    if(PID == 0x3D) { // Slave response frame
-        // TODO only send out if NAD is equal to this NAD
+    if(PID == 0x3D && <interface.name>_has_slave_response) { // Slave response frame
         tx_buffer.state = L_DATA_CHECKSUM;
         tx_buffer.size = 8;
         tx_buffer.index = 0;
         tx_buffer.data.scalar = slave_response_frame.data.scalar;
+        <interface.name>_has_slave_response = false;
     }
 <endif>
 <node.publishFrames:{frame|
