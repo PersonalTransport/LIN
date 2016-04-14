@@ -28,11 +28,11 @@ enum l_configuration_status {
     LD_SERVICE_ERROR
 };
 
-extern struct l_schedule _L_NULL_SCHEDULE;
-<node.scheduleTables:{schedule|extern struct l_schedule _<schedule.name>;};separator="\n">
+enum l_schedule_handle {
+    L_NULL_SCHEDULE,
+    <node.scheduleTables:{schedule|<schedule.name>};separator=",\n">
+};
 
-#define L_NULL_SCHEDULE &_L_NULL_SCHEDULE
-<node.scheduleTables:{schedule|#define <schedule.name> &_<schedule.name>};separator="\n">
 <else>
 enum l_set_configuration_status {
     LD_SET_OK,
@@ -94,7 +94,7 @@ l_u8 l_sch_tick_<interface.name>();
 * @param entry the entry to start the schedule at 0 or 1
                will start the schedule from the start.
 **/
-void l_sch_set_<interface.name>(struct l_schedule *schedule, l_u8 entry);
+void l_sch_set_<interface.name>(enum l_schedule_handle schedule, l_u8 entry);
 <endif>
 
 /**
