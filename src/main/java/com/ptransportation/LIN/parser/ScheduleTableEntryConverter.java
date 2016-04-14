@@ -94,11 +94,4 @@ public class ScheduleTableEntryConverter extends NodeCapabilityFileBaseVisitor<S
         entry.setFrameTime(Double.parseDouble(ctx.frameTime.getText()));
         return entry;
     }
-
-    @Override
-    public ScheduleTableEntry visitAssignFrameIdEntry(NodeCapabilityFileParser.AssignFrameIdEntryContext ctx) {
-        AssignFrameIdEntry entry = new AssignFrameIdEntry();
-        entry.setFrameTime(Double.parseDouble(ctx.frameTime.getText()));
-        return entry;
-    }
 }

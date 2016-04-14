@@ -157,25 +157,6 @@ public class NodeCapabilityFileLinker extends NodeCapabilityFileBaseVisitor<Void
     }
 
     @Override
-    public Void visitAssignFrameIdEntry(NodeCapabilityFileParser.AssignFrameIdEntryContext ctx) {
-        AssignFrameIdEntry entry = (AssignFrameIdEntry) scheduleTable.getEntries().get(entryIndex);
-
-        Slave slave = getSlave(ctx.slaveName.getText());
-        if (slave != null)
-            entry.setSlave(slave);
-        else
-            error("Slave '" + ctx.slaveName.getText() + "' was not defined.", entry, "slave");
-
-        Frame frame = getFrame(ctx.frameName.getText());
-        if (frame != null)
-            entry.setFrame(frame);
-        else
-            error("Frame '" + ctx.frameName.getText() + "' was not defined.", entry, "frame");
-
-        return super.visitAssignFrameIdEntry(ctx);
-    }
-
-    @Override
     public Void visitSlave(NodeCapabilityFileParser.SlaveContext ctx) {
         node = slave = getSlave(ctx.name.getText());
 

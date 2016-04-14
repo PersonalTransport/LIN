@@ -161,8 +161,7 @@ scheduleTableEntry:
 	dataDumpEntry |
 	saveConfigurationEntry |
 	assignFrameIdRangeEntry |
-	freeFormatEntry |
-	assignFrameIdEntry
+	freeFormatEntry
 ;
 
 frameEntry: frameName=Identifier 'delay' frameTime=number 'ms' ';';
@@ -198,9 +197,6 @@ freeFormatEntry:
 	'FreeFormat' '{'
 		d1=integer',' d2=integer',' d3=integer',' d4=integer',' d5=integer',' d6=integer',' d7=integer',' d8=integer
 	'}' 'delay' frameTime=number 'ms' ';';
-
-assignFrameIdEntry:
-	'AssignFrameId' '{' slaveName=Identifier ',' frameName=Identifier '}' 'delay' frameTime=number 'ms' ';';
 
 number: integer | Real;
 

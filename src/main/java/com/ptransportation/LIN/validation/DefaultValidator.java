@@ -29,18 +29,6 @@ public class DefaultValidator extends AbstractValidator {
     }
 
     @Check
-    void checkThatAssignFrameIdEntrySlaveIsNotNull(AssignFrameIdEntry entry) {
-        if (entry.getSlave() == null)
-            error("Invalid reference to slave.", entry, "slave");
-    }
-
-    @Check
-    void checkThatAssignFrameIdEntryFrameIsNotNull(AssignFrameIdEntry entry) {
-        if (entry.getFrame() == null)
-            error("Invalid reference to frame.", entry, "frame");
-    }
-
-    @Check
     void checkThatAssignFrameIdRangeEntrySlaveIsNotNull(AssignFrameIdRangeEntry entry) {
         if (entry.getSlave() == null)
             error("Invalid reference to slave.", entry, "slave");
