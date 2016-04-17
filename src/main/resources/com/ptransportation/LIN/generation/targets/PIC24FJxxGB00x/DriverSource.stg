@@ -86,6 +86,8 @@ TRISBbits.TRISB4  = 0; // Turn RB4 into output for CS/LWAKE
 TRISBbits.TRISB7  = 0; // Turn RB7 into output for !FAULT/TXE
 TRISBbits.TRISB15 = 0;  // Turn RB15 into output for UART1 TX
 TRISBbits.TRISB3  = 1;  // Turn RB3 into input for UART1 RX
+
+LATBbits.LATB15 = 1;
 //========================================================================//
 
 //========================================================================//
@@ -188,8 +190,8 @@ interfaceTxData(cVarToTx,node,interface,target) ::= <<
 interfaceTxBreakAndSync(node,interface,target) ::= <<
 // Send the break and sync.
 while(!<interface.statusRegister>.TRMT); // Wait for tx to complete.
-<interface.statusRegister>.UTXBRK = 1; // Enable a break sequence.
 <interface.statusRegister>.UTXEN  = 1; // Signal the send 2 clock cycles from now.
+<interface.statusRegister>.UTXBRK = 1; // Enable a break sequence.
 <interface.txRegister> = 0x00;  // Value is ignored.
 <interface.txRegister> = 0x55; // Send the sync character.
 >>
