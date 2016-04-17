@@ -211,7 +211,6 @@ l_u8 l_sch_tick_<interface.name>() {
 
     struct l_schedule_entry *entry = current.entry;
     if(current.tick == 0) {
-        setup_rx_<interface.name>(entry->PID);
         setup_tx_<interface.name>(entry->PID);
         l_ifc_tx_<interface.name>();
     }
@@ -437,9 +436,9 @@ void l_ifc_rx_<interface.name>() {
         switch(rx_buffer.state) {
             case L_PID: {
                 rx_buffer.state = L_DATA_CHECKSUM;
-                <if(node.slave)>
                 <(interface.rxData)("rx_buffer.PID",node,interface,target)>
                 setup_rx_<interface.name>(rx_buffer.PID);
+                <if(node.slave)>
                 setup_tx_<interface.name>(rx_buffer.PID);
                 l_ifc_tx_<interface.name>();
                 <endif>

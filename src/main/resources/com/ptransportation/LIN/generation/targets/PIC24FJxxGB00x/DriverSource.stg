@@ -4,13 +4,6 @@ targetIncludes(node,interface,target) ::= <<
 #ifndef FCY
 #error "FCY must be defined while compiling <node.name>.c"
 #endif
-
-#define MIN_BAUD 10000
-#define MAX_BAUD 20000
-
-#if (13*FCY/MIN_BAUD)  > 0xFFFF
-    #error "FCY/MAX_BAUD is too large for a 16-bit timer!"
-#endif
 >>
 
 targetGlobals(node,interface,target) ::= ""
@@ -22,7 +15,8 @@ systemInitialization(node,interface,target) ::= <<
 interfaceGlobals(node,interface,target) ::= <<
 void l_ifc_aux_<interface.name>() {
     if(rx_buffer.state == L_BREAK_SYNC) {
-        <if(node.master)><interfaceRxData("l_u8 sync0x55",node,interface,target)><endif>
+        <if(node.master)><interfaceRxData("l_u8 sync0x55",node,interface,target)>
+        (void)sync0x55;<endif>
         rx_buffer.PID = 0xFF;
         rx_buffer.size = 0;
         rx_buffer.index = 0;

@@ -10,9 +10,6 @@ targetGlobals(node,interface,target) ::= <<
 struct l_irqmask {
     unsigned int rx_level : 3;
     unsigned int tx_level : 3;
-    <if(node.slave)>
-    unsigned int t1_level : 3;
-    <endif>
 };
 >>
 
