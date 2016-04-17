@@ -431,15 +431,10 @@ static inline void cleanup_rx_<interface.name>() {
 }
 
 void l_ifc_rx_<interface.name>() {
+    l_ifc_aux_<interface.name>();
+
     while(<(interface.rxDataAvailable)(node,interface,target)>) {
         switch(rx_buffer.state) {
-            case L_BREAK_SYNC: {
-                rx_buffer.state = L_PID;
-                <if(node.slave)>
-                <(interface.rxBreakSync)(node,interface,target)>
-                <endif>
-                break;
-            }
             case L_PID: {
                 rx_buffer.state = L_DATA_CHECKSUM;
                 <if(node.slave)>
@@ -466,8 +461,7 @@ void l_ifc_rx_<interface.name>() {
                 }
                 break;
             }
-            case L_IDLE: {
-                // TODO only the slave should eat data that this node does not care about, right?
+            default: {
                 <(interface.rxData)("l_u8 data",node,interface,target)>
                 (void)data;
                 break;
@@ -596,10 +590,6 @@ void l_ifc_tx_<interface.name>() {
             break;
         }
     }
-}
-
-void l_ifc_aux_<interface.name>() {
-    // TODO implement!
 }
 
 l_u16 l_ifc_read_status_<interface.name>() {

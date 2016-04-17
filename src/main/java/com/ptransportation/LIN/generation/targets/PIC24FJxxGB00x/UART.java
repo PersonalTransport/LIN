@@ -26,11 +26,6 @@ public class UART extends Interface {
     }
 
     @Override
-    public String getRxBreakSync() {
-        return "interfaceRxBreakSync";
-    }
-
-    @Override
     public String getRxDataAvailable() {
         return "interfaceRxDataAvailable";
     }

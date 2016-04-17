@@ -20,57 +20,21 @@ systemInitialization(node,interface,target) ::= <<
 >>
 
 interfaceGlobals(node,interface,target) ::= <<
-<if(node.slave)>
-static l_u16 break_ticks_<interface.name> = 0;
-
-#if defined(PIC24FJxxGBxxx)
-void __attribute__((interrupt,no_auto_psv)) _IC1Interrupt() {
-    if(IFS0bits.IC1IF) {
-        l_u16 time = TMR1;
-        TMR1 = 0;
-        if(IC1CON1bits.ICM == 0x02) {
-            IC1CON1bits.ICM = 0x03;
-        }
-        else if(IC1CON1bits.ICM == 0x03) {
-            if(break_ticks_<interface.name> == 0) {
-                <interface.baudRateRegister> = time/52-1; // TODO this does not look right
-                break_ticks_<interface.name> = 44*<interface.baudRateRegister>+44; // TODO this does not look right
-                <interface.modeRegister>.UARTEN = 1;
-            }
-            if(time >= break_ticks_<interface.name>) {
-                rx_buffer.state = L_BREAK_SYNC;
-                <interface.modeRegister>.ABAUD = 1;
-            }
-            IC1CON1bits.ICM = 0x02;
-        }
-        IFS0bits.IC1IF = 0;
+void l_ifc_aux_<interface.name>() {
+    if(rx_buffer.state == L_BREAK_SYNC) {
+        <if(node.master)><interfaceRxData("l_u8 sync0x55",node,interface,target)><endif>
+        rx_buffer.PID = 0xFF;
+        rx_buffer.size = 0;
+        rx_buffer.index = 0;
+        rx_buffer.data.scalar = 0;
+        rx_buffer.state = L_PID;
+    }
+    else if(<interface.statusRegister>.FERR) {
+        rx_buffer.state = L_BREAK_SYNC;
+        while(PORTBbits.RB3 != 1);
+        <if(node.slave)><interface.modeRegister>.ABAUD = 1;<endif>
     }
 }
-#elif defined(PIC24FJxxGAxxx)
-void __attribute__((interrupt,no_auto_psv)) _IC1Interrupt() {
-    if(IFS0bits.IC1IF) {
-        l_u16 time = TMR1;
-        TMR1 = 0;
-        if(IC1CONbits.ICM == 0x02) {
-            IC1CONbits.ICM = 0x03;
-        }
-        else if(IC1CONbits.ICM == 0x03) {
-            if(break_ticks_<interface.name> == 0) {
-                <interface.baudRateRegister> = time/52-1; // TODO this does not look right
-                break_ticks_<interface.name> = 44*<interface.baudRateRegister>+44; // TODO this does not look right
-                <interface.modeRegister>.UARTEN = 1;
-            }
-            if(time >= break_ticks_<interface.name>) {
-                rx_buffer.state = L_BREAK_SYNC;
-                <interface.modeRegister>.ABAUD = 1;
-            }
-            IC1CONbits.ICM = 0x02;
-        }
-        IFS0bits.IC1IF = 0;
-    }
-}
-#endif
-<endif>
 >>
 
 interfaceInitialization(node,interface,target) ::= <<
@@ -87,7 +51,11 @@ TRISBbits.TRISB7  = 0; // Turn RB7 into output for !FAULT/TXE
 TRISBbits.TRISB15 = 0;  // Turn RB15 into output for UART1 TX
 TRISBbits.TRISB3  = 1;  // Turn RB3 into input for UART1 RX
 
+// Force MCP2050 into operation mode
 LATBbits.LATB15 = 1;
+LATBbits.LATB4 = 1;
+LATBbits.LATB7 = 1;
+
 //========================================================================//
 
 //========================================================================//
@@ -103,9 +71,6 @@ RPOR7bits.RP15R = <interface.outputFunction>; //Assign U1TX To Pin RP15
 
 //Configure Input Functions
 <interface.inputFunction> = 3; //Assign U1RX To Pin RP3
-<if(node.slave)>
-RPINR7bits.IC1R = 3; //Assign IC1 To Pin RP3
-<endif>
 
 //Lock the registers by setting bit 6 of OSCCON to 1 (http://ww1.microchip.com/downloads/en/DeviceDoc/39940d.pdf#page=110)
 __builtin_write_OSCCONL(OSCCON | (1\<\<6));
@@ -130,57 +95,12 @@ __builtin_write_OSCCONL(OSCCON | (1\<\<6));
 <interface.statusRegister>.URXISEL0 = 0;
 
 l_sys_irq_disable();
-<if(node.master)>
 <interface.modeRegister>.UARTEN = 1; // Enable the UART 1 module.
-<elseif(node.slave)>
-<interface.modeRegister>.UARTEN = 0; // Disable the UART 1 module until first break.
-<endif>
-//========================================================================//
-<if(node.slave)>
-
-//========================================================================//
-// Timer 1 for break detection.
-T1CONbits.TON = 1;
-T1CONbits.TCKPS = 0;
-T1CONbits.TCS = 0;
-T1CONbits.TGATE = 0;
-T1CONbits.TSYNC = 0;
-
-#if defined(PIC24FJxxGBxxx)
-while(IC1CON1bits.ICBNE != 0)
-    (unsigned int)IC1BUF;
-
-IC1CON1bits.ICSIDL = 0x00;
-IC1CON1bits.ICTSEL = 0x07;
-IC1CON1bits.ICI    = 0x00;
-IC1CON1bits.ICM    = 0x02;
-
-IC1CON2bits.IC32 = 0x00;
-IC1CON2bits.ICTRIG = 0x01;
-IC1CON2bits.SYNCSEL = 0xB;
-
-IC1TMR = 0;
-#elif defined(PIC24FJxxGAxxx)
-while(IC1CONbits.ICBNE != 0)
-    (unsigned int)IC1BUF;
-
-IC1CONbits.ICSIDL = 0x00;
-IC1CONbits.ICI    = 0x00;
-IC1CONbits.ICM    = 0x02;
-#endif
-//========================================================================//
-<endif>
-
-// Force MCP2050 into operation mode
-LATBbits.LATB4 = 1;
-LATBbits.LATB7 = 1;
 >>
 
 interfaceRxDataAvailable(node,interface,target) ::= "<interface.statusRegister>.URXDA"
 
 interfaceRxData(cVarToStoreIn,node,interface,target) ::= "<cVarToStoreIn> = (l_u8)<interface.rxRegister>;"
-
-interfaceRxBreakSync(node,interface,target) ::= "break_ticks_<interface.name> = 44 * <interface.baudRateRegister> + 44;" // TODO this does not look right
 
 interfaceTxData(cVarToTx,node,interface,target) ::= <<
 <interface.statusRegister>.UTXEN  = 1; // Signal the send 2 clock cycles from now.

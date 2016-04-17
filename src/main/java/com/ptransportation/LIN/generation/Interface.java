@@ -13,8 +13,6 @@ public abstract class Interface {
 
     public abstract String getInitialization();
 
-    public abstract String getRxBreakSync();
-
     public abstract String getRxDataAvailable();
 
     public abstract String getRxData();

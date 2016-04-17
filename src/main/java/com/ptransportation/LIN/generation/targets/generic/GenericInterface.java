@@ -21,11 +21,6 @@ public class GenericInterface extends Interface {
     }
 
     @Override
-    public String getRxBreakSync() {
-        return "rxBreakSyncGenericInterface";
-    }
-
-    @Override
     public String getRxDataAvailable() {
         return "rxDataAvailableGenericInterface";
     }
