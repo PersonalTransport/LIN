@@ -19,6 +19,12 @@ public class SignalModelAdaptor extends PolymorphismModelAdaptor {
                 signalMask |= (1 << i);
             return signalMask;
         }
+        else if (propertyName.equals("signalFullMask")) {
+            long signalMask = 0;
+            for (long i = 0; i < signal.getSize(); ++i)
+                signalMask |= ((long)1 << i);
+            return signalMask << (long)signal.getOffset();
+        }
 
         return super.getProperty(interp, self, o, property, propertyName);
     }
