@@ -412,10 +412,8 @@ static inline void cleanup_rx_<interface.name>() {
 <node.subscribeFrames:{frame|
     else if(rx_buffer.PID == frames[<frame.name>_INDEX].PID) {
         if((l_u8)<if(frame.useClassicChecksum)>classic_checksum<else>enhanced_checksum<endif> == rx_buffer.checksum) {
-            <frame.name>_flag = true;
-<frame.signals:{signal|
-            if((frames[<frame.name>_INDEX].data.scalar & <signal.signalFullMask.hex>) != (rx_buffer.data.scalar & <signal.signalFullMask.hex>))
-                <signal.name>_flag = true;};separator="\n">
+            <frame.name>_flag = (frames[<frame.name>_INDEX].data.scalar != rx_buffer.data.scalar);
+            <frame.signals:{signal|<signal.name>_flag = (frames[<frame.name>_INDEX].data.scalar & <signal.signalFullMask.hex>) != (rx_buffer.data.scalar & <signal.signalFullMask.hex>);};separator="\n">
             frames[<frame.name>_INDEX].data.scalar = rx_buffer.data.scalar;
         \}
         else {
