@@ -54,6 +54,14 @@ public class NodeCapabilityFileLinker extends NodeCapabilityFileBaseVisitor<Void
                 error("Slave '" + slaveName + "' was not defined.", master, "slaves", i);
         }
 
+        for(Slave slave:master.getSlaves()) {
+            List<Frame> slaveFrames = slave.getFrames();
+            for(Frame frame:slave.getSubscribeFrames()) {
+                int index = slaveFrames.indexOf(frame);
+                slaveFrames.set(index,getFrame(master,frame.getName()));
+            }
+        }
+
         return super.visitMaster(ctx);
     }
 
