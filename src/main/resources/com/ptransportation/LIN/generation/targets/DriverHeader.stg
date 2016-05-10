@@ -1,12 +1,12 @@
-driverHeader(node,interface,target) ::= <<
+driverHeader(options,node,interface,target) ::= <<
 #ifndef <node.name>_<interface.name>_DRIVER_H
 #define <node.name>_<interface.name>_DRIVER_H
 
 #include \<stdlib.h>
 #include \<stdint.h>
 #include \<stdbool.h>
-<if(target.includes)><(target.includes)(node,interface,target)><endif>
-<if(interface.includes)><(interface.includes)(node,interface,target)><endif>
+<if(target.includes)><(target.includes)(options,node,interface,target)><endif>
+<if(interface.includes)><(interface.includes)(options,node,interface,target)><endif>
 
 #define L_FRAME_PID(id) (~((id \<\< 6) ^ (id \<\< 4) ^ (id \<\< 3) ^ (id \<\< 2)) & 0x80) |\
                          (((id \<\< 6) ^ (id \<\< 5) ^ (id \<\< 4) ^ (id \<\< 2)) & 0x40) |\
@@ -45,8 +45,8 @@ enum l_read_configuration_status {
 };
 <endif>
 
-<if(target.globals)><(target.globals)(node,interface,target)><endif>
-<if(interface.globals)><(interface.globals)(node,interface,target)><endif>
+<if(target.globals)><(target.globals)(options,node,interface,target)><endif>
+<if(interface.globals)><(interface.globals)(options,node,interface,target)><endif>
 
 /**
 * Initialize the core api.
@@ -255,34 +255,34 @@ l_u8 ld_read_configuration_<interface.name>(l_u8* const data,l_u8* const length)
 l_u8 ld_set_configuration_<interface.name>(const l_u8* const data,l_u16 length);
 <endif>
 
-<testFlagPrototypes(node,interface,target)>
-<clearFlagPrototypes(node,interface,target)>
-<readSignalPrototypes(node,interface,target)>
-<writeSignalPrototypes(node,interface,target)>
+<testFlagPrototypes(options,node,interface,target)>
+<clearFlagPrototypes(options,node,interface,target)>
+<readSignalPrototypes(options,node,interface,target)>
+<writeSignalPrototypes(options,node,interface,target)>
 
 #endif //<node.name>_<interface.name>_DRIVER_H
 >>
 
-testFlagPrototypes(node,interface,target) ::= <<
+testFlagPrototypes(options,node,interface,target) ::= <<
 <node.frames:{frame|
 <testFlagPrototype(frame.name,node,interface,target)>
 <frame.signals:{signal|
 <testFlagPrototype(signal.name,node,interface,target)>}>}>
 >>
 
-clearFlagPrototypes(node,interface,target) ::= <<
+clearFlagPrototypes(options,node,interface,target) ::= <<
 <node.frames:{frame|
 <clearFlagPrototype(frame.name,node,interface,target)>
 <frame.signals:{signal|<clearFlagPrototype(signal.name,node,interface,target)>}>}>
 >>
 
-readSignalPrototypes(node,interface,target) ::= <<
+readSignalPrototypes(options,node,interface,target) ::= <<
 <node.frames:{frame|
 <frame.signals:{signal|<signal:(signal.signalType_ReadPrototype)(frame,node,interface,target)>}>}>
 >>
 
 
-writeSignalPrototypes(node,interface,target) ::= <<
+writeSignalPrototypes(options,node,interface,target) ::= <<
 <node.publishFrames:{frame|
 <frame.signals:{signal|<signal:(signal.signalType_WritePrototype)(frame,node,interface,target)>}>}>
 >>

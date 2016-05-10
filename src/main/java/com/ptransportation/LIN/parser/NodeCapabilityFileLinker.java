@@ -47,18 +47,17 @@ public class NodeCapabilityFileLinker extends NodeCapabilityFileBaseVisitor<Void
             Slave slave = getSlave(slaveName);
             if (slave != null) {
                 master.getSlaves().add(slave);
-                slave.setNAD(((NadList)slave.getNadSet()).getValues().get(0));// TODO this is a hack.
+                slave.setNAD(((NadList) slave.getNadSet()).getValues().get(0));// TODO this is a hack.
                 master.getFrames().addAll(slave.getPublishFrames());
-            }
-            else
+            } else
                 error("Slave '" + slaveName + "' was not defined.", master, "slaves", i);
         }
 
-        for(Slave slave:master.getSlaves()) {
+        for (Slave slave : master.getSlaves()) {
             List<Frame> slaveFrames = slave.getFrames();
-            for(Frame frame:slave.getSubscribeFrames()) {
+            for (Frame frame : slave.getSubscribeFrames()) {
                 int index = slaveFrames.indexOf(frame);
-                slaveFrames.set(index,getFrame(master,frame.getName()));
+                slaveFrames.set(index, getFrame(master, frame.getName()));
             }
         }
 
@@ -130,7 +129,7 @@ public class NodeCapabilityFileLinker extends NodeCapabilityFileBaseVisitor<Void
         if (slave != null) {
             entry.setSlave(slave);
 
-            if(entry.isLookupIDs()) {
+            if (entry.isLookupIDs()) {
                 entry.setPID0(0xFF);
                 entry.setPID1(0xFF);
                 entry.setPID2(0xFF);
@@ -142,22 +141,21 @@ public class NodeCapabilityFileLinker extends NodeCapabilityFileBaseVisitor<Void
                 int index = entry.getStartIndex();
                 int size = slaveFrames.size();
 
-                entry.setPID0(Frame.getFramePIDFromID(masterFrames.indexOf(slaveFrames.get(index))+1));
+                entry.setPID0(Frame.getFramePIDFromID(masterFrames.indexOf(slaveFrames.get(index)) + 1));
 
                 index++;
-                if(index < size)
-                    entry.setPID1(Frame.getFramePIDFromID(masterFrames.indexOf(slaveFrames.get(index))+1));
+                if (index < size)
+                    entry.setPID1(Frame.getFramePIDFromID(masterFrames.indexOf(slaveFrames.get(index)) + 1));
 
                 index++;
-                if(index < size)
-                    entry.setPID2(Frame.getFramePIDFromID(masterFrames.indexOf(slaveFrames.get(index))+1));
+                if (index < size)
+                    entry.setPID2(Frame.getFramePIDFromID(masterFrames.indexOf(slaveFrames.get(index)) + 1));
 
                 index++;
-                if(index < size)
-                    entry.setPID3(Frame.getFramePIDFromID(masterFrames.indexOf(slaveFrames.get(index))+1));
+                if (index < size)
+                    entry.setPID3(Frame.getFramePIDFromID(masterFrames.indexOf(slaveFrames.get(index)) + 1));
             }
-        }
-        else {
+        } else {
             error("Slave '" + ctx.slaveName.getText() + "' was not defined.", entry, "slave");
         }
 

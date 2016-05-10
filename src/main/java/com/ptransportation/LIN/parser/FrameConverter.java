@@ -27,7 +27,7 @@ public class FrameConverter extends NodeCapabilityFileBaseVisitor<Frame> {
 
         for (NodeCapabilityFileParser.SignalContext signalCtx : ctx.signals) {
             Signal signal = new Signal(signalCtx.name.getText());
-            
+
             signal.setFrame(frame);
 
             signal.setSize(Integer.decode(signalCtx.size.getText()));

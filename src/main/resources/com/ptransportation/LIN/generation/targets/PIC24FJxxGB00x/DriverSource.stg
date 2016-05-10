@@ -1,4 +1,4 @@
-targetIncludes(node,interface,target) ::= <<
+targetIncludes(options,node,interface,target) ::= <<
 #include \<xc.h>
 
 #ifndef FCY
@@ -6,13 +6,14 @@ targetIncludes(node,interface,target) ::= <<
 #endif
 >>
 
-targetGlobals(node,interface,target) ::= ""
+targetGlobals(options,node,interface,target) ::= <<
+>>
 
-systemInitialization(node,interface,target) ::= <<
+systemInitialization(options,node,interface,target) ::= <<
 // TODO implement!
 >>
 
-interfaceGlobals(node,interface,target) ::= <<
+interfaceGlobals(options,node,interface,target) ::= <<
 void l_ifc_aux_<interface.name>() {
     if(rx_buffer.state == L_BREAK_SYNC) {
         <if(node.master)><interfaceRxData("l_u8 sync0x55",node,interface,target)>
@@ -31,7 +32,7 @@ void l_ifc_aux_<interface.name>() {
 }
 >>
 
-interfaceInitialization(node,interface,target) ::= <<
+interfaceInitialization(options,node,interface,target) ::= <<
 
 //========================================================================//
 #if defined(PIC24FJxxGBxxx)
@@ -91,7 +92,7 @@ l_sys_irq_disable();
 <interface.modeRegister>.UARTEN = 1; // Enable the UART 1 module.
 >>
 
-interfaceRxDataAvailable(node,interface,target) ::= "<interface.statusRegister>.URXDA"
+interfaceRxDataAvailable(options,node,interface,target) ::= "<interface.statusRegister>.URXDA"
 
 interfaceRxData(cVarToStoreIn,node,interface,target) ::= "<cVarToStoreIn> = (l_u8)<interface.rxRegister>;"
 
@@ -100,7 +101,7 @@ interfaceTxData(cVarToTx,node,interface,target) ::= <<
 <interface.txRegister> = (l_u8)<cVarToTx>;
 >>
 
-interfaceTxBreakAndSync(node,interface,target) ::= <<
+interfaceTxBreakAndSync(options,node,interface,target) ::= <<
 // Send the break and sync.
 while(!<interface.statusRegister>.TRMT); // Wait for tx to complete.
 <interface.statusRegister>.UTXEN  = 1; // Signal the send 2 clock cycles from now.

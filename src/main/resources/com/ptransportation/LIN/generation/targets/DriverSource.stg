@@ -1,7 +1,7 @@
-driverSource(node,interface,target) ::= <<
+driverSource(options,node,interface,target) ::= <<
 #include "<node.name>.h"
-<if(target.includes)><(target.includes)(node,interface,target)><endif>
-<if(interface.includes)><(interface.includes)(node,interface,target)><endif>
+<if(target.includes)><(target.includes)(options,node,interface,target)><endif>
+<if(interface.includes)><(interface.includes)(options,node,interface,target)><endif>
 
 enum frame_indices {
     <node.frames:{frame|<frame.name>_INDEX};separator=",\n">,
@@ -169,8 +169,8 @@ static void setup_tx_<interface.name>(l_u8 PID);
 static void setup_rx_<interface.name>(l_u8 PID);
 static void cleanup_tx_<interface.name>();
 static void cleanup_rx_<interface.name>();
-<if(target.globals)><(target.globals)(node,interface,target)><endif>
-<if(interface.globals)><(interface.globals)(node,interface,target)><endif>
+<if(target.globals)><(target.globals)(options,node,interface,target)><endif>
+<if(interface.globals)><(interface.globals)(options,node,interface,target)><endif>
 
 l_bool l_sys_init() {
     tx_buffer.PID = 0xFF;
@@ -185,7 +185,7 @@ l_bool l_sys_init() {
     rx_buffer.data.scalar = 0;
     rx_buffer.state = L_IDLE;
 
-    <systemInitialization(node,interface,target)>
+    <systemInitialization(options,node,interface,target)>
 
     return false;
 }
@@ -239,7 +239,7 @@ l_bool l_ifc_init_<interface.name>() {
     l_sch_set_<interface.name>(L_NULL_SCHEDULE,0);
     <endif>
     <interface.name>_status.raw_data = 0;
-    <(interface.initialization)(node,interface,target)>
+    <(interface.initialization)(options,node,interface,target)>
     return false;
 }
 <if(node.master)>
@@ -432,7 +432,7 @@ static inline void cleanup_rx_<interface.name>() {
 void l_ifc_rx_<interface.name>() {
     l_ifc_aux_<interface.name>();
 
-    while(<(interface.rxDataAvailable)(node,interface,target)>) {
+    while(<(interface.rxDataAvailable)(options,node,interface,target)>) {
         switch(rx_buffer.state) {
             case L_PID: {
                 rx_buffer.state = L_DATA_CHECKSUM;
@@ -555,7 +555,7 @@ void l_ifc_tx_<interface.name>() {
         case L_BREAK_SYNC: {
             tx_buffer.state = L_PID;
             <if(node.master)>
-            <(interface.txBreakAndSync)(node,interface,target)>
+            <(interface.txBreakAndSync)(options,node,interface,target)>
             <endif>
             break;
         }
@@ -680,32 +680,32 @@ l_u8 ld_set_configuration_<interface.name>(const l_u8* const data,l_u16 length) 
 }
 <endif>
 
-<testFlagImplementations(node,interface,target)>
-<clearFlagImplementations(node,interface,target)>
-<readSignalImplementations(node,interface,target)>
-<writeSignalImplementations(node,interface,target)>
+<testFlagImplementations(options,node,interface,target)>
+<clearFlagImplementations(options,node,interface,target)>
+<readSignalImplementations(options,node,interface,target)>
+<writeSignalImplementations(options,node,interface,target)>
 >>
 
-testFlagImplementations(node,interface,target) ::= <<
+testFlagImplementations(options,node,interface,target) ::= <<
 <node.frames:{frame|
 <testFlagImplementation(frame.name,node,interface,target)>
 <frame.signals:{signal|
 <testFlagImplementation(signal.name,node,interface,target)>}>}>
 >>
 
-clearFlagImplementations(node,interface,target) ::= <<
+clearFlagImplementations(options,node,interface,target) ::= <<
 <node.frames:{frame|
 <clearFlagImplementation(frame.name,node,interface,target)>
 <frame.signals:{signal|<clearFlagImplementation(signal.name,node,interface,target)>}>}>
 >>
 
-readSignalImplementations(node,interface,target) ::= <<
+readSignalImplementations(options,node,interface,target) ::= <<
 <node.frames:{frame|
 <frame.signals:{signal|<signal:(signal.signalType_ReadImplementation)(frame,node,interface,target)>}>}>
 >>
 
 
-writeSignalImplementations(node,interface,target) ::= <<
+writeSignalImplementations(options,node,interface,target) ::= <<
 <node.publishFrames:{frame|
 <frame.signals:{signal|<signal:(signal.signalType_WriteImplementation)(frame,node,interface,target)>}>}>
 >>

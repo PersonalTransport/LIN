@@ -7,7 +7,7 @@ import com.beust.jcommander.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CompilerOptions {
+public class CommandLineOptions {
     private JCommander jCommander;
 
     @Parameter(names = {"-h", "--help"}, help = true, description = "Show help this message.")
@@ -25,10 +25,13 @@ public class CompilerOptions {
     @Parameter(names = {"-o", "--output"}, description = "Output directory.")
     private String outputDirectory = "gen";
 
+    @Parameter(names = {"-aoa", "--android-open-accessory"}, description = "Generate PIC24FJXXGBXXX android open accessory.")
+    private boolean AOA = false;
+
     @Parameter(description = "source files...", required = true)
     private List<String> sources = new ArrayList<String>();
 
-    public CompilerOptions() {
+    public CommandLineOptions() {
         jCommander = new JCommander(this);
         jCommander.setProgramName("LIN");
     }
@@ -55,6 +58,10 @@ public class CompilerOptions {
 
     public boolean isVersion() {
         return version;
+    }
+
+    public boolean isAOA() {
+        return AOA;
     }
 
     public List<String> getSources() {

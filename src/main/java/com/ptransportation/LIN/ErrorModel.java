@@ -30,7 +30,7 @@ public class ErrorModel extends ConsoleErrorListener {
                             RecognitionException e) {
         String fileName = recognizer.getInputStream().getSourceName();
 
-        System.err.println(fileName+":"+line+":"+charPositionInLine+": error: "+msg);
+        System.err.println(fileName + ":" + line + ":" + charPositionInLine + ": error: " + msg);
         this.errorCount++;
     }
 

@@ -74,8 +74,8 @@ public abstract class Node {
 
     public List<Frame> getPublishFrames() {
         ArrayList<Frame> publishFrames = new ArrayList<>();
-        for(Frame frame:this.frames) {
-            if(frame.getPublisher() == this)
+        for (Frame frame : this.frames) {
+            if (frame.getPublisher() == this)
                 publishFrames.add(frame);
         }
         return publishFrames;
@@ -83,8 +83,8 @@ public abstract class Node {
 
     public List<Frame> getSubscribeFrames() {
         ArrayList<Frame> subscribeFrames = new ArrayList<>();
-        for(Frame frame:this.frames) {
-            if(frame.getPublisher() != this)
+        for (Frame frame : this.frames) {
+            if (frame.getPublisher() != this)
                 subscribeFrames.add(frame);
         }
         return subscribeFrames;

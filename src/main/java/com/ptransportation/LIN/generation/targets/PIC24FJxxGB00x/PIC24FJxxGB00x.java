@@ -1,9 +1,17 @@
 package com.ptransportation.LIN.generation.targets.PIC24FJxxGB00x;
 
+import com.ptransportation.LIN.CommandLineOptions;
 import com.ptransportation.LIN.generation.Interface;
 import com.ptransportation.LIN.generation.Target;
+import com.ptransportation.LIN.model.Node;
+import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 
 public class PIC24FJxxGB00x extends Target {
 
@@ -40,5 +48,37 @@ public class PIC24FJxxGB00x extends Target {
     @Override
     public String getGlobals() {
         return "targetGlobals";
+    }
+
+    public void generateDriver(CommandLineOptions options, Node node, File outputDir) throws FileNotFoundException {
+        super.generateDriver(options, node, outputDir);
+
+        if (options.isAOA()) {
+            STGroup aoaHeader = new STGroupFile("com/ptransportation/LIN/generation/targets/PIC24FJxxGB00x/AOAHeader.stg");
+            addHeaderGroups(aoaHeader);
+            addModelAdaptors(aoaHeader);
+
+            ST aoaHeaderGroup = aoaHeader.getInstanceOf("aoaHeader");
+            aoaHeaderGroup.add("options", options);
+            aoaHeaderGroup.add("node", node);
+            aoaHeaderGroup.add("target", this);
+
+            PrintWriter headerFile = new PrintWriter(new FileOutputStream(new File(outputDir, node.getName() + "_aoa.h")));
+            headerFile.println(aoaHeaderGroup.render());
+            headerFile.close();
+
+            STGroup aoaSource = new STGroupFile("com/ptransportation/LIN/generation/targets/PIC24FJxxGB00x/AOASource.stg");
+            addSourceGroups(aoaSource);
+            addModelAdaptors(aoaSource);
+
+            ST aoaSourceGroup = aoaSource.getInstanceOf("aoaSource");
+            aoaSourceGroup.add("options", options);
+            aoaSourceGroup.add("node", node);
+            aoaSourceGroup.add("target", this);
+
+            PrintWriter sourceFile = new PrintWriter(new FileOutputStream(new File(outputDir, node.getName() + "_aoa.c")));
+            sourceFile.println(aoaSourceGroup.render());
+            sourceFile.close();
+        }
     }
 }

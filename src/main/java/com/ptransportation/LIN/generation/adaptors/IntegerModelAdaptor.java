@@ -8,12 +8,11 @@ import org.stringtemplate.v4.misc.STNoSuchPropertyException;
 public class IntegerModelAdaptor extends ObjectModelAdaptor {
     @Override
     public synchronized Object getProperty(Interpreter interp, ST self, Object o, Object property, String propertyName) throws STNoSuchPropertyException {
-        if(o instanceof Integer) {
+        if (o instanceof Integer) {
             Integer value = (Integer) o;
             if (propertyName.equals("hex"))
                 return "0x" + Integer.toHexString(value).toUpperCase();
-        }
-        else if(o instanceof Long) {
+        } else if (o instanceof Long) {
             Long value = (Long) o;
             if (propertyName.equals("hex"))
                 return "0x" + Long.toHexString(value).toUpperCase();

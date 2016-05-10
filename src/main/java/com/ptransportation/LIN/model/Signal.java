@@ -8,6 +8,10 @@ public class Signal {
     private int offset;
     private Encoding encoding;
 
+    public static int signalHash(byte[] input, int i) {
+        return (input.length != i) ? ((int) input[i]) + 33 * signalHash(input, i + 1) : 5381;
+    }
+
     public Signal(String name) {
         this.name = name;
     }
@@ -58,6 +62,10 @@ public class Signal {
 
     public void setEncoding(Encoding encoding) {
         this.encoding = encoding;
+    }
+
+    public int getSID() {
+        return signalHash(this.name.getBytes(), 0);
     }
 
     @Override
