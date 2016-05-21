@@ -123,11 +123,21 @@ void <node.name>_aoa_update()
             message->header.comm = USBMESSAGE_COMM_SET_VAR;
 
 <node.subscribeFrames:{frame|<frame.signals:{signal|
-            <signal:(signal.signalType_AOAWrite)()>};separator=" else ">};separator=" else ">
+            if(l_flg_tst_<signal.name>()) {
+                l_flg_clr_<signal.name>();
+                <signal:(signal.signalType_AOAWrite)()>
+            \}};separator=" else ">};separator=" else ">
             else {
                 break;
             }
         }
+
+<node.publishFrames:{frame|<frame.signals:{signal|
+        if(write_size \< (USB_BUFFER_SIZE - MAX_USB_MESSAGE_SIZE)) {
+            struct usb_message* message = (struct usb_message*)(write_buffer + write_size);
+            message->header.comm = USBMESSAGE_COMM_SET_VAR;
+            <signal:(signal.signalType_AOAWrite)()>
+        \}};separator="\n">};separator="\n">
 
         if (device_attached && write_size > 0) {
             write_in_progress = (AndroidAppWrite(device_handle, write_buffer, write_size) == USB_SUCCESS);
@@ -201,31 +211,22 @@ case <signal.SID.hex>ul: { // <signal.name>
 
 
 boolAOAWrite(signal) ::= <<
-if(l_flg_tst_<signal.name>()) {
-    l_flg_clr_<signal.name>();
-    message->header.sid = <signal.SID.hex>ul;
-    message->header.length = 1;
-    *((l_bool*)message->data) = l_bool_rd_<signal.name>();
-    write_size += sizeof(struct usb_message_header) + message->header.length;
-}
+message->header.sid = <signal.SID.hex>ul;
+message->header.length = 1;
+*((l_bool*)message->data) = l_bool_rd_<signal.name>();
+write_size += sizeof(struct usb_message_header) + message->header.length;
 >>
 
 u8AOAWrite(signal) ::= <<
-if(l_flg_tst_<signal.name>()) {
-    l_flg_clr_<signal.name>();
-    message->header.sid = <signal.SID.hex>ul;
-    message->header.length = 1;
-    *((l_u8*)message->data) = l_u8_rd_<signal.name>();
-    write_size += sizeof(struct usb_message_header) + message->header.length;
-}
+message->header.sid = <signal.SID.hex>ul;
+message->header.length = 1;
+*((l_u8*)message->data) = l_u8_rd_<signal.name>();
+write_size += sizeof(struct usb_message_header) + message->header.length;
 >>
 
 u16AOAWrite(signal) ::= <<
-if(l_flg_tst_<signal.name>()) {
-    l_flg_clr_<signal.name>();
-    message->header.sid = <signal.SID.hex>ul;
-    message->header.length = 2;
-    *((l_u16*)message->data) = l_u16_rd_<signal.name>();
-    write_size += sizeof(struct usb_message_header) + message->header.length;
-}
+message->header.sid = <signal.SID.hex>ul;
+message->header.length = 2;
+*((l_u16*)message->data) = l_u16_rd_<signal.name>();
+write_size += sizeof(struct usb_message_header) + message->header.length;
 >>
