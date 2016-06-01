@@ -49,5 +49,5 @@ compileJava.dependsOn antlr4
 
 dependencies {
     compile 'com.beust:jcommander:1.48'
-    compile 'org.antlr:antlr4:4.5'
+    compile 'org.antlr:antlr4:4.+'
 }
