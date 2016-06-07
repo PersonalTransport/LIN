@@ -3,6 +3,7 @@ package com.ptransportation.LIN;
 
 import com.beust.jcommander.ParameterException;
 import com.ptransportation.LIN.generation.Target;
+import com.ptransportation.LIN.generation.targets.AndroidAccessory.AndroidAccessory;
 import com.ptransportation.LIN.generation.targets.PIC24FJxxGB00x.PIC24FJxxGB00x;
 import com.ptransportation.LIN.generation.targets.generic.GenericTarget;
 import com.ptransportation.LIN.model.Node;
@@ -26,7 +27,8 @@ import java.util.Properties;
 public class Compiler {
     private static Target[] targets = {
             new GenericTarget(),
-            new PIC24FJxxGB00x()
+            new PIC24FJxxGB00x(),
+            new AndroidAccessory()
     };
 
     public static void main(String[] args) throws IOException {

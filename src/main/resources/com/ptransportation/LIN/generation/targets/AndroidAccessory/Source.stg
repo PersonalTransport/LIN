@@ -1,0 +1,33 @@
+source(options,node,interface,target) ::= <<
+package <interface.name>;
+
+public class <node.name> implements SignalReceivedListener {
+
+    @Override
+    public void onSignalReceived(Signal signal) {
+        switch(signal.header.sid) {
+<node.subscribeFrames:{frame|<frame.signals:{signal|
+            case <signal.SID.hex>: { //<signal.name>
+                //<signal.encoding.name>
+                break;
+            \}
+}>}>
+        }
+    }
+    
+<node.subscribeFrames:{frame|<frame.signals:{signal|
+    public void on_<signal.name>(<signalDecodedType(signal)> value) {
+    \}
+};separator="\n">};separator="\n">
+}
+>>
+
+signalDecodedType(signal) ::= "<signal:(signal.signalType_Type)()>"
+
+boolType(signal) ::= "boolean"
+
+u8Type(signal) ::= "int"
+
+u16Type(signal) ::= "int"
+
+physicalEncodedValueType(signal) ::= "double"
