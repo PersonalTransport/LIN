@@ -30,6 +30,22 @@ void l_ifc_aux_<interface.name>() {
         <if(node.slave)><interface.modeRegister>.ABAUD = 1;<endif>
     }
 }
+
+void __attribute__((interrupt, no_auto_psv)) _U<interface.version>TXInterrupt()
+{
+    if (<interface.txInterruptFlag>) {
+        <interface.txInterruptFlag> = 0;
+        l_ifc_tx_<interface.name>();
+    }
+}
+
+void __attribute__((interrupt, no_auto_psv)) _U<interface.version>RXInterrupt()
+{
+    if (<interface.rxInterruptFlag>) {
+        <interface.rxInterruptFlag> = 0;
+        l_ifc_rx_<interface.name>();
+    }
+}
 >>
 
 interfaceInitialization(options,node,interface,target) ::= <<

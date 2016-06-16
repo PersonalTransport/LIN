@@ -10,6 +10,10 @@ public class UART extends Interface {
         this.version = version;
     }
 
+    public int getVersion() {
+        return this.version;
+    }
+
     @Override
     public String getName() {
         return "UART" + version;
@@ -55,6 +59,14 @@ public class UART extends Interface {
 
     public String getStatusRegister() {
         return "U" + version + "STAbits";
+    }
+
+    public String getRxInterruptFlag() {
+        return (version == 1) ? "IFS0bits.U1RXIF" : "IFS1bits.U2RXIF";
+    }
+
+    public String getTxInterruptFlag() {
+        return (version == 1) ? "IFS0bits.U1TXIF" : "IFS1bits.U2TXIF";
     }
 
     public String getTxRegister() {
