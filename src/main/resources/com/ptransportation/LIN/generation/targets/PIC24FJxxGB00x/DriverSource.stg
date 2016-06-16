@@ -1,9 +1,6 @@
 targetIncludes(options,node,interface,target) ::= <<
+#include "../mcc_generated_files/mcc.h"
 #include \<xc.h>
-
-#ifndef FCY
-#error "FCY must be defined while compiling <node.name>.c"
-#endif
 >>
 
 targetGlobals(options,node,interface,target) ::= <<
@@ -26,7 +23,7 @@ void l_ifc_aux_<interface.name>() {
     }
     else if(<interface.statusRegister>.FERR) {
         rx_buffer.state = L_BREAK_SYNC;
-        while(PORTBbits.RB3 != 1);
+        while(U1RX_GetValue() != 1);
         <if(node.slave)><interface.modeRegister>.ABAUD = 1;<endif>
     }
 }
@@ -49,51 +46,6 @@ void __attribute__((interrupt, no_auto_psv)) _U<interface.version>RXInterrupt()
 >>
 
 interfaceInitialization(options,node,interface,target) ::= <<
-
-//========================================================================//
-#if defined(PIC24FJxxGBxxx)
-AD1PCFGL = 0xFFFF;
-#elif defined(PIC24FJxxGAxxx)
-AD1PCFG = 0xFFFF;
-#endif
-
-TRISBbits.TRISB4  = 0; // Turn RB4 into output for CS/LWAKE
-TRISBbits.TRISB7  = 0; // Turn RB7 into output for !FAULT/TXE
-TRISBbits.TRISB15 = 0;  // Turn RB15 into output for UART1 TX
-TRISBbits.TRISB3  = 1;  // Turn RB3 into input for UART1 RX
-
-// Force MCP2050 into operation mode
-LATBbits.LATB15 = 1;
-LATBbits.LATB4 = 1;
-LATBbits.LATB7 = 1;
-
-//========================================================================//
-
-//========================================================================//
-//Setup peripheral pin select (http://ww1.microchip.com/downloads/en/DeviceDoc/70234B.pdf#page=12)
-//Input setup                 (http://ww1.microchip.com/downloads/en/DeviceDoc/39940d.pdf#page=130)
-//Output setup                (http://ww1.microchip.com/downloads/en/DeviceDoc/39940d.pdf#page=131)
-
-//Unlock the registers by setting bit 6 of OSCCON to 0 (http://ww1.microchip.com/downloads/en/DeviceDoc/39940d.pdf#page=110)
-__builtin_write_OSCCONL(OSCCON & ~(1\<\<6));
-
-//Configure Output Functions
-RPOR7bits.RP15R = <interface.outputFunction>; //Assign U1TX To Pin RP15
-
-//Configure Input Functions
-<interface.inputFunction> = 3; //Assign U1RX To Pin RP3
-
-//Lock the registers by setting bit 6 of OSCCON to 1 (http://ww1.microchip.com/downloads/en/DeviceDoc/39940d.pdf#page=110)
-__builtin_write_OSCCONL(OSCCON | (1\<\<6));
-//========================================================================//
-
-//========================================================================//
-// Section 21. UART http://ww1.microchip.com/downloads/en/DeviceDoc/en026583.pdf
-
-// TODO make this adjustable.
-// BRG = FCY    /(4*BAUD_RATE) - 1
-<interface.baudRateRegister> = FCY/20000ul/4ul - 1; // Set Baud Rate to 20000
-
 <interface.modeRegister>.BRGH  = 1; // High Baud Rate
 <interface.modeRegister>.PDSEL = 0; // 8-bit data, no parity
 <interface.modeRegister>.STSEL = 0; // One stop bit
