@@ -14,9 +14,10 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 
 public class PIC24FJxxGB00x extends Target {
-
+    public String device;
     public boolean targetMatches(String targetDevice) {
-        return targetDevice.trim().toUpperCase().matches("^(PIC24FJ\\d\\dG[A|B]00\\d)");
+        device = targetDevice.trim().toUpperCase();
+        return device.matches("^(PIC24FJ\\d\\dG[A|B]00\\d)") || device.matches("^(DSPIC33EP64MC502)");
     }
 
     @Override

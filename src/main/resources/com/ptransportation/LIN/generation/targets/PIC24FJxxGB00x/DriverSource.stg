@@ -1,6 +1,10 @@
 targetIncludes(options,node,interface,target) ::= <<
 #include \<xc.h>
 
+#if !defined(PIC24FJxxGBxxx) && !defined(PIC24FJxxGAxxx)
+#include "../mcc_generated_files/mcc.h"
+#endif
+
 #ifndef FCY
 #error "FCY must be defined while compiling <node.name>.c"
 #endif
@@ -26,7 +30,11 @@ void l_ifc_aux_<interface.name>() {
     }
     else if(<interface.statusRegister>.FERR) {
         rx_buffer.state = L_BREAK_SYNC;
+        #if defined(PIC24FJxxGBxxx) || defined(PIC24FJxxGAxxx)
         while(PORTBbits.RB3 != 1);
+        #else
+        while(U1RXGetValue() != 1);
+        #endif
         <if(node.slave)><interface.modeRegister>.ABAUD = 1;<endif>
     }
 }
@@ -50,6 +58,7 @@ void __attribute__((interrupt, no_auto_psv)) _U<interface.version>RXInterrupt()
 
 interfaceInitialization(options,node,interface,target) ::= <<
 
+#if defined(PIC24FJxxGBxxx) || defined(PIC24FJxxGAxxx)
 //========================================================================//
 #if defined(PIC24FJxxGBxxx)
 AD1PCFGL = 0xFFFF;
@@ -66,9 +75,16 @@ TRISBbits.TRISB3  = 1;  // Turn RB3 into input for UART1 RX
 LATBbits.LATB15 = 1;
 LATBbits.LATB4 = 1;
 LATBbits.LATB7 = 1;
+#else
+// Force MCP2050 into operation mode
+U1TXSetHigh();
+CS_LWAKESetHigh();
+NFAULT_TXESetHigh();
+#endif
 
 //========================================================================//
 
+#if defined(PIC24FJxxGBxxx) || defined(PIC24FJxxGAxxx)
 //========================================================================//
 //Setup peripheral pin select (http://ww1.microchip.com/downloads/en/DeviceDoc/70234B.pdf#page=12)
 //Input setup                 (http://ww1.microchip.com/downloads/en/DeviceDoc/39940d.pdf#page=130)
@@ -86,6 +102,7 @@ RPOR7bits.RP15R = <interface.outputFunction>; //Assign U1TX To Pin RP15
 //Lock the registers by setting bit 6 of OSCCON to 1 (http://ww1.microchip.com/downloads/en/DeviceDoc/39940d.pdf#page=110)
 __builtin_write_OSCCONL(OSCCON | (1\<\<6));
 //========================================================================//
+#endif
 
 //========================================================================//
 // Section 21. UART http://ww1.microchip.com/downloads/en/DeviceDoc/en026583.pdf
