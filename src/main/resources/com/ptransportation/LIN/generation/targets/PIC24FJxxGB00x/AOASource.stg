@@ -62,13 +62,6 @@ static l_u8 write_buffer[USB_BUFFER_SIZE];
 
 void <node.name>_aoa_initialize()
 {
-    {
-        unsigned int pll_startup_counter = 600;
-        CLKDIVbits.PLLEN = 1;
-        while (pll_startup_counter--) {
-        }
-    }
-
     // Setup the AOA and USB
     AndroidAppStart(&device_info);
     USBHostInit(0);

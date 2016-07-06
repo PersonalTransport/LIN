@@ -88,9 +88,9 @@ public class UART extends Interface {
 
     public String getOutputFunction() {
         if (version == 1) {
-            return "3";
+            return "3"; // TODO this needs to be different ("1") for the dsPIC33EP MCUs
         } else if (version == 2) {
-            return "5";
+            return "5"; // TODO this needs to be different ("3") for the dsPIC33EP MCUs
         }
         return "";
     }

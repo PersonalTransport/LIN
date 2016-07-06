@@ -28,6 +28,9 @@ public class CommandLineOptions {
     @Parameter(names = {"-aoa", "--android-open-accessory"}, description = "Generate PIC24FJXXGBXXX android open accessory.")
     private boolean AOA = false;
 
+    @Parameter(names = {"-mcc", "--microchip-code-configurator"}, description = "Use the microchip code configurator.")
+    private boolean MCC = false;
+
     @Parameter(description = "source files...", required = true)
     private List<String> sources = new ArrayList<String>();
 
@@ -62,6 +65,10 @@ public class CommandLineOptions {
 
     public boolean isAOA() {
         return AOA;
+    }
+
+    public boolean isMCC() {
+        return MCC;
     }
 
     public List<String> getSources() {

@@ -13,6 +13,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 
+// TODO make an xc16 target and then make dsPICE and PIC24F inherit from it.
 public class PIC24FJxxGB00x extends Target {
     public String device;
     public boolean targetMatches(String targetDevice) {
